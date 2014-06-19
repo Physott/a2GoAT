@@ -19,6 +19,18 @@ private:
     Double_t	meson_theta_min;
     Double_t	meson_theta_max;
 
+    Double_t    minChiSq;
+    UInt_t      minDecayIndex;
+    UInt_t      minIndex;
+    TLorentzVector  reconstructedEta;
+    TLorentzVector  reconstructedEtap;
+
+    static  Int_t   perm6g[15][6];
+
+    void    Reconstruct6g();
+    void    Reconstruct6g(TLorentzVector *vec);
+    void    Reconstruct7g();
+
 protected:
 
             Bool_t  ProcessEventWithoutFilling();

@@ -84,291 +84,272 @@ Bool_t  GMesonReconstruction::ProcessEventWithoutFilling()
     eta->Clear();
     etap->Clear();
 
-    Int_t       maxSubs = rootinos->GetNParticles() + photons->GetNParticles() + chargedPi->GetNParticles();
+    if(GetNReconstructed()!=6)
+        return kFALSE;
 
-    Int_t		index1	  [maxSubs * maxSubs];
-    Int_t		index2	  [maxSubs * maxSubs];
-    Int_t 		tempID    [maxSubs * maxSubs];
-    Double_t 	diff_meson[maxSubs * maxSubs];
-    Int_t 		sort_index[maxSubs * maxSubs];
-    Bool_t 		is_meson  [maxSubs];
-    Int_t 		ndaughter   = 0;
-    TLorentzVector* daughter_list[maxSubs];
-    Int_t       daughter_index[maxSubs];
-    Int_t       pdg_list[maxSubs];
-    Int_t       countRootinos	= 0;
-    Int_t       countPhotons	= 0;
-    Int_t       countChargedPi	= 0;
-
-    //	TLorentzVector	initialParticle[GetNParticles()];
-    TLorentzVector	reaction_p4;
-
-	for (int i = 0; i < rootinos->GetNParticles(); i++)
-    {
-        if (rootinos->Particle(i).Theta() < meson_theta_min) continue; // user rejected theta region
-        if (rootinos->Particle(i).Theta() > meson_theta_max) continue; // user rejected theta region
-
-        is_meson[ndaughter] = kFALSE;
-
-        reaction_p4 += rootinos->Particle(i);
-        daughter_list[ndaughter] = &rootinos->Particle(i);
-        daughter_index[ndaughter]= i;
-        pdg_list[ndaughter] = pdg_rootino;
-        countRootinos++;
-        ndaughter++;
-    }
-    for (int i = 0; i < photons->GetNParticles(); i++)
-    {
-        if (photons->Particle(i).Theta() < meson_theta_min) continue; // user rejected theta region
-        if (photons->Particle(i).Theta() > meson_theta_max) continue; // user rejected theta region
-
-        is_meson[ndaughter] = kFALSE;
-
-        reaction_p4 += photons->Particle(i);
-        daughter_list[ndaughter] = &photons->Particle(i);
-        daughter_index[ndaughter]= i;
-        pdg_list[ndaughter] = pdgDB->GetParticle("gamma")->PdgCode();
-        countPhotons++;
-        ndaughter++;
-    }
-    for (int i = 0; i < chargedPi->GetNParticles(); i++)
-    {
-        if (chargedPi->Particle(i).Theta() < meson_theta_min) continue; // user rejected theta region
-        if (chargedPi->Particle(i).Theta() > meson_theta_max) continue; // user rejected theta region
-
-        is_meson[ndaughter] = kFALSE;
-
-        reaction_p4 += chargedPi->Particle(i);
-        daughter_list[ndaughter] = &chargedPi->Particle(i);
-        daughter_index[ndaughter]= i;
-        pdg_list[ndaughter] = pdgDB->GetParticle("pi+")->PdgCode();
-        countChargedPi++;
-        ndaughter++;
-    }
-
-//###################################
-//************From Here**************
-//###################################
-
-    // LEVEL 1:
-    // Test full reaction 4 momentum (ignoring protons and neutrons)
-    // This is to test the following complex decays
-    // n' -> pi+  pi-  n
-    // n' -> pi0  pi0  n
-    // n  -> pi0  pi0  pi0
-    // n  -> pi0  pi+  pi-
-    // n  -> pi0 (pi+  pi-  g)  - omega meson intermediate state
-    // n  -> pi+  pi-  g		- direct n decay
-    // 							    (or rho_0 intermediate state)
-
-    Double_t diff_pi0  = TMath::Abs( reaction_p4.M() - (pdgDB->GetParticle("pi0" )->Mass()*1000)  )/width_pi0;
-    Double_t diff_eta  = TMath::Abs( reaction_p4.M() - (pdgDB->GetParticle("eta" )->Mass()*1000)  )/width_eta;
-    Double_t diff_etap = TMath::Abs( reaction_p4.M() - (pdgDB->GetParticle("eta'")->Mass()*1000) )/width_etap;
-
-    if ((diff_pi0 <= 1.0) && (diff_pi0 < diff_eta) && (diff_pi0 < diff_etap) && (ndaughter >= 2))
-    {
-        pi0->AddParticle(countRootinos, daughter_index, daughter_list, countPhotons, &daughter_index[countRootinos], &daughter_list[countRootinos], countChargedPi, &daughter_index[countRootinos+countPhotons], &daughter_list[countRootinos+countPhotons]);
-        rootinos->RemoveParticles(countRootinos, daughter_index);
-        photons->RemoveParticles(countPhotons, &daughter_index[countRootinos]);
-        chargedPi->RemoveParticles(countChargedPi, &daughter_index[countRootinos+countPhotons]);
-        return kTRUE;
-    }
-    else if ((diff_eta <= 1.0) && (diff_eta < diff_pi0) && (diff_eta < diff_etap) && (ndaughter >= 2))
-    {
-        eta->AddParticle(countRootinos, daughter_index, daughter_list, countPhotons, &daughter_index[countRootinos], &daughter_list[countRootinos], countChargedPi, &daughter_index[countRootinos+countPhotons], &daughter_list[countRootinos+countPhotons]);
-        rootinos->RemoveParticles(countRootinos, daughter_index);
-        photons->RemoveParticles(countPhotons, &daughter_index[countRootinos]);
-        chargedPi->RemoveParticles(countChargedPi, &daughter_index[countRootinos+countPhotons]);
-        return kTRUE;
-    }
-    else if ((diff_etap <= 1.0) && (diff_etap < diff_pi0) && (diff_etap < diff_eta) && (ndaughter >= 2))
-    {
-        etap->AddParticle(countRootinos, daughter_index, daughter_list, countPhotons, &daughter_index[countRootinos], &daughter_list[countRootinos], countChargedPi, &daughter_index[countRootinos+countPhotons], &daughter_list[countRootinos+countPhotons]);
-        rootinos->RemoveParticles(countRootinos, daughter_index);
-        photons->RemoveParticles(countPhotons, &daughter_index[countRootinos]);
-        chargedPi->RemoveParticles(countChargedPi, &daughter_index[countRootinos+countPhotons]);
-        return kTRUE;
-    }
-
-    // LEVEL 2:
-    // Well that didn't work, let's try to make some 2 particle checks
-    // Loop over possible 2-particle combinations (skip i=j, ij = ji)
-    // to check pi0 -> 2g, n -> 2g , n' -> 2g
-    // Find all pairs within IM limits and sort by best Chi
-    // Don't double count in sorting!
-    // Reset daughter list
-    Int_t k = 0;
-    for (int i = 0; i < ndaughter; i++)
-    {
-        if (daughter_list[i]->Theta() < meson_theta_min) continue; // user rejected theta region
-        if (daughter_list[i]->Theta() > meson_theta_max) continue; // user rejected theta region
-
-        for (int j = i+1; j < ndaughter; j++)
-        {
-            if (daughter_list[j]->Theta() < meson_theta_min) continue; // user rejected theta region
-            if (daughter_list[j]->Theta() > meson_theta_max) continue; // user rejected theta region
-
-            TLorentzVector p4 = *daughter_list[i] + *daughter_list[j];
-
-            Double_t diff_pi0  = TMath::Abs( p4.M() - (pdgDB->GetParticle("pi0" )->Mass()*1000) )/width_pi0;
-            Double_t diff_eta  = TMath::Abs( p4.M() - (pdgDB->GetParticle("eta" )->Mass()*1000) )/width_eta;
-            Double_t diff_etap = TMath::Abs( p4.M() - (pdgDB->GetParticle("eta'")->Mass()*1000) )/width_etap;
-
-            if ((diff_pi0 <= 1.0) && (diff_pi0 < diff_eta) && (diff_pi0 < diff_etap))
-            {
-                diff_meson[k] 	= diff_pi0;
-                tempID[k] 		= pdgDB->GetParticle("pi0")->PdgCode();
-                index1[k]		= i;
-                index2[k]		= j;
-                k++;
-            }
-            else if ((diff_eta <= 1.0) && (diff_eta < diff_pi0) && (diff_eta < diff_etap))
-            {
-                diff_meson[k]	= diff_eta;
-                tempID[k] 		= pdgDB->GetParticle("eta")->PdgCode();
-                index1[k]		= i;
-                index2[k]		= j;
-                k++;
-            }
-            else if ((diff_etap <= 1.0) && (diff_etap < diff_pi0) && (diff_etap < diff_eta))
-            {
-                diff_meson[k]	= diff_etap;
-                tempID[k] 		= pdgDB->GetParticle("eta'")->PdgCode();
-                index1[k]		= i;
-                index2[k]		= j;
-                k++;
-            }
-        }
-    }
-
-    TMath::Sort(k, diff_meson, sort_index, kFALSE);
-
-    Int_t		nIndex_rootino_delete    = 0;
-    Int_t		nIndex_photon_delete    = 0;
-    Int_t		nIndex_chargedPi_delete = 0;
-    Int_t		index_rootino_delete[GTreeParticle_MaxEntries];
-    Int_t		index_photon_delete[GTreeParticle_MaxEntries];
-    Int_t		index_chargedPi_delete[GTreeParticle_MaxEntries];
-
-    for (Int_t i = 0; i < k; i++)
-    {
-        //particle pair already involved in a meson reconstruction?
-        if(is_meson[index1[sort_index[i]]] == kTRUE)  continue;
-        if(is_meson[index2[sort_index[i]]] == kTRUE)  continue;
-
-        // New meson identified!
-        is_meson[index1[sort_index[i]]] = kTRUE;
-        is_meson[index2[sort_index[i]]] = kTRUE;
-
-        // Add to particle list
-        if(tempID[sort_index[i]] == pdgDB->GetParticle("pi0")->PdgCode())
-        {
-            pi0->AddParticle(daughter_index[index1[sort_index[i]]], *daughter_list[index1[sort_index[i]]], pdg_list[index1[sort_index[i]]], daughter_index[index2[sort_index[i]]], *daughter_list[index2[sort_index[i]]], pdg_list[index2[sort_index[i]]]);
-            if(index1[sort_index[i]] < countRootinos)
-            {
-                index_rootino_delete[nIndex_rootino_delete] = daughter_index[index1[sort_index[i]]];
-                nIndex_rootino_delete++;
-            }
-            else if(index1[sort_index[i]] < (countRootinos+countPhotons))
-            {
-                index_photon_delete[nIndex_photon_delete] = daughter_index[index1[sort_index[i]]];
-                nIndex_photon_delete++;
-            }
-            else
-            {
-                index_chargedPi_delete[nIndex_chargedPi_delete] = daughter_index[index1[sort_index[i]]];
-                nIndex_chargedPi_delete++;
-            }
-            if(index2[sort_index[i]] < countRootinos)
-            {
-                index_rootino_delete[nIndex_rootino_delete] = daughter_index[index2[sort_index[i]]];
-                nIndex_rootino_delete++;
-            }
-            else if(index2[sort_index[i]] < (countRootinos+countPhotons))
-            {
-                index_photon_delete[nIndex_photon_delete] = daughter_index[index2[sort_index[i]]];
-                nIndex_photon_delete++;
-            }
-            else
-            {
-                index_chargedPi_delete[nIndex_chargedPi_delete] = daughter_index[index2[sort_index[i]]];
-                nIndex_chargedPi_delete++;
-            }
-        }
-        else if(tempID[sort_index[i]] == pdgDB->GetParticle("eta")->PdgCode())
-        {
-            eta->AddParticle(daughter_index[index1[sort_index[i]]], *daughter_list[index1[sort_index[i]]], pdg_list[index1[sort_index[i]]], daughter_index[index2[sort_index[i]]], *daughter_list[index2[sort_index[i]]], pdg_list[index2[sort_index[i]]]);
-            if(index1[sort_index[i]] < countRootinos)
-            {
-                index_rootino_delete[nIndex_rootino_delete] = daughter_index[index1[sort_index[i]]];
-                nIndex_rootino_delete++;
-            }
-            else if(index1[sort_index[i]] < (countRootinos+countPhotons))
-            {
-                index_photon_delete[nIndex_photon_delete] = daughter_index[index1[sort_index[i]]];
-                nIndex_photon_delete++;
-            }
-            else
-            {
-                index_chargedPi_delete[nIndex_chargedPi_delete] = daughter_index[index1[sort_index[i]]];
-                nIndex_chargedPi_delete++;
-            }
-            if(index2[sort_index[i]] < countRootinos)
-            {
-                index_rootino_delete[nIndex_rootino_delete] = daughter_index[index2[sort_index[i]]];
-                nIndex_rootino_delete++;
-            }
-            else if(index2[sort_index[i]] < (countRootinos+countPhotons))
-            {
-                index_photon_delete[nIndex_photon_delete] = daughter_index[index2[sort_index[i]]];
-                nIndex_photon_delete++;
-            }
-            else
-            {
-                index_chargedPi_delete[nIndex_chargedPi_delete] = daughter_index[index2[sort_index[i]]];
-                nIndex_chargedPi_delete++;
-            }
-        }
-        else if(tempID[sort_index[i]] == pdgDB->GetParticle("eta'")->PdgCode())
-        {
-            etap->AddParticle(daughter_index[index1[sort_index[i]]], *daughter_list[index1[sort_index[i]]], pdg_list[index1[sort_index[i]]], daughter_index[index2[sort_index[i]]], *daughter_list[index2[sort_index[i]]], pdg_list[index2[sort_index[i]]]);
-            if(index1[sort_index[i]] < countRootinos)
-            {
-                index_rootino_delete[nIndex_rootino_delete] = daughter_index[index1[sort_index[i]]];
-                nIndex_rootino_delete++;
-            }
-            else if(index1[sort_index[i]] < (countRootinos+countPhotons))
-            {
-                index_photon_delete[nIndex_photon_delete] = daughter_index[index1[sort_index[i]]];
-                nIndex_photon_delete++;
-            }
-            else
-            {
-                index_chargedPi_delete[nIndex_chargedPi_delete] = daughter_index[index1[sort_index[i]]];
-                nIndex_chargedPi_delete++;
-            }
-            if(index2[sort_index[i]] < countRootinos)
-            {
-                index_rootino_delete[nIndex_rootino_delete] = daughter_index[index2[sort_index[i]]];
-                nIndex_rootino_delete++;
-            }
-            else if(index2[sort_index[i]] < (countRootinos+countPhotons))
-            {
-                index_photon_delete[nIndex_photon_delete] = daughter_index[index2[sort_index[i]]];
-                nIndex_photon_delete++;
-            }
-            else
-            {
-                index_chargedPi_delete[nIndex_chargedPi_delete] = daughter_index[index2[sort_index[i]]];
-                nIndex_chargedPi_delete++;
-            }
-        }
-    }
-    rootinos->RemoveParticles(nIndex_rootino_delete, index_rootino_delete);
-    photons->RemoveParticles(nIndex_photon_delete, index_photon_delete);
-    chargedPi->RemoveParticles(nIndex_chargedPi_delete, index_chargedPi_delete);
+    Reconstruct6g();
 
     return kTRUE;
+}
+
+void    GMesonReconstruction::Reconstruct6g()
+{
+    TLorentzVector  meson[15][3];
+    Double_t        help[2][3];
+    Double_t        ChiSq[15][4];
+
+    for(int i=0; i<15; i++)
+    {
+        meson[i][0] = photons->Particle(perm6g[i][0]) + photons->Particle(perm6g[i][1]);
+        meson[i][1] = photons->Particle(perm6g[i][2]) + photons->Particle(perm6g[i][3]);
+        meson[i][2] = photons->Particle(perm6g[i][4]) + photons->Particle(perm6g[i][5]);
+        help[0][0]     = (MASS_ETA - meson[i][0].M())/width_eta;
+        help[0][1]     = (MASS_ETA - meson[i][1].M())/width_eta;
+        help[0][2]     = (MASS_ETA - meson[i][2].M())/width_eta;
+        help[1][0]     = (MASS_PI0 - meson[i][0].M())/width_pi0;
+        help[1][1]     = (MASS_PI0 - meson[i][1].M())/width_pi0;
+        help[1][2]     = (MASS_PI0 - meson[i][2].M())/width_pi0;
+        ChiSq[i][0] = (help[0][0]*help[0][0]) + (help[1][1]*help[1][1]) + (help[1][2]*help[1][2]);
+        ChiSq[i][1] = (help[1][0]*help[1][0]) + (help[0][1]*help[0][1]) + (help[1][2]*help[1][2]);
+        ChiSq[i][2] = (help[1][0]*help[1][0]) + (help[1][1]*help[1][1]) + (help[0][2]*help[0][2]);
+        ChiSq[i][3] = (help[1][0]*help[1][0]) + (help[1][1]*help[1][1]) + (help[1][2]*help[1][2]);
+    }
+
+    minChiSq        = ChiSq[0][0];
+    minDecayIndex   = 0;
+    minIndex        = 0;
+
+    for(int i=0; i<15; i++)
+    {
+        for(int d=0; d<4; d++)
+        {
+            if(ChiSq[i][d]<=minChiSq)
+            {
+                minChiSq        = ChiSq[i][d];
+                minIndex        = i;
+                minDecayIndex   = d;
+            }
+        }
+    }
+
+    //Int_t   daughter_pdg[3];
+    Int_t           daughter_index[6];
+    TLorentzVector* daughter[6];
+    if(minDecayIndex == 3)      //found 3Pi0
+    {
+        /*daughter_pdg[0] = 22;
+        daughter_pdg[1] = 22;
+        daughter_index[0] = perm6g[minIndex][0];
+        daughter_index[1] = perm6g[minIndex][1];
+        //pi0->AddParticle(meson[minIndex][0], 2, daughter_pdg, daughter_index);
+        daughter_index[0] = perm6g[minIndex][2];
+        daughter_index[1] = perm6g[minIndex][3];
+        //pi0->AddParticle(meson[minIndex][1], 2, daughter_pdg, daughter_index);
+        daughter_index[0] = perm6g[minIndex][4];
+        daughter_index[1] = perm6g[minIndex][5];
+        //pi0->AddParticle(meson[minIndex][2], 2, daughter_pdg, daughter_index);*/
+
+        reconstructedEta    = meson[minIndex][0] + meson[minIndex][1] + meson[minIndex][2];
+        daughter_index[0] = perm6g[minIndex][0];
+        daughter_index[1] = perm6g[minIndex][1];
+        daughter_index[2] = perm6g[minIndex][2];
+        daughter_index[3] = perm6g[minIndex][3];
+        daughter_index[4] = perm6g[minIndex][4];
+        daughter_index[5] = perm6g[minIndex][5];
+        daughter[0] = &photons->Particle(perm6g[minIndex][0]);
+        daughter[1] = &photons->Particle(perm6g[minIndex][1]);
+        daughter[2] = &photons->Particle(perm6g[minIndex][2]);
+        daughter[3] = &photons->Particle(perm6g[minIndex][3]);
+        daughter[4] = &photons->Particle(perm6g[minIndex][4]);
+        daughter[5] = &photons->Particle(perm6g[minIndex][5]);
+        eta->AddParticle(6, daughter_index, daughter, 0, 0, 0);
+        photons->Clear();
+        return;
+    }
+
+    //found Eta2Pi0
+
+    if(minDecayIndex == 0)  //Eta is meson[i][0]
+    {
+        daughter_index[0] = perm6g[minIndex][0];
+        daughter_index[1] = perm6g[minIndex][1];
+        daughter_index[2] = perm6g[minIndex][2];
+        daughter_index[3] = perm6g[minIndex][3];
+        daughter_index[4] = perm6g[minIndex][4];
+        daughter_index[5] = perm6g[minIndex][5];
+        daughter[0] = &photons->Particle(perm6g[minIndex][0]);
+        daughter[1] = &photons->Particle(perm6g[minIndex][1]);
+        daughter[2] = &photons->Particle(perm6g[minIndex][2]);
+        daughter[3] = &photons->Particle(perm6g[minIndex][3]);
+        daughter[4] = &photons->Particle(perm6g[minIndex][4]);
+        daughter[5] = &photons->Particle(perm6g[minIndex][5]);
+    }
+    else if(minDecayIndex == 1)  //Eta is meson[i][1]
+    {
+        daughter_index[0] = perm6g[minIndex][2];
+        daughter_index[1] = perm6g[minIndex][3];
+        daughter_index[2] = perm6g[minIndex][0];
+        daughter_index[3] = perm6g[minIndex][1];
+        daughter_index[4] = perm6g[minIndex][4];
+        daughter_index[5] = perm6g[minIndex][5];
+        daughter[0] = &photons->Particle(perm6g[minIndex][2]);
+        daughter[1] = &photons->Particle(perm6g[minIndex][3]);
+        daughter[2] = &photons->Particle(perm6g[minIndex][0]);
+        daughter[3] = &photons->Particle(perm6g[minIndex][1]);
+        daughter[4] = &photons->Particle(perm6g[minIndex][4]);
+        daughter[5] = &photons->Particle(perm6g[minIndex][5]);
+    }
+    else if(minDecayIndex == 2)  //Eta is meson[i][2]
+    {
+        daughter_index[0] = perm6g[minIndex][4];
+        daughter_index[1] = perm6g[minIndex][5];
+        daughter_index[2] = perm6g[minIndex][0];
+        daughter_index[3] = perm6g[minIndex][1];
+        daughter_index[4] = perm6g[minIndex][2];
+        daughter_index[5] = perm6g[minIndex][3];
+        daughter[0] = &photons->Particle(perm6g[minIndex][4]);
+        daughter[1] = &photons->Particle(perm6g[minIndex][5]);
+        daughter[2] = &photons->Particle(perm6g[minIndex][0]);
+        daughter[3] = &photons->Particle(perm6g[minIndex][1]);
+        daughter[4] = &photons->Particle(perm6g[minIndex][2]);
+        daughter[5] = &photons->Particle(perm6g[minIndex][3]);
+    }
+
+    reconstructedEtap   = meson[minIndex][0] + meson[minIndex][1] + meson[minIndex][2];
+    etap->AddParticle(6, daughter_index, daughter, 0, 0, 0);
+    photons->Clear();
+}
+
+void    GMesonReconstruction::Reconstruct6g(TLorentzVector* vec)
+{
+    TLorentzVector  meson[15][3];
+    Double_t        help[2][3];
+    Double_t        ChiSq[15][4];
+
+    for(int i=0; i<15; i++)
+    {
+        meson[i][0] = vec[perm6g[i][0]] + vec[perm6g[i][1]];
+        meson[i][1] = vec[perm6g[i][2]] + vec[perm6g[i][3]];
+        meson[i][2] = vec[perm6g[i][4]] + vec[perm6g[i][5]];
+        help[0][0]     = (MASS_ETA - meson[i][0].M())/width_eta;
+        help[0][1]     = (MASS_ETA - meson[i][1].M())/width_eta;
+        help[0][2]     = (MASS_ETA - meson[i][2].M())/width_eta;
+        help[1][0]     = (MASS_PI0 - meson[i][0].M())/width_pi0;
+        help[1][1]     = (MASS_PI0 - meson[i][1].M())/width_pi0;
+        help[1][2]     = (MASS_PI0 - meson[i][2].M())/width_pi0;
+        ChiSq[i][0] = (help[0][0]*help[0][0]) + (help[1][1]*help[1][1]) + (help[1][2]*help[1][2]);
+        ChiSq[i][1] = (help[1][0]*help[1][0]) + (help[0][1]*help[0][1]) + (help[1][2]*help[1][2]);
+        ChiSq[i][2] = (help[1][0]*help[1][0]) + (help[1][1]*help[1][1]) + (help[0][2]*help[0][2]);
+        ChiSq[i][3] = (help[1][0]*help[1][0]) + (help[1][1]*help[1][1]) + (help[1][2]*help[1][2]);
+    }
+
+    minChiSq        = ChiSq[0][0];
+    minDecayIndex   = 0;
+    minIndex        = 0;
+
+    for(int i=0; i<15; i++)
+    {
+        for(int d=0; d<4; d++)
+        {
+            if(ChiSq[i][d]<=minChiSq)
+            {
+                minChiSq        = ChiSq[i][d];
+                minIndex        = i;
+                minDecayIndex   = d;
+            }
+        }
+    }
+
+    //Int_t   daughter_pdg[3];
+    Int_t           daughter_index[6];
+    TLorentzVector* daughter[6];
+    if(minDecayIndex == 3)      //found 3Pi0
+    {
+        /*daughter_pdg[0] = 22;
+        daughter_pdg[1] = 22;
+        daughter_index[0] = perm6g[minIndex][0];
+        daughter_index[1] = perm6g[minIndex][1];
+        //pi0->AddParticle(meson[minIndex][0], 2, daughter_pdg, daughter_index);
+        daughter_index[0] = perm6g[minIndex][2];
+        daughter_index[1] = perm6g[minIndex][3];
+        //pi0->AddParticle(meson[minIndex][1], 2, daughter_pdg, daughter_index);
+        daughter_index[0] = perm6g[minIndex][4];
+        daughter_index[1] = perm6g[minIndex][5];
+        //pi0->AddParticle(meson[minIndex][2], 2, daughter_pdg, daughter_index);*/
+
+        reconstructedEta    = meson[minIndex][0] + meson[minIndex][1] + meson[minIndex][2];
+        daughter_index[0] = perm6g[minIndex][0];
+        daughter_index[1] = perm6g[minIndex][1];
+        daughter_index[2] = perm6g[minIndex][2];
+        daughter_index[3] = perm6g[minIndex][3];
+        daughter_index[4] = perm6g[minIndex][4];
+        daughter_index[5] = perm6g[minIndex][5];
+        daughter[0] = &vec[perm6g[minIndex][0]];
+        daughter[1] = &vec[perm6g[minIndex][1]];
+        daughter[2] = &vec[perm6g[minIndex][2]];
+        daughter[3] = &vec[perm6g[minIndex][3]];
+        daughter[4] = &vec[perm6g[minIndex][4]];
+        daughter[5] = &vec[perm6g[minIndex][5]];
+        eta->AddParticle(6, daughter_index, daughter, 0, 0, 0);
+        photons->Clear();
+        return;
+    }
+
+    //found Eta2Pi0
+    if(minDecayIndex == 0)  //Eta is meson[i][0]
+    {
+        daughter_index[0] = perm6g[minIndex][0];
+        daughter_index[1] = perm6g[minIndex][1];
+        daughter_index[2] = perm6g[minIndex][2];
+        daughter_index[3] = perm6g[minIndex][3];
+        daughter_index[4] = perm6g[minIndex][4];
+        daughter_index[5] = perm6g[minIndex][5];
+        daughter[0] = &vec[perm6g[minIndex][0]];
+        daughter[1] = &vec[perm6g[minIndex][1]];
+        daughter[2] = &vec[perm6g[minIndex][2]];
+        daughter[3] = &vec[perm6g[minIndex][3]];
+        daughter[4] = &vec[perm6g[minIndex][4]];
+        daughter[5] = &vec[perm6g[minIndex][5]];
+    }
+    else if(minDecayIndex == 1)  //Eta is meson[i][1]
+    {
+        daughter_index[0] = perm6g[minIndex][2];
+        daughter_index[1] = perm6g[minIndex][3];
+        daughter_index[2] = perm6g[minIndex][0];
+        daughter_index[3] = perm6g[minIndex][1];
+        daughter_index[4] = perm6g[minIndex][4];
+        daughter_index[5] = perm6g[minIndex][5];
+        daughter[0] = &vec[perm6g[minIndex][2]];
+        daughter[1] = &vec[perm6g[minIndex][3]];
+        daughter[2] = &vec[perm6g[minIndex][0]];
+        daughter[3] = &vec[perm6g[minIndex][1]];
+        daughter[4] = &vec[perm6g[minIndex][4]];
+        daughter[5] = &vec[perm6g[minIndex][5]];
+    }
+    else if(minDecayIndex == 2)  //Eta is meson[i][2]
+    {
+        daughter_index[0] = perm6g[minIndex][4];
+        daughter_index[1] = perm6g[minIndex][5];
+        daughter_index[2] = perm6g[minIndex][0];
+        daughter_index[3] = perm6g[minIndex][1];
+        daughter_index[4] = perm6g[minIndex][2];
+        daughter_index[5] = perm6g[minIndex][3];
+        daughter[0] = &vec[perm6g[minIndex][4]];
+        daughter[1] = &vec[perm6g[minIndex][5]];
+        daughter[2] = &vec[perm6g[minIndex][0]];
+        daughter[3] = &vec[perm6g[minIndex][1]];
+        daughter[4] = &vec[perm6g[minIndex][2]];
+        daughter[5] = &vec[perm6g[minIndex][3]];
+    }
+
+    reconstructedEtap   = meson[minIndex][0] + meson[minIndex][1] + meson[minIndex][2];
+    etap->AddParticle(6, daughter_index, daughter, 0, 0, 0);
+    photons->Clear();
+}
+
+void    GMesonReconstruction::Reconstruct7g()
+{
+
 }
 
 void  GMesonReconstruction::ProcessEvent()
@@ -383,3 +364,27 @@ void  GMesonReconstruction::ProcessEvent()
     etap->Fill();
     FillReadList();
 }
+
+
+Int_t		GMesonReconstruction::perm6g[15][6]=
+{
+    {0,1,2,3,4,5},
+    {0,1,2,4,3,5},
+    {0,1,2,5,4,3},
+
+    {0,2,1,3,4,5},
+    {0,2,1,4,3,5},
+    {0,2,1,5,4,3},
+
+    {0,3,2,1,4,5},
+    {0,3,2,4,1,5},
+    {0,3,2,5,4,1},
+
+    {0,4,2,3,1,5},
+    {0,4,2,1,3,5},
+    {0,4,2,5,1,3},
+
+    {0,5,2,3,4,1},
+    {0,5,2,4,3,1},
+    {0,5,2,1,4,3}
+};
