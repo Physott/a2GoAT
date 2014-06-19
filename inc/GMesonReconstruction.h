@@ -24,12 +24,18 @@ private:
     UInt_t      minIndex;
     TLorentzVector  reconstructedEta;
     TLorentzVector  reconstructedEtap;
+    Int_t           daughter_index[6];
+    TLorentzVector* daughter[6];
+    UInt_t          foundTaggerHitForProton;
 
     static  Int_t   perm6g[15][6];
 
     void    Reconstruct6g();
-    void    Reconstruct6g(TLorentzVector *vec);
+    void    Reconstruct6g(TLorentzVector** vec);
     void    Reconstruct7g();
+    Bool_t  CheckProton();
+
+    TLorentzVector  SetMass(const TLorentzVector& vec, const Double_t mass);
 
 protected:
 

@@ -13,12 +13,12 @@ Period-Macro:	100000
 #-----------------------------------------------------------------------
 Do-Particle-Reconstruction: 1
 
-Do-Charged-Particle-Reconstruction: 1
+#Do-Charged-Particle-Reconstruction: 1
 #Cut-dE-E-CB-Proton: 	configfiles/cuts/CB_DeltaE-E_Proton.root Proton
 #Cut-dE-E-CB-Pion: 		configfiles/cuts/CB_DeltaE-E_Pion.root Pion
-Cut-dE-E-TAPS-Pion: 	configfiles/cuts/TAPS_DeltaE-E.root	CutPiplus
-Cut-dE-E-TAPS-Proton: 	configfiles/cuts/TAPS_DeltaE-E.root CutProton
-Cut-dE-E-TAPS-Electron: configfiles/cuts/TAPS_DeltaE-E.root CutElectron
+#Cut-dE-E-TAPS-Pion: 	configfiles/cuts/TAPS_DeltaE-E.root	CutPiplus
+#Cut-dE-E-TAPS-Proton: 	configfiles/cuts/TAPS_DeltaE-E.root CutProton
+#Cut-dE-E-TAPS-Electron: configfiles/cuts/TAPS_DeltaE-E.root CutElectron
 
 Do-Meson-Reconstruction: 1
 Cut-IM-Width-Pi0: 20
@@ -35,7 +35,7 @@ Cut-IM-Width-Eta-Prime: 60
 # Sort on number of raw particle tracks (total, CB, and TAPS)
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #					Total 	CB		TAPS
-SortRaw-NParticles: 3-		0+		0+
+SortRaw-NParticles: 6+		0+		0+
 
 
 # Sort on Trigger conditions (Crystal Ball Energy Sum)
@@ -48,8 +48,8 @@ SortRaw-CBEnergySum: 	90+
 Sort-NParticles: 	1+
 
 				Type 	Number	Theta-min 	Theta-max
-Sort-Particle:	pi0		1=		0			180
-#Sort-Particle:	charged	1= 		0			20
+Sort-Particle:	eta		0+		0			180
+Sort-Particle:	eta'	0+		0			180
 
 # Note: (I'll put this here while we don't have a manual)
 # the charged and neutral particle cuts are additional 
