@@ -13,34 +13,34 @@ class	MyEtap : public PPhysics
 private:
 
 	Double_t time;
-	TH1* 	time_eta;
-	TH1* 	time_eta_cuts;	
+    TH1* 	time_etap;
+    TH1* 	time_etap_cuts;
 
-	TH1* 	MM_prompt_eta;
-	TH1* 	MM_random_eta;
-	TH1* 	MM_eta;
+    TH1* 	MM_prompt_etap;
+    TH1* 	MM_random_etap;
+    TH1* 	MM_etap;
 	
-	TH1* 	MM_prompt_eta_n;
-	TH1* 	MM_random_eta_n;
-	TH1* 	MM_eta_n;
+    TH1* 	MM_prompt_etap_n;
+    TH1* 	MM_random_etap_n;
+    TH1* 	MM_etap_n;
 
-	TH1* 	MM_prompt_eta_n_6g;
-	TH1* 	MM_random_eta_n_6g;
-	TH1* 	MM_eta_n_6g;
+    TH1* 	MM_prompt_etap_n_6g;
+    TH1* 	MM_random_etap_n_6g;
+    TH1* 	MM_etap_n_6g;
 
-	TH1* 	MM_prompt_eta_n_2g;
-	TH1* 	MM_random_eta_n_2g;
-	TH1* 	MM_eta_n_2g;
+    TH1* 	MM_prompt_etap_n_2g;
+    TH1* 	MM_random_etap_n_2g;
+    TH1* 	MM_etap_n_2g;
 
-	TH1* 	MM_prompt_eta_c;
-	TH1* 	MM_random_eta_c;
-	TH1* 	MM_eta_c;
+    TH1* 	MM_prompt_etap_c;
+    TH1* 	MM_random_etap_c;
+    TH1* 	MM_etap_c;
 	
-	TH1* 	MM_prompt_eta_c_4d;
-	TH1* 	MM_random_eta_c_4d;
-	TH1* 	MM_eta_c_4d;		
+    TH1* 	MM_prompt_etap_c_4d;
+    TH1* 	MM_random_etap_c_4d;
+    TH1* 	MM_etap_c_4d;
 
-	Int_t 	N_eta;
+    Int_t 	N_etap;
 
 protected:
     virtual Bool_t  Start();

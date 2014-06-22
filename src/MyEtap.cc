@@ -85,47 +85,47 @@ int main(int argc, char *argv[])
 	else serverfile = configfile;
 
     // Create instance of MyEtap class
-    MyEtap* peta = new MyEtap;
+    MyEtap* petap = new MyEtap;
 
 	// If unset, scan server or config file for file settings
 	if(dir_in.length() == 0)
 	{
-		flag = peta->ReadConfig("Input-Directory",0,(Char_t*)serverfile.c_str());	
+        flag = petap->ReadConfig("Input-Directory",0,(Char_t*)serverfile.c_str());
 		flag.erase(0,flag.find_first_not_of(" "));
 		if(strcmp(flag.c_str(),"nokey") != 0) dir_in = flag;
 	}
 	
 	if(dir_out.length() == 0)
 	{	
-		flag = peta->ReadConfig("Output-Directory",0,(Char_t*)serverfile.c_str());	
+        flag = petap->ReadConfig("Output-Directory",0,(Char_t*)serverfile.c_str());
 		flag.erase(0,flag.find_first_not_of(" "));
 		if(strcmp(flag.c_str(),"nokey") != 0) dir_out = flag;
 	}
 	
 	if(file_in.length() == 0)
 	{	
-		flag = peta->ReadConfig("Input-File",0,(Char_t*)serverfile.c_str());	
+        flag = petap->ReadConfig("Input-File",0,(Char_t*)serverfile.c_str());
 		flag.erase(0,flag.find_first_not_of(" "));
 		if(strcmp(flag.c_str(),"nokey") != 0) file_in = flag;
 	}
 	
 	if(file_out.length() == 0)
 	{	
-		flag = peta->ReadConfig("Output-File",0,(Char_t*)serverfile.c_str());	
+        flag = petap->ReadConfig("Output-File",0,(Char_t*)serverfile.c_str());
 		flag.erase(0,flag.find_first_not_of(" "));
 		if(strcmp(flag.c_str(),"nokey") != 0) file_out = flag;
 	}
 	
 	if(pre_in.length() == 0)
 	{	
-		flag = peta->ReadConfig("Input-Prefix",0,(Char_t*)serverfile.c_str());	
+        flag = petap->ReadConfig("Input-Prefix",0,(Char_t*)serverfile.c_str());
 		flag.erase(0,flag.find_first_not_of(" "));
 		if(strcmp(flag.c_str(),"nokey") != 0) pre_in = flag;
 	}
 	
 	if(pre_out.length() == 0)
 	{	
-		flag = peta->ReadConfig("Output-Prefix",0,(Char_t*)serverfile.c_str());	
+        flag = petap->ReadConfig("Output-Prefix",0,(Char_t*)serverfile.c_str());
 		flag.erase(0,flag.find_first_not_of(" "));
 		if(strcmp(flag.c_str(),"nokey") != 0) pre_out = flag;
 	}
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 	cout << endl;
 	
 	// Perform full initialisation 
-	if(!peta->Init(configfile.c_str()))
+    if(!petap->Init(configfile.c_str()))
 	{
         cout << "ERROR: MyEtap Init failed!" << endl;
 		return 0;
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
 			}
 			
 			cout << "Output file '" << file_out << "' chosen" << endl << endl;
-            if(!peta->StartFile(file_in.c_str(), file_out.c_str())) cout << "ERROR: MyEtap failed on file " << file_in << "!" << endl;
+            if(!petap->StartFile(file_in.c_str(), file_out.c_str())) cout << "ERROR: MyEtap failed on file " << file_in << "!" << endl;
 			files_found++;
 		}
 	}
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
 
 					files_found++;
                     // Run MyEtap
-                    if(!peta->StartFile(file_in.c_str(), file_out.c_str()))
+                    if(!petap->StartFile(file_in.c_str(), file_out.c_str()))
                         cout << "ERROR: MyEtap failed on file " << file_in << "!" << endl;
 
 				}
@@ -268,18 +268,11 @@ MyEtap::~MyEtap()
 Bool_t	MyEtap::Init(const char* configfile)
 {
 	// Set by user in the future...
-	SetTarget(938);
-	
-	Double_t Prompt_low 	=  -20;
-	Double_t Prompt_high 	=   15;
-	Double_t Random_low1 	= -100;
-	Double_t Random_high1 	=  -40;
-	Double_t Random_low2 	=   35;
-	Double_t Random_high2 	=   95;
-	
-	SetPromptWindow(Prompt_low, Prompt_high);
-	SetRandomWindow1(Random_low1, Random_high1);
-	SetRandomWindow2(Random_low2, Random_high2);
+    SetTarget(MASS_PROTON);
+
+    SetPromptWindow(-5, 5);
+    SetRandomWindow1(-510, -10);
+    SetRandomWindow2(10, 510);
 	SetPvRratio();
 
 	return kTRUE;
@@ -296,7 +289,7 @@ Bool_t	MyEtap::Start()
 
 	DefineHistograms();
 
-    TraverseEntries(0, eta->GetNEntries());
+    TraverseEntries(0, etap->GetNEntries());
 			
     PostReconstruction();
     WriteHistograms();
@@ -305,33 +298,33 @@ Bool_t	MyEtap::Start()
 
 void	MyEtap::ProcessEvent()
 {
-    if(GetEventNumber() == 0) N_eta = 0;
-    else if(GetEventNumber() % 100000 == 0) cout << "Event: "<< GetEventNumber() << " Total Etas found: " << N_eta << endl;
+    if(GetEventNumber() == 0) N_etap = 0;
+    else if(GetEventNumber() % 100000 == 0) cout << "Event: "<< GetEventNumber() << " Total Etas found: " << N_etap << endl;
 
-	FillTimePDG(*eta,time_eta);
-    MissingMassPDG(*eta, MM_prompt_eta, MM_random_eta);
+    FillTimePDG(*etap,time_etap);
+    MissingMassPDG(*etap, MM_prompt_etap, MM_random_etap);
 
-    for (Int_t i = 0; i < eta->GetNParticles(); i++)
+    for (Int_t i = 0; i < etap->GetNParticles(); i++)
 	{
 		// Count total pi0s
-        N_eta++;
+        N_etap++;
 		
         // All sub particles are photons (completely neutral)
-        if(eta->GetNSubParticles(i) == eta->GetNSubPhotons(i))
+        if(etap->GetNSubParticles(i) == etap->GetNSubPhotons(i))
         {
-            FillMissingMass(*eta, i, MM_prompt_eta_n, MM_random_eta_n);
+            FillMissingMass(*etap, i, MM_prompt_etap_n, MM_random_etap_n);
 
             //2 photon decay
-            if(eta->GetNSubPhotons(i) == 2) FillMissingMass(*eta, i, MM_prompt_eta_n_2g, MM_random_eta_n_2g);
+            if(etap->GetNSubPhotons(i) == 2) FillMissingMass(*etap, i, MM_prompt_etap_n_2g, MM_random_etap_n_2g);
 
             //6 photon decay
-            if(eta->GetNSubPhotons(i) == 6) FillMissingMass(*eta, i, MM_prompt_eta_n_6g, MM_random_eta_n_6g);
+            if(etap->GetNSubPhotons(i) == 6) FillMissingMass(*etap, i, MM_prompt_etap_n_6g, MM_random_etap_n_6g);
         }
-        // else, eta is charged
+        // else, etap is charged
         else
         {
-            FillMissingMass(*eta, i, MM_prompt_eta_c, MM_random_eta_c);
-            if(eta->GetNSubParticles(i) == 4)  FillMissingMass(*eta, i, MM_prompt_eta_c_4d, MM_random_eta_c_4d);
+            FillMissingMass(*etap, i, MM_prompt_etap_c, MM_random_etap_c);
+            if(etap->GetNSubParticles(i) == 4)  FillMissingMass(*etap, i, MM_prompt_etap_c_4d, MM_random_etap_c_4d);
         }
 
 
@@ -343,16 +336,16 @@ void  MyEtap::PostReconstruction()
 {
 	cout << "Performing post reconstruction." << endl;
 
-	RandomSubtraction(MM_prompt_eta,MM_random_eta, MM_eta);		
+    RandomSubtraction(MM_prompt_etap,MM_random_etap, MM_etap);
 	
-	RandomSubtraction(MM_prompt_eta_n,MM_random_eta_n, MM_eta_n);	
-	RandomSubtraction(MM_prompt_eta_n_2g,MM_random_eta_n_2g, MM_eta_n_2g);	
-	RandomSubtraction(MM_prompt_eta_n_6g,MM_random_eta_n_6g, MM_eta_n_6g);
+    RandomSubtraction(MM_prompt_etap_n,MM_random_etap_n, MM_etap_n);
+    RandomSubtraction(MM_prompt_etap_n_2g,MM_random_etap_n_2g, MM_etap_n_2g);
+    RandomSubtraction(MM_prompt_etap_n_6g,MM_random_etap_n_6g, MM_etap_n_6g);
 
-	RandomSubtraction(MM_prompt_eta_c,MM_random_eta_c, MM_eta_c);	
-	RandomSubtraction(MM_prompt_eta_c_4d,MM_random_eta_c_4d, MM_eta_c_4d);	
+    RandomSubtraction(MM_prompt_etap_c,MM_random_etap_c, MM_etap_c);
+    RandomSubtraction(MM_prompt_etap_c_4d,MM_random_etap_c_4d, MM_etap_c_4d);
 	
-	ShowTimeCuts(time_eta, time_eta_cuts);
+    ShowTimeCuts(time_etap, time_etap_cuts);
 
 }
 
@@ -360,32 +353,32 @@ void	MyEtap::DefineHistograms()
 {
 	gROOT->cd();
 	
-	time_eta		= new TH1D("time_eta",		"time_eta",		1000,-500,500);
-	time_eta_cuts	= new TH1D("time_eta_cuts",	"time_eta_cuts",1000,-500,500);
+    time_etap		= new TH1D("time_etap",		"time_etap",		1000,-500,500);
+    time_etap_cuts	= new TH1D("time_etap_cuts",	"time_etap_cuts",1000,-500,500);
 
-	MM_prompt_eta 	= new TH1D("MM_prompt_eta",	"MM_prompt_eta",1500,0,1500);
-	MM_random_eta 	= new TH1D("MM_random_eta",	"MM_random_eta",1500,0,1500);
-	MM_eta			= new TH1D("MM_eta",		"MM_eta",		1500,0,1500);
+    MM_prompt_etap 	= new TH1D("MM_prompt_etap",	"MM_prompt_etap",1500,0,1500);
+    MM_random_etap 	= new TH1D("MM_random_etap",	"MM_random_etap",1500,0,1500);
+    MM_etap			= new TH1D("MM_etap",		"MM_etap",		1500,0,1500);
 	
-	MM_prompt_eta_n = new TH1D("MM_prompt_eta_n","MM_prompt_eta_n",1500,0,1500);
-	MM_random_eta_n = new TH1D("MM_random_eta_n","MM_random_eta_n",1500,0,1500);
-	MM_eta_n		= new TH1D("MM_eta_n",		 "MM_eta_n",	   1500,0,1500);
+    MM_prompt_etap_n = new TH1D("MM_prompt_etap_n","MM_prompt_etap_n",1500,0,1500);
+    MM_random_etap_n = new TH1D("MM_random_etap_n","MM_random_etap_n",1500,0,1500);
+    MM_etap_n		= new TH1D("MM_etap_n",		 "MM_etap_n",	   1500,0,1500);
 
-	MM_prompt_eta_n_6g = new TH1D("MM_prompt_eta_n_6g","MM_prompt_eta_n_6g",1500,0,1500);
-	MM_random_eta_n_6g = new TH1D("MM_random_eta_n_6g","MM_random_eta_n_6g",1500,0,1500);
-	MM_eta_n_6g		  = new TH1D("MM_eta_n_6g",		 "MM_eta_n_6g",	   1500,0,1500);	
+    MM_prompt_etap_n_6g = new TH1D("MM_prompt_etap_n_6g","MM_prompt_etap_n_6g",1500,0,1500);
+    MM_random_etap_n_6g = new TH1D("MM_random_etap_n_6g","MM_random_etap_n_6g",1500,0,1500);
+    MM_etap_n_6g		  = new TH1D("MM_etap_n_6g",		 "MM_etap_n_6g",	   1500,0,1500);
 
-	MM_prompt_eta_n_2g = new TH1D("MM_prompt_eta_n_2g","MM_prompt_eta_n_2g",1500,0,1500);
-	MM_random_eta_n_2g = new TH1D("MM_random_eta_n_2g","MM_random_eta_n_2g",1500,0,1500);
-	MM_eta_n_2g		  = new TH1D("MM_eta_n_2g",		 "MM_eta_n_2g",	   1500,0,1500);	
+    MM_prompt_etap_n_2g = new TH1D("MM_prompt_etap_n_2g","MM_prompt_etap_n_2g",1500,0,1500);
+    MM_random_etap_n_2g = new TH1D("MM_random_etap_n_2g","MM_random_etap_n_2g",1500,0,1500);
+    MM_etap_n_2g		  = new TH1D("MM_etap_n_2g",		 "MM_etap_n_2g",	   1500,0,1500);
 	
-	MM_prompt_eta_c = new TH1D("MM_prompt_eta_c","MM_prompt_eta_c",1500,0,1500);
-	MM_random_eta_c = new TH1D("MM_random_eta_c","MM_random_eta_c",1500,0,1500);
-	MM_eta_c		= new TH1D("MM_eta_c",		 "MM_eta_c",	   1500,0,1500);
+    MM_prompt_etap_c = new TH1D("MM_prompt_etap_c","MM_prompt_etap_c",1500,0,1500);
+    MM_random_etap_c = new TH1D("MM_random_etap_c","MM_random_etap_c",1500,0,1500);
+    MM_etap_c		= new TH1D("MM_etap_c",		 "MM_etap_c",	   1500,0,1500);
 	
-	MM_prompt_eta_c_4d = new TH1D("MM_prompt_eta_c_4d","MM_prompt_eta_c_4d",1500,0,1500);
-	MM_random_eta_c_4d = new TH1D("MM_random_eta_c_4d","MM_random_eta_c_4d",1500,0,1500);
-	MM_eta_c_4d		= new TH1D("MM_eta_c_4d",		 "MM_eta_c_4d",	   1500,0,1500);	
+    MM_prompt_etap_c_4d = new TH1D("MM_prompt_etap_c_4d","MM_prompt_etap_c_4d",1500,0,1500);
+    MM_random_etap_c_4d = new TH1D("MM_random_etap_c_4d","MM_random_etap_c_4d",1500,0,1500);
+    MM_etap_c_4d		= new TH1D("MM_etap_c_4d",		 "MM_etap_c_4d",	   1500,0,1500);
 }
 
 Bool_t 	MyEtap::WriteHistograms(TFile* pfile)
