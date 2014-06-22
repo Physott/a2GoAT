@@ -1,6 +1,6 @@
 #ifndef __CINT__
 
-#include "PEtaExample.h"
+#include "MyEtap.h"
 #include "TSystem.h"
 #include "TSystemDirectory.h"
 #include "TSystemFile.h"
@@ -84,8 +84,8 @@ int main(int argc, char *argv[])
 	// If no server file is specified, allow for checking in the config file
 	else serverfile = configfile;
 
-	// Create instance of PEtaExample class
-	PEtaExample* peta = new PEtaExample;
+    // Create instance of MyEtap class
+    MyEtap* peta = new MyEtap;
 
 	// If unset, scan server or config file for file settings
 	if(dir_in.length() == 0)
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 	// Perform full initialisation 
 	if(!peta->Init(configfile.c_str()))
 	{
-		cout << "ERROR: PEtaExample Init failed!" << endl;
+        cout << "ERROR: MyEtap Init failed!" << endl;
 		return 0;
 	}
 
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
 			}
 			
 			cout << "Output file '" << file_out << "' chosen" << endl << endl;
-            if(!peta->StartFile(file_in.c_str(), file_out.c_str())) cout << "ERROR: PEtaExample failed on file " << file_in << "!" << endl;
+            if(!peta->StartFile(file_in.c_str(), file_out.c_str())) cout << "ERROR: MyEtap failed on file " << file_in << "!" << endl;
 			files_found++;
 		}
 	}
@@ -235,9 +235,9 @@ int main(int argc, char *argv[])
 					file_out = dir_out+pre_out+suffix;					
 
 					files_found++;
-					// Run PEtaExample
+                    // Run MyEtap
                     if(!peta->StartFile(file_in.c_str(), file_out.c_str()))
-						cout << "ERROR: PEtaExample failed on file " << file_in << "!" << endl;
+                        cout << "ERROR: MyEtap failed on file " << file_in << "!" << endl;
 
 				}
 			}
@@ -257,15 +257,15 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-PEtaExample::PEtaExample() 
+MyEtap::MyEtap()
 { 
 }
 
-PEtaExample::~PEtaExample()
+MyEtap::~MyEtap()
 {
 }
 
-Bool_t	PEtaExample::Init(const char* configfile)
+Bool_t	MyEtap::Init(const char* configfile)
 {
 	// Set by user in the future...
 	SetTarget(938);
@@ -285,7 +285,7 @@ Bool_t	PEtaExample::Init(const char* configfile)
 	return kTRUE;
 }
 
-Bool_t	PEtaExample::Start()
+Bool_t	MyEtap::Start()
 {
     if(!IsGoATFile())
     {
@@ -303,7 +303,7 @@ Bool_t	PEtaExample::Start()
 	return kTRUE;
 }
 
-void	PEtaExample::ProcessEvent()
+void	MyEtap::ProcessEvent()
 {
     if(GetEventNumber() == 0) N_eta = 0;
     else if(GetEventNumber() % 100000 == 0) cout << "Event: "<< GetEventNumber() << " Total Etas found: " << N_eta << endl;
@@ -339,7 +339,7 @@ void	PEtaExample::ProcessEvent()
 
 }
 
-void  PEtaExample::PostReconstruction()
+void  MyEtap::PostReconstruction()
 {
 	cout << "Performing post reconstruction." << endl;
 
@@ -356,7 +356,7 @@ void  PEtaExample::PostReconstruction()
 
 }
 
-void	PEtaExample::DefineHistograms()
+void	MyEtap::DefineHistograms()
 {
 	gROOT->cd();
 	
@@ -388,7 +388,7 @@ void	PEtaExample::DefineHistograms()
 	MM_eta_c_4d		= new TH1D("MM_eta_c_4d",		 "MM_eta_c_4d",	   1500,0,1500);	
 }
 
-Bool_t 	PEtaExample::WriteHistograms(TFile* pfile)
+Bool_t 	MyEtap::WriteHistograms(TFile* pfile)
 {
 	cout << "Writing histograms." << endl;
 		

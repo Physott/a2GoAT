@@ -1,5 +1,5 @@
-#ifndef __PEtaExample_h__
-#define __PEtaExample_h__
+#ifndef __MyEtap_h__
+#define __MyEtap_h__
 
 #include <iostream>
 #include <fstream>
@@ -8,7 +8,7 @@
 
 #include "PPhysics.h"
 
-class	PEtaExample : public PPhysics
+class	MyEtap : public PPhysics
 {
 private:
 
@@ -53,8 +53,8 @@ protected:
 			Bool_t	WriteHistograms() {return WriteHistograms(HistFile);}
 			
 public:
-    PEtaExample();
-    virtual ~PEtaExample();
+    MyEtap();
+    virtual ~MyEtap();
 
     virtual Bool_t	Init(const char* configfile);
 

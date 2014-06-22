@@ -72,7 +72,7 @@ add_executable(goat
    )
 target_link_libraries(goat ${ROOT_LIBRARIES})
 
-add_executable(pi0-example
+add_executable(etap
    inc/GTree.h
    inc/GTreeRawEvent.h
    inc/GTreeDetectorHits.h
@@ -85,7 +85,9 @@ add_executable(pi0-example
    inc/GTreeEventParameters.h
    inc/GTreeManager.h
    inc/GConfigFile.h
-   inc/PPi0Example.h
+   inc/GKinFitter.h
+   inc/GKinFitterParticle.h
+   inc/MyEtap.h
    inc/PPhysics.h
    src/GTree.cc
    src/GTreeRawEvent.cc
@@ -99,40 +101,10 @@ add_executable(pi0-example
    src/GTreeEventParameters.cc
    src/GTreeManager.cc
    src/GConfigFile.cc
-   src/PPi0Example.cc
+   src/GKinFitter.cc
+   src/GKinFitterParticle.cc
+   src/MyEtap.cc
    src/PPhysics.cc
    )
-target_link_libraries(pi0-example ${ROOT_LIBRARIES})
-
-add_executable(eta-example
-   inc/GTree.h
-   inc/GTreeRawEvent.h
-   inc/GTreeDetectorHits.h
-   inc/GTreeTagger.h
-   inc/GTreeLinPol.h
-   inc/GTreeScaler.h
-   inc/GTreeParticle.h
-   inc/GTreeMeson.h
-   inc/GTreeTrigger.h
-   inc/GTreeEventParameters.h
-   inc/GTreeManager.h
-   inc/GConfigFile.h
-   inc/PEtaExample.h
-   inc/PPhysics.h
-   src/GTree.cc
-   src/GTreeRawEvent.cc
-   src/GTreeDetectorHits.cc
-   src/GTreeTagger.cc
-   src/GTreeLinPol.cc
-   src/GTreeScaler.cc
-   src/GTreeParticle.cc
-   src/GTreeMeson.cc
-   src/GTreeTrigger.cc
-   src/GTreeEventParameters.cc
-   src/GTreeManager.cc
-   src/GConfigFile.cc
-   src/PEtaExample.cc
-   src/PPhysics.cc
-   )
-target_link_libraries(eta-example ${ROOT_LIBRARIES})
+target_link_libraries(etap ${ROOT_LIBRARIES})
 
