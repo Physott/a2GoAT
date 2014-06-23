@@ -259,7 +259,8 @@ void    GMesonReconstruction::Reconstruct6g(TLorentzVector** vec)
 
     for(int i=0; i<15; i++)
     {
-        meson[i][0] = *vec[perm6g[i][0]] + *vec[perm6g[i][1]];
+        meson[i][0] = *vec[perm6g[i][0]];
+        meson[i][0] += *vec[perm6g[i][1]];
         meson[i][1] = *vec[perm6g[i][2]] + *vec[perm6g[i][3]];
         meson[i][2] = *vec[perm6g[i][4]] + *vec[perm6g[i][5]];
         help[0][0]     = (MASS_ETA - meson[i][0].M())/width_eta;

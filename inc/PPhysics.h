@@ -10,6 +10,7 @@
 
 #include "GTreeManager.h"
 #include "GConfigFile.h"
+#include "PHist.h"
 
 
 class	PPhysics : virtual public GTreeManager
@@ -47,10 +48,12 @@ public:
 	virtual void	Reconstruct();
     virtual Bool_t	Write();
 
-    void 	MissingMassPDG(const GTreeParticle &tree, TH1* Hprompt, TH1* Hrandom);
-	void 	MissingMassPDG(Int_t pdg, TH1* Hprompt, TH1* Hrandom);
-    Bool_t	FillMissingMass(const GTreeParticle &tree, Int_t particle_index, TH1* Hprompt, TH1* Hrandom);
-    Bool_t 	FillMissingMassPair(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index, TH1* Hprompt, TH1* Hrandom);
+    Double_t 	GetPvRratio() {return PvR_ratio;}
+
+    void 	MissingMassPDG(const GTreeParticle &tree, PHist &hist);
+    void 	MissingMassPDG(Int_t pdg, PHist& hist);
+    Bool_t	FillMissingMass(const GTreeParticle &tree, Int_t particle_index, PHist& hist);
+    Bool_t  FillMissingMassPair(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, PHist& hist);
     Double_t CalcMissingMass(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
     Double_t CalcMissingEnergy(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
     TLorentzVector CalcMissingP4(const GTreeParticle &tree, Int_t particle_index, Int_t tagger_index);
@@ -69,7 +72,7 @@ public:
 	
 	void	SetPromptWindow( Double_t t1, Double_t t2) {Prompt_low  = t1; Prompt_high  = t2;}
 	void	SetRandomWindow1(Double_t t1, Double_t t2) {Random_low1 = t1; Random_high1 = t2;}
-	void	SetRandomWindow2(Double_t t1, Double_t t2) {Random_low2 = t1; Random_high2 = t2;}
+    void	SetRandomWindow2(Double_t t1, Double_t t2) {Random_low2 = t1; Random_high2 = t2;}
 	void 	SetPvRratio(Double_t value) {PvR_ratio = value;}
 	void 	SetPvRratio() {PvR_ratio = (Prompt_high - Prompt_low)/((Random_high1 - Random_low1) + (Random_high2 - Random_low2));}
 	

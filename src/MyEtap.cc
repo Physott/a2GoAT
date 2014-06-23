@@ -149,11 +149,11 @@ int main(int argc, char *argv[])
 	cout << endl;
 	
 	// Perform full initialisation 
-    if(!petap->Init(configfile.c_str()))
+    /*if(!petap->Init(configfile.c_str()))
 	{
         cout << "ERROR: MyEtap Init failed!" << endl;
 		return 0;
-	}
+    }*/
 
 	std::string file;
 	std::string prefix;
@@ -257,25 +257,36 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-MyEtap::MyEtap()
-{ 
+MyEtap::MyEtap()    :
+    time_eta(0),
+    raw(TString("raw")),
+    N_eta(0)
+{
+    cutIM[0][0] = 0;
+    cutIM[0][1] = 1000000;
+    cutIM[1][0] = 0;
+    cutIM[1][1] = 1000000;
+    cutIM[2][0] = 0;
+    cutIM[2][1] = 1000000;
 }
 
 MyEtap::~MyEtap()
 {
+    if(time_eta)       delete time_eta;
+    if(CutIM_IM_sub[0])      delete CutIM_IM_sub[0];
+    if(CutIM_IM_sub[1])      delete CutIM_IM_sub[1];
+    if(CutIM_IM_sub[2])      delete CutIM_IM_sub[2];
+    if(CutIM_IM_eta)         delete CutIM_IM_eta;
+    if(CutIM_MM_eta)         delete CutIM_MM_eta;
 }
 
 Bool_t	MyEtap::Init(const char* configfile)
 {
-	// Set by user in the future...
-    SetTarget(MASS_PROTON);
+    gROOT->cd();
 
-    SetPromptWindow(-5, 5);
-    SetRandomWindow1(-510, -10);
-    SetRandomWindow2(10, 510);
-	SetPvRratio();
+    time_eta		= new TH1D("time_eta",		"time_eta",		1000,-500,500);
 
-	return kTRUE;
+    raw.SetCuts(-10, 5, -515, -15, 15, 510);
 }
 
 Bool_t	MyEtap::Start()
@@ -287,110 +298,45 @@ Bool_t	MyEtap::Start()
     }
     SetAsPhysicsFile();
 
-	DefineHistograms();
+    TraverseEntries(0, eta->GetNEntries());
 
-    TraverseEntries(0, etap->GetNEntries());
-			
-    PostReconstruction();
+    raw.RandomSubtraction();
+
     WriteHistograms();
 	return kTRUE;
 }
 
 void	MyEtap::ProcessEvent()
 {
-    if(GetEventNumber() == 0) N_etap = 0;
-    else if(GetEventNumber() % 100000 == 0) cout << "Event: "<< GetEventNumber() << " Total Etas found: " << N_etap << endl;
+    if(GetEventNumber() == 0) N_eta = 0;
+    else if(GetEventNumber() % 100000 == 0) cout << "Event: "<< GetEventNumber() << " Total Etas found: " << N_eta << endl;
 
-    FillTimePDG(*etap,time_etap);
-    MissingMassPDG(*etap, MM_prompt_etap, MM_random_etap);
-
-    for (Int_t i = 0; i < etap->GetNParticles(); i++)
-	{
-		// Count total pi0s
-        N_etap++;
-		
-        // All sub particles are photons (completely neutral)
-        if(etap->GetNSubParticles(i) == etap->GetNSubPhotons(i))
+    if(eta->GetNParticles()>0)
+    {
+        Double_t imSub[3];
+        imSub[0]    = eta->SubParticles(0, 0).M();
+        imSub[1]    = eta->SubParticles(0, 1).M();
+        imSub[2]    = eta->SubParticles(0, 2).M();
+        for(int i=0; i<tagger->GetNTagged(); i++)
         {
-            FillMissingMass(*etap, i, MM_prompt_etap_n, MM_random_etap_n);
-
-            //2 photon decay
-            if(etap->GetNSubPhotons(i) == 2) FillMissingMass(*etap, i, MM_prompt_etap_n_2g, MM_random_etap_n_2g);
-
-            //6 photon decay
-            if(etap->GetNSubPhotons(i) == 6) FillMissingMass(*etap, i, MM_prompt_etap_n_6g, MM_random_etap_n_6g);
+            time_eta->Fill(tagger->GetTagged_t(i));
+            raw.Fill(tagger->GetTagged_t(i), eta->Meson(0).M(), (tagger->GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - eta->Meson(0)).M());
         }
-        // else, etap is charged
-        else
-        {
-            FillMissingMass(*etap, i, MM_prompt_etap_c, MM_random_etap_c);
-            if(etap->GetNSubParticles(i) == 4)  FillMissingMass(*etap, i, MM_prompt_etap_c_4d, MM_random_etap_c_4d);
-        }
-
-
-	}
-
+        N_eta++;
+    }
 }
 
-void  MyEtap::PostReconstruction()
-{
-	cout << "Performing post reconstruction." << endl;
 
-    RandomSubtraction(MM_prompt_etap,MM_random_etap, MM_etap);
-	
-    RandomSubtraction(MM_prompt_etap_n,MM_random_etap_n, MM_etap_n);
-    RandomSubtraction(MM_prompt_etap_n_2g,MM_random_etap_n_2g, MM_etap_n_2g);
-    RandomSubtraction(MM_prompt_etap_n_6g,MM_random_etap_n_6g, MM_etap_n_6g);
-
-    RandomSubtraction(MM_prompt_etap_c,MM_random_etap_c, MM_etap_c);
-    RandomSubtraction(MM_prompt_etap_c_4d,MM_random_etap_c_4d, MM_etap_c_4d);
-	
-    ShowTimeCuts(time_etap, time_etap_cuts);
-
-}
-
-void	MyEtap::DefineHistograms()
-{
-	gROOT->cd();
-	
-    time_etap		= new TH1D("time_etap",		"time_etap",		1000,-500,500);
-    time_etap_cuts	= new TH1D("time_etap_cuts",	"time_etap_cuts",1000,-500,500);
-
-    MM_prompt_etap 	= new TH1D("MM_prompt_etap",	"MM_prompt_etap",1500,0,1500);
-    MM_random_etap 	= new TH1D("MM_random_etap",	"MM_random_etap",1500,0,1500);
-    MM_etap			= new TH1D("MM_etap",		"MM_etap",		1500,0,1500);
-	
-    MM_prompt_etap_n = new TH1D("MM_prompt_etap_n","MM_prompt_etap_n",1500,0,1500);
-    MM_random_etap_n = new TH1D("MM_random_etap_n","MM_random_etap_n",1500,0,1500);
-    MM_etap_n		= new TH1D("MM_etap_n",		 "MM_etap_n",	   1500,0,1500);
-
-    MM_prompt_etap_n_6g = new TH1D("MM_prompt_etap_n_6g","MM_prompt_etap_n_6g",1500,0,1500);
-    MM_random_etap_n_6g = new TH1D("MM_random_etap_n_6g","MM_random_etap_n_6g",1500,0,1500);
-    MM_etap_n_6g		  = new TH1D("MM_etap_n_6g",		 "MM_etap_n_6g",	   1500,0,1500);
-
-    MM_prompt_etap_n_2g = new TH1D("MM_prompt_etap_n_2g","MM_prompt_etap_n_2g",1500,0,1500);
-    MM_random_etap_n_2g = new TH1D("MM_random_etap_n_2g","MM_random_etap_n_2g",1500,0,1500);
-    MM_etap_n_2g		  = new TH1D("MM_etap_n_2g",		 "MM_etap_n_2g",	   1500,0,1500);
-	
-    MM_prompt_etap_c = new TH1D("MM_prompt_etap_c","MM_prompt_etap_c",1500,0,1500);
-    MM_random_etap_c = new TH1D("MM_random_etap_c","MM_random_etap_c",1500,0,1500);
-    MM_etap_c		= new TH1D("MM_etap_c",		 "MM_etap_c",	   1500,0,1500);
-	
-    MM_prompt_etap_c_4d = new TH1D("MM_prompt_etap_c_4d","MM_prompt_etap_c_4d",1500,0,1500);
-    MM_random_etap_c_4d = new TH1D("MM_random_etap_c_4d","MM_random_etap_c_4d",1500,0,1500);
-    MM_etap_c_4d		= new TH1D("MM_etap_c_4d",		 "MM_etap_c_4d",	   1500,0,1500);
-}
-
-Bool_t 	MyEtap::WriteHistograms(TFile* pfile)
+Bool_t 	MyEtap::WriteHistograms()
 {
 	cout << "Writing histograms." << endl;
-		
-	if(!pfile) return kFALSE;
-	pfile->cd();
 
-	gROOT->GetList()->Write();
-	gROOT->GetList()->Delete();
-		
+    if(!file_out) return kFALSE;
+    file_out->cd();
+
+    time_eta->Write();
+    raw.Write(file_out);
+
 	return kTRUE;
 }
 

@@ -87,8 +87,10 @@ add_executable(etap
    inc/GConfigFile.h
    inc/GKinFitter.h
    inc/GKinFitterParticle.h
-   inc/MyEtap.h
+   inc/PHist.h
+   inc/PHistEvent.h
    inc/PPhysics.h
+   inc/MyEtap.h
    src/GTree.cc
    src/GTreeRawEvent.cc
    src/GTreeDetectorHits.cc
@@ -103,8 +105,10 @@ add_executable(etap
    src/GConfigFile.cc
    src/GKinFitter.cc
    src/GKinFitterParticle.cc
-   src/MyEtap.cc
+   src/PHist.cc
+   src/PHistEvent.cc
    src/PPhysics.cc
+   src/MyEtap.cc
    )
 target_link_libraries(etap ${ROOT_LIBRARIES})
 

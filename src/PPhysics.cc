@@ -20,7 +20,7 @@ void	PPhysics::Reconstruct()
 {
 }
 
-void PPhysics::MissingMassPDG(const GTreeParticle& tree, TH1* Hprompt, TH1* Hrandom)
+void PPhysics::MissingMassPDG(const GTreeParticle& tree, PHist& hist)
 {
     for (Int_t i = 0; i < tree.GetNParticles(); i++)
     {
@@ -28,21 +28,21 @@ void PPhysics::MissingMassPDG(const GTreeParticle& tree, TH1* Hprompt, TH1* Hran
 		
         for (Int_t j = 0; j < tagger->GetNTagged(); j++)
 		{
-            FillMissingMassPair(tree, i, j, Hprompt, Hrandom);
+            FillMissingMassPair(tree, i, j, hist);
 		}
 	}
 }	
 
-Bool_t PPhysics::FillMissingMass(const GTreeParticle& tree, Int_t particle_index, TH1* Hprompt, TH1* Hrandom)
+Bool_t PPhysics::FillMissingMass(const GTreeParticle& tree, Int_t particle_index, PHist& hist)
 {
     for (Int_t i = 0; i < tagger->GetNTagged(); i++)
 	{
-        FillMissingMassPair(tree, particle_index, i, Hprompt, Hrandom);
+        FillMissingMassPair(tree, particle_index, i, hist);
 	}
 	return kTRUE;	
 }
 
-Bool_t PPhysics::FillMissingMassPair(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, TH1* Hprompt, TH1* Hrandom)
+Bool_t PPhysics::FillMissingMassPair(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, PHist& hist)
 {
     time = tagger->GetTagged_t(tagger_index) - tree.GetTime(particle_index);
 
@@ -53,8 +53,14 @@ Bool_t PPhysics::FillMissingMassPair(const GTreeParticle& tree, Int_t particle_i
 
     missingp4 = CalcMissingP4(tree, particle_index,tagger_index);
 
-	if (Prompt) Hprompt->Fill(missingp4.M());
-	if (Random) Hrandom->Fill(missingp4.M());						
+    if (Prompt) hist.prompt->Fill(missingp4.M());
+    if (Random)
+    {
+        if(time<Prompt_low)
+            hist.rand[0]->Fill(missingp4.M());
+        else
+            hist.rand[1]->Fill(missingp4.M());
+    }
 
 	return kTRUE;
 }
