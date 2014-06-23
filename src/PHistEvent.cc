@@ -28,8 +28,6 @@ void    PHistEvent::RandomSubtraction()
     MM.RandomSubtraction();
 }
 
-
-
 void    PHistEvent::Write(TDirectory *dir)
 {
     TDirectory* curDir  = dir->GetDirectory(name.Data());
@@ -60,4 +58,36 @@ PHistEvent3Meson::PHistEvent3Meson(const TString& _Name)    :
 PHistEvent3Meson::~PHistEvent3Meson()
 {
 
+}
+
+void    PHistEvent3Meson::SetCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t Rand0Min, const Double_t Rand0Max, const Double_t Rand1Min, const Double_t Rand1Max)
+{
+    PHistEvent::SetCuts(PromptMin, PromptMax, Rand0Min, Rand0Max, Rand1Min, Rand1Max);
+    sub0.SetCuts(PromptMin, PromptMax, Rand0Min, Rand0Max, Rand1Min, Rand1Max);
+    sub1.SetCuts(PromptMin, PromptMax, Rand0Min, Rand0Max, Rand1Min, Rand1Max);
+    sub2.SetCuts(PromptMin, PromptMax, Rand0Min, Rand0Max, Rand1Min, Rand1Max);
+}
+
+void    PHistEvent3Meson::RandomSubtraction()
+{
+    PHistEvent::RandomSubtraction();
+    sub0.RandomSubtraction();
+    sub1.RandomSubtraction();
+    sub2.RandomSubtraction();
+}
+
+void    PHistEvent3Meson::Write(TDirectory *dir)
+{
+    TDirectory* curDir  = dir->GetDirectory(name.Data());
+    if(!curDir)
+    {
+        dir->cd();
+        gDirectory->mkdir(name.Data());
+        curDir  = dir->GetDirectory(name.Data());
+    }
+    IM.Write(curDir);
+    MM.Write(curDir);
+    sub0.Write(curDir);
+    sub1.Write(curDir);
+    sub2.Write(curDir);
 }

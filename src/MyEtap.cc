@@ -149,11 +149,11 @@ int main(int argc, char *argv[])
 	cout << endl;
 	
 	// Perform full initialisation 
-    /*if(!petap->Init(configfile.c_str()))
+    if(!petap->Init(configfile.c_str()))
 	{
         cout << "ERROR: MyEtap Init failed!" << endl;
 		return 0;
-    }*/
+    }
 
 	std::string file;
 	std::string prefix;
@@ -258,35 +258,37 @@ int main(int argc, char *argv[])
 }
 
 MyEtap::MyEtap()    :
-    time_eta(0),
+    time_raw(0),
+    time_cutIM(0),
     raw(TString("raw")),
+    cutIMevent(TString("cutIM")),
     N_eta(0)
 {
-    cutIM[0][0] = 0;
-    cutIM[0][1] = 1000000;
-    cutIM[1][0] = 0;
-    cutIM[1][1] = 1000000;
-    cutIM[2][0] = 0;
-    cutIM[2][1] = 1000000;
+    cutIM[0][0] = 110;
+    cutIM[0][1] = 155;
+    cutIM[1][0] = 110;
+    cutIM[1][1] = 155;
+    cutIM[2][0] = 110;
+    cutIM[2][1] = 155;
 }
 
 MyEtap::~MyEtap()
 {
-    if(time_eta)       delete time_eta;
-    if(CutIM_IM_sub[0])      delete CutIM_IM_sub[0];
-    if(CutIM_IM_sub[1])      delete CutIM_IM_sub[1];
-    if(CutIM_IM_sub[2])      delete CutIM_IM_sub[2];
-    if(CutIM_IM_eta)         delete CutIM_IM_eta;
-    if(CutIM_MM_eta)         delete CutIM_MM_eta;
+    if(time_raw)       delete time_raw;
+    if(time_cutIM)     delete time_cutIM;
 }
 
 Bool_t	MyEtap::Init(const char* configfile)
 {
     gROOT->cd();
 
-    time_eta		= new TH1D("time_eta",		"time_eta",		1000,-500,500);
+    time_raw		= new TH1D("time_raw",		"time_raw",		1000,-500,500);
+    time_cutIM		= new TH1D("time_cutIM",		"time_cutIM",		1000,-500,500);
 
     raw.SetCuts(-10, 5, -515, -15, 15, 510);
+    cutIMevent.SetCuts(-10, 5, -515, -15, 15, 510);
+
+    return kTRUE;
 }
 
 Bool_t	MyEtap::Start()
@@ -301,6 +303,7 @@ Bool_t	MyEtap::Start()
     TraverseEntries(0, eta->GetNEntries());
 
     raw.RandomSubtraction();
+    cutIMevent.RandomSubtraction();
 
     WriteHistograms();
 	return kTRUE;
@@ -314,15 +317,26 @@ void	MyEtap::ProcessEvent()
     if(eta->GetNParticles()>0)
     {
         Double_t imSub[3];
-        imSub[0]    = eta->SubParticles(0, 0).M();
-        imSub[1]    = eta->SubParticles(0, 1).M();
-        imSub[2]    = eta->SubParticles(0, 2).M();
+        imSub[0]    = (eta->SubParticles(0, 0)+eta->SubParticles(0, 1)).M();
+        imSub[1]    = (eta->SubParticles(0, 2)+eta->SubParticles(0, 3)).M();
+        imSub[2]    = (eta->SubParticles(0, 4)+eta->SubParticles(0, 5)).M();
         for(int i=0; i<tagger->GetNTagged(); i++)
         {
-            time_eta->Fill(tagger->GetTagged_t(i));
+            time_raw->Fill(tagger->GetTagged_t(i));
             raw.Fill(tagger->GetTagged_t(i), eta->Meson(0).M(), (tagger->GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - eta->Meson(0)).M());
+            raw.FillSubMesons(tagger->GetTagged_t(i), imSub[0], imSub[1], imSub[2]);
         }
         N_eta++;
+
+        if((imSub[0]>cutIM[0][0] && imSub[0]<cutIM[0][1]) && (imSub[1]>cutIM[1][0] && imSub[1]<cutIM[1][1]) && (imSub[2]>cutIM[2][0] && imSub[2]<cutIM[2][1]))
+        {
+            for(int i=0; i<tagger->GetNTagged(); i++)
+            {
+                time_cutIM->Fill(tagger->GetTagged_t(i));
+                cutIMevent.Fill(tagger->GetTagged_t(i), eta->Meson(0).M(), (tagger->GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - eta->Meson(0)).M());
+                cutIMevent.FillSubMesons(tagger->GetTagged_t(i), imSub[0], imSub[1], imSub[2]);
+            }
+        }
     }
 }
 
@@ -332,10 +346,14 @@ Bool_t 	MyEtap::WriteHistograms()
 	cout << "Writing histograms." << endl;
 
     if(!file_out) return kFALSE;
-    file_out->cd();
 
-    time_eta->Write();
+    file_out->cd();
+    time_raw->Write();
     raw.Write(file_out);
+
+    file_out->cd();
+    time_cutIM->Write();
+    cutIMevent.Write(file_out);
 
 	return kTRUE;
 }

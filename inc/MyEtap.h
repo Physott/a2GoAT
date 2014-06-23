@@ -13,14 +13,13 @@ class	MyEtap : public PPhysics
 {
 private:
 
-    TH1* 	time_eta;
+    TH1* 	time_raw;
+    TH1* 	time_cutIM;
 
-    PHistEvent  raw;
+    PHistEvent3Meson  raw;
 
     Double_t cutIM[3][2];
-    PHistD*	CutIM_IM_sub[3];
-    PHistD*	CutIM_IM_eta;
-    PHistD*	CutIM_MM_eta;
+    PHistEvent3Meson  cutIMevent;
 	
     Int_t 	N_eta;
 
