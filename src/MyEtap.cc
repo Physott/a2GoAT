@@ -259,9 +259,11 @@ int main(int argc, char *argv[])
 
 MyEtap::MyEtap()    :
     time_raw(0),
-    time_cutIM(0),
     raw(TString("raw")),
+    time_cutIM(0),
     cutIMevent(TString("cutIM")),
+    time_cutMM(0),
+    cutMMevent(TString("cutMM")),
     N_eta(0)
 {
     cutIM[0][0] = 110;
@@ -270,12 +272,16 @@ MyEtap::MyEtap()    :
     cutIM[1][1] = 155;
     cutIM[2][0] = 110;
     cutIM[2][1] = 155;
+
+    cutMM[0] = 850;
+    cutMM[1] = 1050;
 }
 
 MyEtap::~MyEtap()
 {
     if(time_raw)       delete time_raw;
     if(time_cutIM)     delete time_cutIM;
+    if(time_cutMM)     delete time_cutMM;
 }
 
 Bool_t	MyEtap::Init(const char* configfile)
@@ -284,9 +290,11 @@ Bool_t	MyEtap::Init(const char* configfile)
 
     time_raw		= new TH1D("time_raw",		"time_raw",		1000,-500,500);
     time_cutIM		= new TH1D("time_cutIM",		"time_cutIM",		1000,-500,500);
+    time_cutMM		= new TH1D("time_cutMM",		"time_cutMM",		1000,-500,500);
 
     raw.SetCuts(-10, 5, -515, -15, 15, 510);
     cutIMevent.SetCuts(-10, 5, -515, -15, 15, 510);
+    cutMMevent.SetCuts(-10, 5, -515, -15, 15, 510);
 
     return kTRUE;
 }
@@ -304,6 +312,7 @@ Bool_t	MyEtap::Start()
 
     raw.RandomSubtraction();
     cutIMevent.RandomSubtraction();
+    cutMMevent.RandomSubtraction();
 
     WriteHistograms();
 	return kTRUE;
@@ -314,29 +323,42 @@ void	MyEtap::ProcessEvent()
     if(GetEventNumber() == 0) N_eta = 0;
     else if(GetEventNumber() % 100000 == 0) cout << "Event: "<< GetEventNumber() << " Total Etas found: " << N_eta << endl;
 
+    Double_t    imSub[3];
+    Double_t    misMass;
+    bool        passIM;
+
     if(eta->GetNParticles()>0)
     {
-        Double_t imSub[3];
         imSub[0]    = (eta->SubParticles(0, 0)+eta->SubParticles(0, 1)).M();
         imSub[1]    = (eta->SubParticles(0, 2)+eta->SubParticles(0, 3)).M();
         imSub[2]    = (eta->SubParticles(0, 4)+eta->SubParticles(0, 5)).M();
+        if((imSub[0]>cutIM[0][0] && imSub[0]<cutIM[0][1]) && (imSub[1]>cutIM[1][0] && imSub[1]<cutIM[1][1]) && (imSub[2]>cutIM[2][0] && imSub[2]<cutIM[2][1]))
+            passIM  = true;
+        else
+            passIM  = false;
+
         for(int i=0; i<tagger->GetNTagged(); i++)
         {
             time_raw->Fill(tagger->GetTagged_t(i));
-            raw.Fill(tagger->GetTagged_t(i), eta->Meson(0).M(), (tagger->GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - eta->Meson(0)).M());
+            misMass = (tagger->GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - eta->Meson(0)).M();
+            raw.Fill(tagger->GetTagged_t(i), eta->Meson(0).M(), misMass);
             raw.FillSubMesons(tagger->GetTagged_t(i), imSub[0], imSub[1], imSub[2]);
-        }
-        N_eta++;
 
-        if((imSub[0]>cutIM[0][0] && imSub[0]<cutIM[0][1]) && (imSub[1]>cutIM[1][0] && imSub[1]<cutIM[1][1]) && (imSub[2]>cutIM[2][0] && imSub[2]<cutIM[2][1]))
-        {
-            for(int i=0; i<tagger->GetNTagged(); i++)
+            if(passIM)
             {
                 time_cutIM->Fill(tagger->GetTagged_t(i));
                 cutIMevent.Fill(tagger->GetTagged_t(i), eta->Meson(0).M(), (tagger->GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - eta->Meson(0)).M());
                 cutIMevent.FillSubMesons(tagger->GetTagged_t(i), imSub[0], imSub[1], imSub[2]);
+
+                if(misMass>cutMM[0] && misMass<cutMM[1])
+                {
+                    time_cutMM->Fill(tagger->GetTagged_t(i));
+                    cutMMevent.Fill(tagger->GetTagged_t(i), eta->Meson(0).M(), (tagger->GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - eta->Meson(0)).M());
+                    cutMMevent.FillSubMesons(tagger->GetTagged_t(i), imSub[0], imSub[1], imSub[2]);
+                }
             }
         }
+        N_eta++;
     }
 }
 
