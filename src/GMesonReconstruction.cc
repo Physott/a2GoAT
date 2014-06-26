@@ -193,7 +193,7 @@ void    GMesonReconstruction::Reconstruct6g()
         daughter[3] = &photons->Particle(perm6g[minIndex][3]);
         daughter[4] = &photons->Particle(perm6g[minIndex][4]);
         daughter[5] = &photons->Particle(perm6g[minIndex][5]);
-        eta->AddParticle(6, daughter_index, daughter, 0, 0, 0);
+        eta->AddParticle(0, 0, 0, 6, daughter_index, daughter, 0, 0, 0);
         photons->Clear();
         return;
     }
@@ -247,7 +247,7 @@ void    GMesonReconstruction::Reconstruct6g()
     }
 
     reconstructedEtap   = meson[minIndex][0] + meson[minIndex][1] + meson[minIndex][2];
-    etap->AddParticle(6, daughter_index, daughter, 0, 0, 0);
+    etap->AddParticle(0, 0, 0, 6, daughter_index, daughter, 0, 0, 0);
     photons->Clear();
 }
 
@@ -405,12 +405,12 @@ void    GMesonReconstruction::Reconstruct7g()
 
     if(minDecayIndex == 3)      //found 3Pi0
     {
-        eta->AddParticle(6, daughter_index, daughter, 0, 0, 0);
+        eta->AddParticle(0, 0, 0, 6, daughter_index, daughter, 0, 0, 0);
         photons->Clear();
         return;
     }
 
-    etap->AddParticle(6, daughter_index, daughter, 0, 0, 0);
+    etap->AddParticle(0, 0, 0, 6, daughter_index, daughter, 0, 0, 0);
     photons->Clear();
     return;
 }
