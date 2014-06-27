@@ -194,7 +194,7 @@ void    GMesonReconstruction::Reconstruct6g()
         daughter[4] = &photons->Particle(perm6g[minIndex][4]);
         daughter[5] = &photons->Particle(perm6g[minIndex][5]);
         eta->AddParticle(0, 0, 0, 6, daughter_index, daughter, 0, 0, 0);
-        photons->Clear();
+        photons->RemoveAllParticles();
         return;
     }
 
@@ -248,7 +248,7 @@ void    GMesonReconstruction::Reconstruct6g()
 
     reconstructedEtap   = meson[minIndex][0] + meson[minIndex][1] + meson[minIndex][2];
     etap->AddParticle(0, 0, 0, 6, daughter_index, daughter, 0, 0, 0);
-    photons->Clear();
+    photons->RemoveAllParticles();
 }
 
 void    GMesonReconstruction::Reconstruct6g(TLorentzVector** vec)
@@ -378,7 +378,7 @@ void    GMesonReconstruction::Reconstruct7g()
     Double_t    bestIndex;
     TLorentzVector* vec[6];
     for(int l=1; l<7; l++)
-        vec[l] = &photons->Particle(l);
+        vec[l-1] = &photons->Particle(l);
     Reconstruct6g(vec);
     bestChiSq   = minChiSq;
     bestIndex   = 0;
@@ -406,12 +406,12 @@ void    GMesonReconstruction::Reconstruct7g()
     if(minDecayIndex == 3)      //found 3Pi0
     {
         eta->AddParticle(0, 0, 0, 6, daughter_index, daughter, 0, 0, 0);
-        photons->Clear();
+        photons->RemoveAllParticles();
         return;
     }
 
     etap->AddParticle(0, 0, 0, 6, daughter_index, daughter, 0, 0, 0);
-    photons->Clear();
+    photons->RemoveAllParticles();
     return;
 }
 
