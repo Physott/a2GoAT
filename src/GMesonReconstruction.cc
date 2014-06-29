@@ -92,7 +92,7 @@ Bool_t  GMesonReconstruction::ProcessEventWithoutFilling()
     else if(GetNReconstructed()==7)
     {
         Reconstruct7g();
-        CheckProton();
+        //CheckProton();
         return kTRUE;
     }
 
