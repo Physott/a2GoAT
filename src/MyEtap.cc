@@ -377,6 +377,10 @@ Bool_t 	MyEtap::WriteHistograms()
     time_cutIM->Write();
     cutIMevent.Write(file_out);
 
+    file_out->cd();
+    time_cutMM->Write();
+    cutMMevent.Write(file_out);
+
 	return kTRUE;
 }
 
