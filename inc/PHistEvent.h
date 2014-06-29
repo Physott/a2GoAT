@@ -16,16 +16,20 @@ public:
     PHistEvent(const TString& _Name);
     virtual ~PHistEvent();
 
+    inline  void    Clear();
     inline  void    Fill(const Double_t taggerTime, const Double_t invMass, const Double_t misMass);
     virtual void    SetCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t Rand0Min = 0, const Double_t Rand0Max = 0, const Double_t Rand1Min = 0, const Double_t Rand1Max = 0);
     virtual void	RandomSubtraction();
-    virtual void    Write(TDirectory *dir);
+    virtual void    Write(TDirectory& dir);
 };
 
 
 
-
-
+void    PHistEvent::Clear()
+{
+    IM.Reset();
+    MM.Reset();
+}
 void    PHistEvent::Fill(const Double_t taggerTime, const Double_t invMass, const Double_t misMass)
 {
     IM.Fill(taggerTime, invMass);
@@ -46,11 +50,20 @@ public:
     PHistEvent3Meson(const TString& _Name);
     virtual ~PHistEvent3Meson();
 
+    inline  void    Clear();
     inline  void    FillSubMesons(const Double_t taggerTime, const Double_t invMassSub0, const Double_t invMassSub1, const Double_t invMassSub2);
     virtual void    SetCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t Rand0Min = 0, const Double_t Rand0Max = 0, const Double_t Rand1Min = 0, const Double_t Rand1Max = 0);
     virtual void	RandomSubtraction();
-    virtual void    Write(TDirectory *dir);
+    virtual void    Write(TDirectory& dir);
 };
+
+void    PHistEvent3Meson::Clear()
+{
+    PHistEvent::Clear();
+    sub0.Reset();
+    sub1.Reset();
+    sub2.Reset();
+}
 
 void    PHistEvent3Meson::FillSubMesons(const Double_t taggerTime, const Double_t invMassSub0, const Double_t invMassSub1, const Double_t invMassSub2)
 {

@@ -4,9 +4,11 @@
 #include "GTreeManager.h"
 #include "PHist.h"
 
-class	PProtonCheck : virtual public GTreeManager
+class	PProtonCheck
 {
 private:
+    TString name;
+
     UInt_t      foundProtons;
     UInt_t      foundProtonsIndex[GTreeParticle_MaxEntries];
     UInt_t      smallestProtonAngleDiffIndex[GTreeParticle_MaxEntries];
@@ -20,18 +22,17 @@ private:
 
 protected:
 
-
-    inline  void            Clear();
-            TLorentzVector& GetProton(const int i)          {return protons->Particle(foundProtonsIndex[i]);}
-    const   TLorentzVector& GetProton(const int i)  const   {return protons->Particle(foundProtonsIndex[i]);}
-            Bool_t          ProcessEvent(const TLorentzVector& all);
-    inline  void            RandomSubtraction();
-            void            Write();
+//            TLorentzVector& GetProton(const int i)          {return protons->Particle(foundProtonsIndex[i]);}
+//    const   TLorentzVector& GetProton(const int i)  const   {return protons->Particle(foundProtonsIndex[i]);}
 
 public:
-    PProtonCheck();
+    PProtonCheck(const TString& _Name);
     virtual ~PProtonCheck();
 
+    inline  void            Clear();
+            Bool_t          ProcessEvent(const TLorentzVector& all, const GTreeParticle& protons, const GTreeTagger& tagger);
+    inline  void            RandomSubtraction();
+            void            Write(TDirectory& curDir);
 };
 
 

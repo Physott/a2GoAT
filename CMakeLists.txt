@@ -91,7 +91,8 @@ add_executable(etap
    inc/PHistEvent.h
    inc/PPhysics.h
    inc/PProtonCheck.h
-   inc/MyEtap.h
+   inc/P3Meson.h
+   inc/MyPhysics.h
    src/GTree.cc
    src/GTreeRawEvent.cc
    src/GTreeDetectorHits.cc
@@ -110,7 +111,8 @@ add_executable(etap
    src/PHistEvent.cc
    src/PPhysics.cc
    src/PProtonCheck.cc
-   src/MyEtap.cc
+   src/P3Meson.cc
+   src/MyPhysics.cc
    )
 target_link_libraries(etap ${ROOT_LIBRARIES})
 

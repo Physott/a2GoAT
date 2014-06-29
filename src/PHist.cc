@@ -27,29 +27,29 @@ void    PHist::Add(const PHist* hist, const Double_t scale)
     rand[1]->Add(hist->rand[1], scale);
 }*/
 
-void    PHist::Write(TDirectory* dir)
+void    PHist::Write(TDirectory& dir)
 {
-    TDirectory* curDir  = dir->GetDirectory("prompt");
+    TDirectory* curDir  = dir.GetDirectory("prompt");
     if(!curDir)
     {
-        dir->cd();
+        dir.cd();
         gDirectory->mkdir("prompt");
-        curDir  = dir->GetDirectory("prompt");
+        curDir  = dir.GetDirectory("prompt");
     }
     curDir->cd();
     prompt->Write();
 
-    curDir  = dir->GetDirectory("rand");
+    curDir  = dir.GetDirectory("rand");
     if(!curDir)
     {
-        dir->cd();
+        dir.cd();
         gDirectory->mkdir("rand");
-        curDir  = dir->GetDirectory("rand");
+        curDir  = dir.GetDirectory("rand");
     }
     curDir->cd();
     rand[0]->Write();
     rand[1]->Write();
-    dir->cd();
+    dir.cd();
     result->Write();
 }
 

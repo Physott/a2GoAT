@@ -1,6 +1,6 @@
 #ifndef __CINT__
 
-#include "MyEtap.h"
+#include "MyPhysics.h"
 #include "TSystem.h"
 #include "TSystemDirectory.h"
 #include "TSystemFile.h"
@@ -84,8 +84,8 @@ int main(int argc, char *argv[])
 	// If no server file is specified, allow for checking in the config file
 	else serverfile = configfile;
 
-    // Create instance of MyEtap class
-    MyEtap* petap = new MyEtap;
+    // Create instance of MyPhysics class
+    MyPhysics* petap = new MyPhysics;
 
 	// If unset, scan server or config file for file settings
 	if(dir_in.length() == 0)
@@ -149,11 +149,11 @@ int main(int argc, char *argv[])
 	cout << endl;
 	
 	// Perform full initialisation 
-    if(!petap->Init(configfile.c_str()))
+    /*if(!petap->Init(configfile.c_str()))
 	{
-        cout << "ERROR: MyEtap Init failed!" << endl;
+        cout << "ERROR: MyPhysics Init failed!" << endl;
 		return 0;
-    }
+    }*/
 
 	std::string file;
 	std::string prefix;
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
 			}
 			
 			cout << "Output file '" << file_out << "' chosen" << endl << endl;
-            if(!petap->StartFile(file_in.c_str(), file_out.c_str())) cout << "ERROR: MyEtap failed on file " << file_in << "!" << endl;
+            if(!petap->StartFile(file_in.c_str(), file_out.c_str())) cout << "ERROR: MyPhysics failed on file " << file_in << "!" << endl;
 			files_found++;
 		}
 	}
@@ -235,9 +235,9 @@ int main(int argc, char *argv[])
 					file_out = dir_out+pre_out+suffix;					
 
 					files_found++;
-                    // Run MyEtap
+                    // Run MyPhysics
                     if(!petap->StartFile(file_in.c_str(), file_out.c_str()))
-                        cout << "ERROR: MyEtap failed on file " << file_in << "!" << endl;
+                        cout << "ERROR: MyPhysics failed on file " << file_in << "!" << endl;
 
 				}
 			}
@@ -257,49 +257,23 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-MyEtap::MyEtap()    :
-    time_raw(0),
-    raw(TString("raw")),
-    time_cutIM(0),
-    cutIMevent(TString("cutIM")),
-    time_cutMM(0),
-    cutMMevent(TString("cutMM")),
-    N_eta(0)
+MyPhysics::MyPhysics()    :
+    proton_eta(TString("eta")),
+    hist_eta(TString("eta")),
+    hist_eta_proton(TString("eta_proton")),
+    proton_etap(TString("etap")),
+    hist_etap(TString("etap"), kTRUE),
+    hist_etap_proton(TString("etap_proton"), kTRUE)
 {
-    cutIM[0][0] = 110;
-    cutIM[0][1] = 155;
-    cutIM[1][0] = 110;
-    cutIM[1][1] = 155;
-    cutIM[2][0] = 110;
-    cutIM[2][1] = 155;
 
-    cutMM[0] = 850;
-    cutMM[1] = 1050;
 }
 
-MyEtap::~MyEtap()
+MyPhysics::~MyPhysics()
 {
-    if(time_raw)       delete time_raw;
-    if(time_cutIM)     delete time_cutIM;
-    if(time_cutMM)     delete time_cutMM;
+
 }
 
-Bool_t	MyEtap::Init(const char* configfile)
-{
-    gROOT->cd();
-
-    time_raw		= new TH1D("time_raw",		"time_raw",		1000,-500,500);
-    time_cutIM		= new TH1D("time_cutIM",		"time_cutIM",		1000,-500,500);
-    time_cutMM		= new TH1D("time_cutMM",		"time_cutMM",		1000,-500,500);
-
-    raw.SetCuts(-10, 5, -515, -15, 15, 510);
-    cutIMevent.SetCuts(-10, 5, -515, -15, 15, 510);
-    cutMMevent.SetCuts(-10, 5, -515, -15, 15, 510);
-
-    return kTRUE;
-}
-
-Bool_t	MyEtap::Start()
+Bool_t	MyPhysics::Start()
 {
     if(!IsGoATFile())
     {
@@ -308,95 +282,129 @@ Bool_t	MyEtap::Start()
     }
     SetAsPhysicsFile();
 
+    proton_eta.Clear();
+    hist_eta.Clear();
+    hist_eta_proton.Clear();
+    proton_etap.Clear();
+    hist_etap.Clear();
+    hist_etap_proton.Clear();
+
     TraverseEntries(0, eta->GetNEntries());
 
-    raw.RandomSubtraction();
-    cutIMevent.RandomSubtraction();
-    cutMMevent.RandomSubtraction();
+    proton_eta.RandomSubtraction();
+    hist_eta.RandomSubtraction();
+    hist_eta_proton.RandomSubtraction();
+    proton_etap.RandomSubtraction();
+    hist_etap.RandomSubtraction();
+    hist_etap_proton.RandomSubtraction();
 
-    PProtonCheck::RandomSubtraction();
-
-
-    WriteHistograms();
+    Write();
 	return kTRUE;
 }
 
-void	MyEtap::ProcessEvent()
+void	MyPhysics::ProcessEvent()
 {
-    if(GetEventNumber() == 0) N_eta = 0;
-    else if(GetEventNumber() % 100000 == 0) cout << "Event: "<< GetEventNumber() << " Total Etas found: " << N_eta << endl;
-
-    Double_t    imSub[3];
-    Double_t    misMass;
-    bool        passIM;
+    if((GetEventNumber() % 100000 == 0) && GetEventNumber()!=0) cout << "Event: "<< GetEventNumber() << " Total Etas found: " << hist_eta.GetNFound() << endl;
 
     if(eta->GetNParticles()>0)
     {
         if(protons->GetNParticles()>0)
-            PProtonCheck::ProcessEvent(eta->Particle(0));
-
-        imSub[0]    = (eta->SubParticles(0, 0)+eta->SubParticles(0, 1)).M();
-        imSub[1]    = (eta->SubParticles(0, 2)+eta->SubParticles(0, 3)).M();
-        imSub[2]    = (eta->SubParticles(0, 4)+eta->SubParticles(0, 5)).M();
-        if((imSub[0]>cutIM[0][0] && imSub[0]<cutIM[0][1]) && (imSub[1]>cutIM[1][0] && imSub[1]<cutIM[1][1]) && (imSub[2]>cutIM[2][0] && imSub[2]<cutIM[2][1]))
-            passIM  = true;
-        else
-            passIM  = false;
-
-        for(int i=0; i<tagger->GetNTagged(); i++)
         {
-            time_raw->Fill(tagger->GetTagged_t(i));
-            misMass = (tagger->GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - eta->Meson(0)).M();
-            raw.Fill(tagger->GetTagged_t(i), eta->Meson(0).M(), misMass);
-            raw.FillSubMesons(tagger->GetTagged_t(i), imSub[0], imSub[1], imSub[2]);
-
-            if(passIM)
+            if(proton_eta.ProcessEvent(eta->Particle(0), *protons, *tagger))
             {
-                time_cutIM->Fill(tagger->GetTagged_t(i));
-                cutIMevent.Fill(tagger->GetTagged_t(i), eta->Meson(0).M(), (tagger->GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - eta->Meson(0)).M());
-                cutIMevent.FillSubMesons(tagger->GetTagged_t(i), imSub[0], imSub[1], imSub[2]);
-
-                if(misMass>cutMM[0] && misMass<cutMM[1])
-                {
-                    time_cutMM->Fill(tagger->GetTagged_t(i));
-                    cutMMevent.Fill(tagger->GetTagged_t(i), eta->Meson(0).M(), (tagger->GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - eta->Meson(0)).M());
-                    cutMMevent.FillSubMesons(tagger->GetTagged_t(i), imSub[0], imSub[1], imSub[2]);
-                }
+                hist_eta_proton.ProcessEvent(*eta, *tagger);
+                return;
             }
         }
-        N_eta++;
+        hist_eta.ProcessEvent(*eta, *tagger);
+        return;
+    }
+
+    if(etap->GetNParticles()>0)
+    {
+        if(protons->GetNParticles()>0)
+        {
+            if(proton_etap.ProcessEvent(etap->Particle(0), *protons, *tagger))
+            {
+                hist_etap_proton.ProcessEvent(*etap, *tagger);
+                return;
+            }
+        }
+        hist_etap.ProcessEvent(*etap, *tagger);
+        return;
     }
 }
 
 
-Bool_t 	MyEtap::WriteHistograms()
+Bool_t 	MyPhysics::Write()
 {
-	cout << "Writing histograms." << endl;
-
-    if(!file_out) return kFALSE;
-
     file_out->cd();
-    TDirectory* curDir  = gDirectory->GetDirectory("NoProton");
+    TDirectory* curDir  = gDirectory->GetDirectory("eta");
     if(!curDir)
     {
         file_out->cd();
-        gDirectory->mkdir("NoProton");
-        curDir  = file_out->GetDirectory("NoProton");
+        gDirectory->mkdir("eta");
+        curDir  = file_out->GetDirectory("eta");
     }
-    curDir->cd();
-    time_raw->Write();
-    raw.Write(curDir);
 
     curDir->cd();
-    time_cutIM->Write();
-    cutIMevent.Write(curDir);
+    curDir  = gDirectory->GetDirectory("NoProton");
+    if(!curDir)
+    {
+        curDir  = file_out->GetDirectory("eta");
+        curDir->cd();
+        gDirectory->mkdir("NoProton");
+        curDir  = curDir->GetDirectory("NoProton");
+    }
+    hist_eta.Write(*curDir);
 
     curDir->cd();
-    time_cutMM->Write();
-    cutMMevent.Write(curDir);
+    curDir  = gDirectory->GetDirectory("WithProton");
+    if(!curDir)
+    {
+        curDir  = file_out->GetDirectory("eta");
+        curDir->cd();
+        gDirectory->mkdir("WithProton");
+        curDir  = curDir->GetDirectory("WithProton");
+    }
+    proton_eta.Write(*curDir);
+    hist_eta_proton.Write(*curDir);
 
 
-    PProtonCheck::Write();
+
+    file_out->cd();
+    curDir  = gDirectory->GetDirectory("etap");
+    if(!curDir)
+    {
+        file_out->cd();
+        gDirectory->mkdir("etap");
+        curDir  = file_out->GetDirectory("etap");
+    }
+
+    curDir->cd();
+    curDir  = gDirectory->GetDirectory("NoProton");
+    if(!curDir)
+    {
+        curDir  = file_out->GetDirectory("etap");
+        curDir->cd();
+        gDirectory->mkdir("NoProton");
+        curDir  = curDir->GetDirectory("NoProton");
+    }
+    hist_etap.Write(*curDir);
+
+    curDir->cd();
+    curDir  = gDirectory->GetDirectory("WithProton");
+    if(!curDir)
+    {
+        curDir  = file_out->GetDirectory("etap");
+        curDir->cd();
+        gDirectory->mkdir("WithProton");
+        curDir  = curDir->GetDirectory("WithProton");
+    }
+    proton_etap.Write(*curDir);
+    hist_etap_proton.Write(*curDir);
+
+
 
 	return kTRUE;
 }
