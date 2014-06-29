@@ -8,8 +8,9 @@
 
 #include "PPhysics.h"
 #include "PHistEvent.h"
+#include "PProtonCheck.h"
 
-class	MyEtap : public PPhysics
+class	MyEtap : public PPhysics, public PProtonCheck
 {
 private:
     TH1* 	time_raw;

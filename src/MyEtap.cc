@@ -314,6 +314,9 @@ Bool_t	MyEtap::Start()
     cutIMevent.RandomSubtraction();
     cutMMevent.RandomSubtraction();
 
+    PProtonCheck::RandomSubtraction();
+
+
     WriteHistograms();
 	return kTRUE;
 }
@@ -329,6 +332,9 @@ void	MyEtap::ProcessEvent()
 
     if(eta->GetNParticles()>0)
     {
+        if(protons->GetNParticles()>0)
+            PProtonCheck::ProcessEvent(eta->Particle(0));
+
         imSub[0]    = (eta->SubParticles(0, 0)+eta->SubParticles(0, 1)).M();
         imSub[1]    = (eta->SubParticles(0, 2)+eta->SubParticles(0, 3)).M();
         imSub[2]    = (eta->SubParticles(0, 4)+eta->SubParticles(0, 5)).M();
@@ -370,16 +376,27 @@ Bool_t 	MyEtap::WriteHistograms()
     if(!file_out) return kFALSE;
 
     file_out->cd();
+    TDirectory* curDir  = gDirectory->GetDirectory("NoProton");
+    if(!curDir)
+    {
+        file_out->cd();
+        gDirectory->mkdir("NoProton");
+        curDir  = file_out->GetDirectory("NoProton");
+    }
+    curDir->cd();
     time_raw->Write();
-    raw.Write(file_out);
+    raw.Write(curDir);
 
-    file_out->cd();
+    curDir->cd();
     time_cutIM->Write();
-    cutIMevent.Write(file_out);
+    cutIMevent.Write(curDir);
 
-    file_out->cd();
+    curDir->cd();
     time_cutMM->Write();
-    cutMMevent.Write(file_out);
+    cutMMevent.Write(curDir);
+
+
+    PProtonCheck::Write();
 
 	return kTRUE;
 }
