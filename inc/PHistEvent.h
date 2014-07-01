@@ -26,8 +26,8 @@ public:
 
 void    PHistEvent::Clear()
 {
-    IM.Reset();
-    MM.Reset();
+    IM.Clear();
+    MM.Clear();
 }
 void    PHistEvent::Fill(const Double_t taggerTime, const Double_t invMass, const Double_t misMass)
 {
@@ -58,9 +58,9 @@ public:
 void    PHistEvent3Meson::Clear()
 {
     PHistEvent::Clear();
-    sub0.Reset();
-    sub1.Reset();
-    sub2.Reset();
+    sub0.Clear();
+    sub1.Clear();
+    sub2.Clear();
 }
 
 void    PHistEvent3Meson::FillSubMesons(const Double_t taggerTime, const Double_t invMassSub0, const Double_t invMassSub1, const Double_t invMassSub2)

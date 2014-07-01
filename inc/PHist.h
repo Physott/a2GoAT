@@ -24,11 +24,10 @@ public:
     PHist();
     virtual ~PHist()    = 0;
 
-    //        void    Add(const PHist *hist, const Double_t scale);
+            void    Clear() {prompt->Reset(); rand[0]->Reset(); rand[1]->Reset(); result->Reset();}
     inline  void    Fill(const Double_t taggerTime, const Double_t value);
     inline  void    Fill(const Double_t taggerTime, const Int_t value);
             void	RandomSubtraction();
-            void    Reset() {prompt->Reset(); rand[0]->Reset(); rand[1]->Reset(); result->Reset();}
     static  void    SetCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t Rand0Min = 0, const Double_t Rand0Max = 0, const Double_t Rand1Min = 0, const Double_t Rand1Max = 0);
             void    Write(TDirectory& dir);
 
