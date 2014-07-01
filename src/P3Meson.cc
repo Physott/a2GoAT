@@ -125,10 +125,3 @@ void    P3Meson::Clear()
     cutMMevent.Clear();
 }
 
-void    P3Meson::RandomSubtraction()
-{
-    raw.RandomSubtraction();
-    cutIMevent.RandomSubtraction();
-    cutMMevent.RandomSubtraction();
-}
-

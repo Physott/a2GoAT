@@ -38,7 +38,6 @@ public:
             void	Clear();
             Int_t   GetNFound() const   {return nFound;}
             Bool_t  ProcessEvent(const GTreeMeson &meson, const GTreeTagger &tagger);
-            void	RandomSubtraction();
             Bool_t  Write(TDirectory& curDir);
 };
 

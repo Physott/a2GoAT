@@ -34,13 +34,6 @@ Bool_t	MyPhysics::Start()
 
     TraverseEntries(0, eta->GetNEntries());
 
-    proton_eta.RandomSubtraction();
-    hist_eta.RandomSubtraction();
-    hist_eta_proton.RandomSubtraction();
-    proton_etap.RandomSubtraction();
-    hist_etap.RandomSubtraction();
-    hist_etap_proton.RandomSubtraction();
-
     Write();
 	return kTRUE;
 }

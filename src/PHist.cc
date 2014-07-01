@@ -44,13 +44,16 @@ void    PHist::Write(TDirectory& dir)
     curDir->cd();
     rand[0]->Write();
     rand[1]->Write();
+
+    BackgroundSubtraction();
     dir.cd();
     result->Write();
 }
 
 
-void	PHist::RandomSubtraction()
+void	PHist::BackgroundSubtraction()
 {
+    result->Reset();
     result->Add(prompt,1);
     Double_t    ratio = (cuts[0][1] - cuts[0][0])/((cuts[1][1] - cuts[1][0]) + (cuts[2][1] - cuts[2][0]));
     result->Add(rand[0],-ratio);

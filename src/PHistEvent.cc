@@ -14,12 +14,6 @@ PHistEvent::~PHistEvent()
 
 }
 
-void    PHistEvent::RandomSubtraction()
-{
-    IM.RandomSubtraction();
-    MM.RandomSubtraction();
-}
-
 void    PHistEvent::Write(TDirectory& dir)
 {
     TDirectory* curDir  = dir.GetDirectory(name.Data());
@@ -50,14 +44,6 @@ PHistEvent3Meson::PHistEvent3Meson(const TString& _Name)    :
 PHistEvent3Meson::~PHistEvent3Meson()
 {
 
-}
-
-void    PHistEvent3Meson::RandomSubtraction()
-{
-    PHistEvent::RandomSubtraction();
-    sub0.RandomSubtraction();
-    sub1.RandomSubtraction();
-    sub2.RandomSubtraction();
 }
 
 void    PHistEvent3Meson::Write(TDirectory& dir)

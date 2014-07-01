@@ -18,7 +18,6 @@ public:
 
     inline  void    Clear();
     inline  void    Fill(const Double_t taggerTime, const Double_t invMass, const Double_t misMass);
-    virtual void	RandomSubtraction();
     virtual void    Write(TDirectory& dir);
 };
 
@@ -51,7 +50,6 @@ public:
 
     inline  void    Clear();
     inline  void    FillSubMesons(const Double_t taggerTime, const Double_t invMassSub0, const Double_t invMassSub1, const Double_t invMassSub2);
-    virtual void	RandomSubtraction();
     virtual void    Write(TDirectory& dir);
 };
 

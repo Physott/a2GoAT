@@ -31,7 +31,6 @@ public:
 
     inline  void            Clear();
             Bool_t          ProcessEvent(const TLorentzVector& all, const GTreeParticle& protons, const GTreeTagger& tagger);
-    inline  void            RandomSubtraction();
             void            Write(TDirectory& curDir);
 };
 
@@ -42,12 +41,6 @@ void    PProtonCheck::Clear()
     histProtonAngleDiff.Clear();
     histSmallestProtonAngleDiff.Clear();
     histCoplanarity.Clear();
-}
-
-void    PProtonCheck::RandomSubtraction()
-{
-    histProtonAngleDiff.RandomSubtraction();
-    histSmallestProtonAngleDiff.RandomSubtraction();
 }
 
 #endif
