@@ -265,7 +265,7 @@ MyPhysics::MyPhysics()    :
     hist_etap(TString("etap"), kTRUE),
     hist_etap_proton(TString("etap_proton"), kTRUE)
 {
-
+    PHist::SetCuts(-10, 5, -515, -15, 15, 510);
 }
 
 MyPhysics::~MyPhysics()

@@ -18,7 +18,7 @@ protected:
     TH1*   rand[2];
     TH1*   result;
 
-    Double_t    cuts[3][2];
+    static  Double_t    cuts[3][2];
 
 public:
     PHist();
@@ -29,7 +29,7 @@ public:
     inline  void    Fill(const Double_t taggerTime, const Int_t value);
             void	RandomSubtraction();
             void    Reset() {prompt->Reset(); rand[0]->Reset(); rand[1]->Reset(); result->Reset();}
-    inline  void    SetCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t Rand0Min = 0, const Double_t Rand0Max = 0, const Double_t Rand1Min = 0, const Double_t Rand1Max = 0);
+    static  void    SetCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t Rand0Min = 0, const Double_t Rand0Max = 0, const Double_t Rand1Min = 0, const Double_t Rand1Max = 0);
             void    Write(TDirectory& dir);
 
     friend class PPhysics;
@@ -91,17 +91,6 @@ void    PHist::Fill(const Double_t taggerTime, const Int_t value)
     if(taggerTime>cuts[2][0] && taggerTime<cuts[2][1])
         rand[1]->Fill(value);
 }
-
-void    PHist::SetCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t Rand0Min, const Double_t Rand0Max, const Double_t Rand1Min, const Double_t Rand1Max)
-{
-    cuts[0][0]  = PromptMin;
-    cuts[0][1]  = PromptMax;
-    cuts[1][0]  = Rand0Min;
-    cuts[1][1]  = Rand0Max;
-    cuts[2][0]  = Rand1Min;
-    cuts[2][1]  = Rand1Max;
-}
-
 
 
 

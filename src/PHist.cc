@@ -4,12 +4,7 @@
 
 PHist::PHist()
 {
-    cuts[0][0]  = -1000000;
-    cuts[0][1]  = 1000000;
-    cuts[1][0]  = 1;
-    cuts[1][1]  = 0;
-    cuts[2][0]  = 1;
-    cuts[2][1]  = 0;
+
 }
 
 PHist::~PHist()
@@ -60,6 +55,22 @@ void	PHist::RandomSubtraction()
     Double_t    ratio = (cuts[0][1] - cuts[0][0])/((cuts[1][1] - cuts[1][0]) + (cuts[2][1] - cuts[2][0]));
     result->Add(rand[0],-ratio);
     result->Add(rand[1],-ratio);
+}
+
+Double_t    PHist::cuts[3][2]  =
+{{-1000000, 1000000},
+ {1, 0},
+ {1, 0}
+};
+
+void    PHist::SetCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t Rand0Min, const Double_t Rand0Max, const Double_t Rand1Min, const Double_t Rand1Max)
+{
+    cuts[0][0]  = PromptMin;
+    cuts[0][1]  = PromptMax;
+    cuts[1][0]  = Rand0Min;
+    cuts[1][1]  = Rand0Max;
+    cuts[2][0]  = Rand1Min;
+    cuts[2][1]  = Rand1Max;
 }
 
 

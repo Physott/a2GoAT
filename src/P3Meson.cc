@@ -22,10 +22,6 @@ P3Meson::P3Meson(const TString &_Name, const Bool_t _IsEtap)    :
     cutMM[0] = 850;
     cutMM[1] = 1050;
 
-    raw.SetCuts(-10, 5, -515, -15, 15, 510);
-    cutIMevent.SetCuts(-10, 5, -515, -15, 15, 510);
-    cutMMevent.SetCuts(-10, 5, -515, -15, 15, 510);
-
     if(isEtap)
     {
         cutIM[0][0] = 500;

@@ -18,7 +18,6 @@ public:
 
     inline  void    Clear();
     inline  void    Fill(const Double_t taggerTime, const Double_t invMass, const Double_t misMass);
-    virtual void    SetCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t Rand0Min = 0, const Double_t Rand0Max = 0, const Double_t Rand1Min = 0, const Double_t Rand1Max = 0);
     virtual void	RandomSubtraction();
     virtual void    Write(TDirectory& dir);
 };
@@ -52,7 +51,6 @@ public:
 
     inline  void    Clear();
     inline  void    FillSubMesons(const Double_t taggerTime, const Double_t invMassSub0, const Double_t invMassSub1, const Double_t invMassSub2);
-    virtual void    SetCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t Rand0Min = 0, const Double_t Rand0Max = 0, const Double_t Rand1Min = 0, const Double_t Rand1Max = 0);
     virtual void	RandomSubtraction();
     virtual void    Write(TDirectory& dir);
 };

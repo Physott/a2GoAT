@@ -14,14 +14,6 @@ PHistEvent::~PHistEvent()
 
 }
 
-
-
-void    PHistEvent::SetCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t Rand0Min, const Double_t Rand0Max, const Double_t Rand1Min, const Double_t Rand1Max)
-{
-    IM.SetCuts(PromptMin, PromptMax, Rand0Min, Rand0Max, Rand1Min, Rand1Max);
-    MM.SetCuts(PromptMin, PromptMax, Rand0Min, Rand0Max, Rand1Min, Rand1Max);
-}
-
 void    PHistEvent::RandomSubtraction()
 {
     IM.RandomSubtraction();
@@ -58,14 +50,6 @@ PHistEvent3Meson::PHistEvent3Meson(const TString& _Name)    :
 PHistEvent3Meson::~PHistEvent3Meson()
 {
 
-}
-
-void    PHistEvent3Meson::SetCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t Rand0Min, const Double_t Rand0Max, const Double_t Rand1Min, const Double_t Rand1Max)
-{
-    PHistEvent::SetCuts(PromptMin, PromptMax, Rand0Min, Rand0Max, Rand1Min, Rand1Max);
-    sub0.SetCuts(PromptMin, PromptMax, Rand0Min, Rand0Max, Rand1Min, Rand1Max);
-    sub1.SetCuts(PromptMin, PromptMax, Rand0Min, Rand0Max, Rand1Min, Rand1Max);
-    sub2.SetCuts(PromptMin, PromptMax, Rand0Min, Rand0Max, Rand1Min, Rand1Max);
 }
 
 void    PHistEvent3Meson::RandomSubtraction()
