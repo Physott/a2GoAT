@@ -40,7 +40,7 @@ Bool_t	MyPhysics::Start()
 
 void	MyPhysics::ProcessEvent()
 {
-    if((GetEventNumber() % 100000 == 0) && GetEventNumber()!=0) cout << "Event: "<< GetEventNumber() << " Total Etas found: " << hist_eta.GetNFound() << endl;
+    if((GetEventNumber() % 100000 == 0) && GetEventNumber()!=0) cout << "Event: "<< GetEventNumber() << " Total Etas found: " << hist_eta.GetNFound() << "   Total Etaps found: " << hist_etap.GetNFound() << endl;
 
     if(eta->GetNParticles()>0)
     {

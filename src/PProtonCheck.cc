@@ -34,14 +34,14 @@ Bool_t    PProtonCheck::ProcessEvent(const TLorentzVector &all, const GTreeParti
         {
 
             help = TMath::RadToDeg() * protons.Particle(p).Angle((tagger.GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - all).Vect());
-            histProtonAngleDiff.Fill(tagger.GetTagged_t(i), help);
+            histProtonAngleDiff.Fill(help, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
             if(help < smallestProtonAngleDiff)
             {
                 smallestProtonAngleDiff         = help;
                 smallestProtonAngleDiffIndex[p] = i;
             }
         }
-        histSmallestProtonAngleDiff.Fill(tagger.GetTagged_t(smallestProtonAngleDiffIndex[p]), smallestProtonAngleDiff);
+        histSmallestProtonAngleDiff.Fill(smallestProtonAngleDiff, tagger.GetTagged_t(smallestProtonAngleDiffIndex[p]), tagger.GetTagged_ch(smallestProtonAngleDiffIndex[p]));
         if(smallestProtonAngleDiff<4)
         {
             help    =   TMath::RadToDeg()*TMath::Abs(all.Phi() - protons.Particle(p).Phi());

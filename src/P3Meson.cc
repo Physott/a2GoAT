@@ -76,20 +76,20 @@ Bool_t	P3Meson::ProcessEvent(const GTreeMeson& meson, const GTreeTagger& tagger)
         {
             time_raw.Fill(tagger.GetTagged_t(i));
             misMass = (tagger.GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - meson.Meson(0)).M();
-            raw.Fill(tagger.GetTagged_t(i), meson.Meson(0).M(), misMass);
-            raw.FillSubMesons(tagger.GetTagged_t(i), imSub[0], imSub[1], imSub[2]);
+            raw.Fill(meson.Meson(0).M(), misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+            raw.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
 
             if(passIM)
             {
                 time_cutIM.Fill(tagger.GetTagged_t(i));
-                cutIMevent.Fill(tagger.GetTagged_t(i), meson.Meson(0).M(), (tagger.GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - meson.Meson(0)).M());
-                cutIMevent.FillSubMesons(tagger.GetTagged_t(i), imSub[0], imSub[1], imSub[2]);
+                cutIMevent.Fill(meson.Meson(0).M(), misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                cutIMevent.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
 
                 if(misMass>cutMM[0] && misMass<cutMM[1])
                 {
                     time_cutMM.Fill(tagger.GetTagged_t(i));
-                    cutMMevent.Fill(tagger.GetTagged_t(i), meson.Meson(0).M(), (tagger.GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - meson.Meson(0)).M());
-                    cutMMevent.FillSubMesons(tagger.GetTagged_t(i), imSub[0], imSub[1], imSub[2]);
+                    cutMMevent.Fill(meson.Meson(0).M(), misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                    cutMMevent.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
 
                     nFound++;
                 }
