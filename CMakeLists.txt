@@ -29,11 +29,10 @@ include_directories(inc)
 set(ROOT_LIBRARIES "${ROOT_LIBRARIES} -lEG")
 message(${ROOT_LIBRARIES})
 
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
 
-add_executable(goat
+add_executable(MyGoAT
    inc/GTree.h
    inc/GTreeRawEvent.h
    inc/GTreeDetectorHits.h
@@ -70,9 +69,9 @@ add_executable(goat
    src/GoAT.cc
    src/goat_main.cc
    )
-target_link_libraries(goat ${ROOT_LIBRARIES})
+target_link_libraries(MyGoAT ${ROOT_LIBRARIES})
 
-add_executable(etap
+add_executable(MyPhysics
    inc/GTree.h
    inc/GTreeRawEvent.h
    inc/GTreeDetectorHits.h
@@ -115,5 +114,5 @@ add_executable(etap
    src/MyPhysics.cc
    src/MyPhysics_main.cc
    )
-target_link_libraries(etap ${ROOT_LIBRARIES})
+target_link_libraries(MyPhysics ${ROOT_LIBRARIES})
 
