@@ -113,6 +113,7 @@ add_executable(etap
    src/PProtonCheck.cc
    src/P3Meson.cc
    src/MyPhysics.cc
+   src/MyPhysics_main.cc
    )
 target_link_libraries(etap ${ROOT_LIBRARIES})
 
