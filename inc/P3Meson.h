@@ -6,6 +6,8 @@
 #include <cstdio>
 #include <string> 
 
+#include "GKinFitter.h"
+#include "GKinFitterParticle.h"
 #include "PPhysics.h"
 #include "PHistEvent.h"
 #include "PProtonCheck.h"
@@ -26,6 +28,11 @@ private:
     TH1D 	time_cutMM;
     Double_t cutMM[2];
     PHistEvent3Meson  cutMMevent;
+
+    GKinFitter          fit3Con;
+    PHistEvent3MesonFit hist_fit3Con;
+    GKinFitter          fit4Con;
+    PHistEvent3MesonFit hist_fit4Con;
 	
     Int_t 	nFound;
 

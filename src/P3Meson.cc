@@ -10,6 +10,10 @@ P3Meson::P3Meson(const TString &_Name, const Bool_t _IsEtap)    :
     cutIMevent(TString(name).Append("_cutIM")),
     time_cutMM(TString(name).Append("_time_cutMM").Data(), TString(name).Append("_time_cutMM").Data(),		1000,-500,500),
     cutMMevent(TString(name).Append("_cutMM")),
+    fit3Con(6,3,0),
+    hist_fit3Con(TString(name).Append("_fit3Con")),
+    fit4Con(6,4,0),
+    hist_fit4Con(TString(name).Append("_fit4Con")),
     nFound(0)
 {
     cutIM[0][0] = 110;

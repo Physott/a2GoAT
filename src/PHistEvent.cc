@@ -61,3 +61,41 @@ void    PHistEvent3Meson::Write(TDirectory& dir)
     sub1.Write(*curDir);
     sub2.Write(*curDir);
 }
+
+
+
+
+
+
+PHistEvent3MesonFit::PHistEvent3Meson(const TString& _Name)    :
+    PHistEvent3Meson(_Name),
+    ChiSq(TString("_ChiSq").Prepend(name), TString("Chi Sq ").Append(name), 1500, 0, 1500),
+    ConfidenceLevel(TString("_ConfidenceLevel").Prepend(name), TString("Confidence Level ").Append(name), 1500, 0, 1500)
+{
+    for(int i=0; i<6; i++)
+    {
+        for(int k=0; k<4; k++)
+            Pull[i][k].Clear();
+    }
+}
+
+PHistEvent3Meson::~PHistEvent3Meson()
+{
+
+}
+
+void    PHistEvent3Meson::Write(TDirectory& dir)
+{
+    TDirectory* curDir  = dir.GetDirectory(name.Data());
+    if(!curDir)
+    {
+        dir.cd();
+        gDirectory->mkdir(name.Data());
+        curDir  = dir.GetDirectory(name.Data());
+    }
+    IM.Write(*curDir);
+    MM.Write(*curDir);
+    sub0.Write(*curDir);
+    sub1.Write(*curDir);
+    sub2.Write(*curDir);
+}

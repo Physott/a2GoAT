@@ -68,4 +68,45 @@ void    PHistEvent3Meson::FillSubMesons(const Double_t invMassSub0, const Double
     sub2.Fill(invMassSub2, taggerTime, taggerChannel);
 }
 
+
+
+class   PHistEvent3MesonFit    : public PHistEvent3Meson
+{
+private:
+    PHistD	ChiSq;
+    PHistD	ConfidenceLevel;
+    PHistD	Pull[6][4];
+
+public:
+    PHistEvent3MesonFit(const TString& _Name);
+    virtual ~PHistEvent3MesonFit();
+
+    inline  void    Clear();
+    inline  void    FillFit(const Double_t _ChiSq, const Double_t _ConfidenceLevel, const Double_t* _Pull, const Double_t taggerTime, const Int_t taggerChannel);
+    virtual void    Write(TDirectory& dir);
+};
+
+void    PHistEvent3MesonFit::Clear()
+{
+    PHistEvent3Meson::Clear();
+    ChiSq.Clear();
+    ConfidenceLevel.Clear();
+    for(int i=0; i<6; i++)
+    {
+        for(int k=0; k<4; k++)
+            Pull[i][k].Clear();
+    }
+}
+
+void    PHistEvent3MesonFit::FillFit(const Double_t _ChiSq, const Double_t _ConfidenceLevel, const Double_t* _Pull, const Double_t taggerTime, const Int_t taggerChannel)
+{
+    ChiSq.Fill(_ChiSq, taggerTime, taggerChannel);
+    ConfidenceLevel.Fill(_ConfidenceLevel, taggerTime, taggerChannel);
+    for(int i=0; i<6; i++)
+    {
+        for(int k=0; k<4; k++)
+            Pull[i][k].Fill(_Pull[(4*i)+k], taggerTime, taggerChannel);
+    }
+}
+
 #endif
