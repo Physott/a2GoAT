@@ -39,7 +39,7 @@ void    PHistEvent::Fill(const Double_t invMass, const Double_t misMass, const D
 
 class   PHistEvent3Meson    : public PHistEvent
 {
-private:
+protected:
     PHistD	sub0;
     PHistD	sub1;
     PHistD	sub2;

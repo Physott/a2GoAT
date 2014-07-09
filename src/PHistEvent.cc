@@ -67,24 +67,43 @@ void    PHistEvent3Meson::Write(TDirectory& dir)
 
 
 
-PHistEvent3MesonFit::PHistEvent3Meson(const TString& _Name)    :
+PHistEvent3MesonFit::PHistEvent3MesonFit(const TString& _Name)    :
     PHistEvent3Meson(_Name),
     ChiSq(TString("_ChiSq").Prepend(name), TString("Chi Sq ").Append(name), 1500, 0, 1500),
-    ConfidenceLevel(TString("_ConfidenceLevel").Prepend(name), TString("Confidence Level ").Append(name), 1500, 0, 1500)
+    ConfidenceLevel(TString("_ConfidenceLevel").Prepend(name), TString("Confidence Level ").Append(name), 1500, 0, 1500),
+    Pull({{PHistD(TString("_Pull_0_X").Prepend(name), TString(" Pull Photon 0 Px ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_0_Y").Prepend(name), TString(" Pull Photon 0 Py ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_0_Z").Prepend(name), TString(" Pull Photon 0 Pz ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_0_E").Prepend(name), TString(" Pull Photon 0 E ").Append(name), 1500, 0, 1500)},
+        {PHistD(TString("_Pull_1_X").Prepend(name), TString(" Pull Photon 0 Px ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_1_Y").Prepend(name), TString(" Pull Photon 0 Py ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_1_Z").Prepend(name), TString(" Pull Photon 0 Pz ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_1_E").Prepend(name), TString(" Pull Photon 0 E ").Append(name), 1500, 0, 1500)},
+        {PHistD(TString("_Pull_2_X").Prepend(name), TString(" Pull Photon 0 Px ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_2_Y").Prepend(name), TString(" Pull Photon 0 Py ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_2_Z").Prepend(name), TString(" Pull Photon 0 Pz ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_2_E").Prepend(name), TString(" Pull Photon 0 E ").Append(name), 1500, 0, 1500)},
+        {PHistD(TString("_Pull_3_X").Prepend(name), TString(" Pull Photon 0 Px ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_3_Y").Prepend(name), TString(" Pull Photon 0 Py ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_3_Z").Prepend(name), TString(" Pull Photon 0 Pz ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_3_E").Prepend(name), TString(" Pull Photon 0 E ").Append(name), 1500, 0, 1500)},
+        {PHistD(TString("_Pull_4_X").Prepend(name), TString(" Pull Photon 0 Px ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_4_Y").Prepend(name), TString(" Pull Photon 0 Py ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_4_Z").Prepend(name), TString(" Pull Photon 0 Pz ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_4_E").Prepend(name), TString(" Pull Photon 0 E ").Append(name), 1500, 0, 1500)},
+        {PHistD(TString("_Pull_5_X").Prepend(name), TString(" Pull Photon 0 Px ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_5_Y").Prepend(name), TString(" Pull Photon 0 Py ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_5_Z").Prepend(name), TString(" Pull Photon 0 Pz ").Append(name), 1500, 0, 1500),
+         PHistD(TString("_Pull_5_E").Prepend(name), TString(" Pull Photon 0 E ").Append(name), 1500, 0, 1500)}})
 {
-    for(int i=0; i<6; i++)
-    {
-        for(int k=0; k<4; k++)
-            Pull[i][k].Clear();
-    }
 }
 
-PHistEvent3Meson::~PHistEvent3Meson()
+PHistEvent3MesonFit::~PHistEvent3MesonFit()
 {
 
 }
 
-void    PHistEvent3Meson::Write(TDirectory& dir)
+void    PHistEvent3MesonFit::Write(TDirectory& dir)
 {
     TDirectory* curDir  = dir.GetDirectory(name.Data());
     if(!curDir)
@@ -98,4 +117,11 @@ void    PHistEvent3Meson::Write(TDirectory& dir)
     sub0.Write(*curDir);
     sub1.Write(*curDir);
     sub2.Write(*curDir);
+    ChiSq.Write(*curDir);
+    ConfidenceLevel.Write(*curDir);
+    for(int i=0; i<6; i++)
+    {
+        for(int k=0; k<4; k++)
+            Pull[i][k].Write(*curDir);
+    }
 }

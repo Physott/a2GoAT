@@ -6,6 +6,8 @@
 #include <cstdio>
 #include <string> 
 
+#include <TH2F.h>
+
 #include "GKinFitter.h"
 #include "GKinFitterParticle.h"
 #include "PPhysics.h"
@@ -29,12 +31,25 @@ private:
     Double_t cutMM[2];
     PHistEvent3Meson  cutMMevent;
 
+    Double_t            cutFit3ConConfidenceLevel;
     GKinFitter          fit3Con;
     PHistEvent3MesonFit hist_fit3Con;
+    Double_t            cutFit4ConConfidenceLevel;
     GKinFitter          fit4Con;
     PHistEvent3MesonFit hist_fit4Con;
 	
     Int_t 	nFound;
+
+    TFile*  GammaResFile;
+    TH2F*   GammaEloss;
+    TH2F*   GammaERes;
+    TH2F*   GammaThetaRes;
+    TH2F*   GammaPhiRes;
+
+    Double_t    imSub[3];
+    Double_t    misMass;
+
+    void    fit(const GTreeMeson& meson, const Double_t tagger_time, const Double_t tagger_channel);
 
 protected:
 			

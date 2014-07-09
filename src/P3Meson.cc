@@ -7,30 +7,30 @@ P3Meson::P3Meson(const TString &_Name, const Bool_t _IsEtap)    :
     time_raw(TString(name).Append("_time_raw").Data(), TString(name).Append("_time_raw").Data(),		1000,-500,500),
     raw(TString(name).Append("_raw")),
     time_cutIM(TString(name).Append("_time_cutIM").Data(), TString(name).Append("_time_cutIM").Data(),		1000,-500,500),
+    cutIM({{110,155},{110,155},{110,155}}),
     cutIMevent(TString(name).Append("_cutIM")),
     time_cutMM(TString(name).Append("_time_cutMM").Data(), TString(name).Append("_time_cutMM").Data(),		1000,-500,500),
+    cutMM({850,1050}),
     cutMMevent(TString(name).Append("_cutMM")),
+    cutFit3ConConfidenceLevel(0.1),
     fit3Con(6,3,0),
     hist_fit3Con(TString(name).Append("_fit3Con")),
+    cutFit4ConConfidenceLevel(0.1),
     fit4Con(6,4,0),
     hist_fit4Con(TString(name).Append("_fit4Con")),
     nFound(0)
 {
-    cutIM[0][0] = 110;
-    cutIM[0][1] = 155;
-    cutIM[1][0] = 110;
-    cutIM[1][1] = 155;
-    cutIM[2][0] = 110;
-    cutIM[2][1] = 155;
-
-    cutMM[0] = 850;
-    cutMM[1] = 1050;
-
     if(isEtap)
     {
         cutIM[0][0] = 500;
         cutIM[0][1] = 590;
     }
+
+    GammaResFile   = new TFile("configfiles/FitGammaResolution.root");
+    GammaEloss     = (TH2F*)GammaResFile->Get("Eloss");
+    GammaERes      = (TH2F*)GammaResFile->Get("EResIter");
+    GammaThetaRes  = (TH2F*)GammaResFile->Get("ThetaRes;1");
+    GammaPhiRes    = (TH2F*)GammaResFile->Get("PhiRes;1");
 }
 
 P3Meson::~P3Meson()
@@ -38,31 +38,12 @@ P3Meson::~P3Meson()
 
 }
 
-/*
-Bool_t	P3Meson::Start()
-{
-    PProtonCheck::Clear();
-
-    TraverseEntries(0, eta->GetNEntries());
-
-    raw.RandomSubtraction();
-    cutIMevent.RandomSubtraction();
-    cutMMevent.RandomSubtraction();
-
-    PProtonCheck::RandomSubtraction();
-
-
-    WriteHistograms();
-	return kTRUE;
-}*/
 
 Bool_t	P3Meson::ProcessEvent(const GTreeMeson& meson, const GTreeTagger& tagger)
 {
     //if(GetEventNumber() == 0) nFound = 0;
     //else if(GetEventNumber() % 100000 == 0) cout << "Event: "<< GetEventNumber() << " Total Etas found: " << nFound << endl;
 
-    Double_t    imSub[3];
-    Double_t    misMass;
     bool        passIM;
 
     if(meson.GetNParticles()>0)
@@ -95,11 +76,72 @@ Bool_t	P3Meson::ProcessEvent(const GTreeMeson& meson, const GTreeTagger& tagger)
                     cutMMevent.Fill(meson.Meson(0).M(), misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
                     cutMMevent.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
 
+                    fit(meson, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+
                     nFound++;
                 }
             }
         }
     }
+}
+
+void    P3Meson::fit(const GTreeMeson& meson, const Double_t tagger_time, const Double_t tagger_channel)
+{
+    fit3Con.Reset();
+    GKinFitterParticle  pho[6];
+
+    Int_t Ebin  = 0;
+    Int_t Thbin = 0;
+    Float_t resth = 0;
+    Float_t resph = 0;
+    Float_t resE  = 0;
+
+    fit3Con.Reset();
+    for(int i=0; i<6; i++)
+    {
+        Ebin  = GammaEloss->GetXaxis()->FindFixBin(meson.SubPhotons(0,i).E());
+        Thbin = GammaEloss->GetYaxis()->FindFixBin(meson.SubPhotons(0,i).Theta()*TMath::RadToDeg());
+        // Get resolutions
+        resth = GammaThetaRes->GetBinContent(Ebin, Thbin);
+        resph = GammaPhiRes->GetBinContent(Ebin, Thbin);
+        resE  = GammaERes->GetBinContent(Ebin, Thbin);
+        if(resth==0 || resph==0 || resE==0 ) return; // If energy or angle is out of calibrated  range!
+        // Now set particle parameters
+        //                     LorentzVector
+        pho[i].Set4Vector(meson.SubPhotons(0,i));
+        //std::cout << "Res: " << resth << ", " << resph << ", " << photons->Particle(i).E()*resE << std::endl;
+        pho[i].SetResolutions(1.5* resth, 1.5* resph, 2.2 *meson.SubPhotons(0,i).E()*resE);
+        fit3Con.AddPosKFParticle(pho[i]);
+    }
+
+    Int_t	sub[2];
+    sub[0]	= 0;
+    sub[1]	= 1;
+    if(isEtap)
+        fit3Con.AddSubInvMassConstraint(2, sub, MASS_ETA);
+    else
+        fit3Con.AddSubInvMassConstraint(2, sub, MASS_PI0);
+    sub[0]	= 2;
+    sub[1]	= 3;
+    fit3Con.AddSubInvMassConstraint(2, sub, MASS_PI0);
+    sub[0]	= 4;
+    sub[1]	= 5;
+    fit3Con.AddSubInvMassConstraint(2, sub, MASS_PI0);
+
+    if(fit3Con.Solve()<0)
+        return;
+
+    hist_fit3Con.Fill(meson.Meson(0).M(), misMass, tagger_time, tagger_channel);
+    hist_fit3Con.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger_time, tagger_channel);
+
+    Double_t chiSq      = fit3Con.GetChi2();
+    Double_t conLevel   = fit3Con.ConfidenceLevel();
+    Double_t Pull[24];
+
+    for(int i=0; i<24; i++)
+        Pull[i]   = fit3Con.Pull(i);
+
+    hist_fit3Con.FillFit(chiSq, conLevel, Pull, tagger_time, tagger_channel);
 }
 
 
