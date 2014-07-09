@@ -45,50 +45,61 @@ Bool_t	P3Meson::ProcessEvent(const GTreeMeson& meson, const GTreeTagger& tagger)
     //else if(GetEventNumber() % 100000 == 0) cout << "Event: "<< GetEventNumber() << " Total Etas found: " << nFound << endl;
 
     bool        passIM;
+    bool        passFit3Con;
 
     if(meson.GetNParticles()>0)
     {
-
+        Double_t    im  = meson.Particle(0).M();
         imSub[0]    = (meson.SubParticles(0, 0)+meson.SubParticles(0, 1)).M();
         imSub[1]    = (meson.SubParticles(0, 2)+meson.SubParticles(0, 3)).M();
         imSub[2]    = (meson.SubParticles(0, 4)+meson.SubParticles(0, 5)).M();
+        Double_t Pull[24];
+
         if((imSub[0]>cutIM[0][0] && imSub[0]<cutIM[0][1]) && (imSub[1]>cutIM[1][0] && imSub[1]<cutIM[1][1]) && (imSub[2]>cutIM[2][0] && imSub[2]<cutIM[2][1]))
             passIM  = true;
         else
             passIM  = false;
 
+        passFit3Con = DoFit3Con(meson);
+
         for(int i=0; i<tagger.GetNTagged(); i++)
         {
             time_raw.Fill(tagger.GetTagged_t(i));
             misMass = (tagger.GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - meson.Meson(0)).M();
-            raw.Fill(meson.Meson(0).M(), misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+            raw.Fill(im, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
             raw.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
 
             if(passIM)
             {
                 time_cutIM.Fill(tagger.GetTagged_t(i));
-                cutIMevent.Fill(meson.Meson(0).M(), misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                cutIMevent.Fill(im, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
                 cutIMevent.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
 
-                if(misMass>cutMM[0] && misMass<cutMM[1])
+                if(passFit3Con)
                 {
-                    time_cutMM.Fill(tagger.GetTagged_t(i));
-                    cutMMevent.Fill(meson.Meson(0).M(), misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                    cutMMevent.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                    hist_fit3Con.Fill(im, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                    hist_fit3Con.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                    for(int i=0; i<24; i++)
+                        Pull[i]   = fit3Con.Pull(i);
+                    hist_fit3Con.FillFit(fit3Con.GetChi2(), conLevel, Pull, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
 
-                    fit(meson, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                    if(misMass>cutMM[0] && misMass<cutMM[1])
+                    {
+                        time_cutMM.Fill(tagger.GetTagged_t(i));
+                        cutMMevent.Fill(im, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                        cutMMevent.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
 
-                    nFound++;
+                        nFound++;
+                    }
                 }
             }
         }
     }
 }
 
-void    P3Meson::fit(const GTreeMeson& meson, const Double_t tagger_time, const Double_t tagger_channel)
+Bool_t    P3Meson::fitInit(const GTreeMeson& meson, GKinFitter &fitter)
 {
-    fit3Con.Reset();
-    GKinFitterParticle  pho[6];
+    fitter.Reset();
 
     Int_t Ebin  = 0;
     Int_t Thbin = 0;
@@ -96,7 +107,7 @@ void    P3Meson::fit(const GTreeMeson& meson, const Double_t tagger_time, const 
     Float_t resph = 0;
     Float_t resE  = 0;
 
-    fit3Con.Reset();
+    fitter.Reset();
     for(int i=0; i<6; i++)
     {
         Ebin  = GammaEloss->GetXaxis()->FindFixBin(meson.SubPhotons(0,i).E());
@@ -105,43 +116,52 @@ void    P3Meson::fit(const GTreeMeson& meson, const Double_t tagger_time, const 
         resth = GammaThetaRes->GetBinContent(Ebin, Thbin);
         resph = GammaPhiRes->GetBinContent(Ebin, Thbin);
         resE  = GammaERes->GetBinContent(Ebin, Thbin);
-        if(resth==0 || resph==0 || resE==0 ) return; // If energy or angle is out of calibrated  range!
+        if(resth==0 || resph==0 || resE==0 ) return kFALSE; // If energy or angle is out of calibrated  range!
         // Now set particle parameters
         //                     LorentzVector
         pho[i].Set4Vector(meson.SubPhotons(0,i));
         //std::cout << "Res: " << resth << ", " << resph << ", " << photons->Particle(i).E()*resE << std::endl;
         pho[i].SetResolutions(1.5* resth, 1.5* resph, 2.2 *meson.SubPhotons(0,i).E()*resE);
-        fit3Con.AddPosKFParticle(pho[i]);
+        fitter.AddPosKFParticle(pho[i]);
     }
 
     Int_t	sub[2];
     sub[0]	= 0;
     sub[1]	= 1;
     if(isEtap)
-        fit3Con.AddSubInvMassConstraint(2, sub, MASS_ETA);
+        fitter.AddSubInvMassConstraint(2, sub, MASS_ETA);
     else
-        fit3Con.AddSubInvMassConstraint(2, sub, MASS_PI0);
+        fitter.AddSubInvMassConstraint(2, sub, MASS_PI0);
     sub[0]	= 2;
     sub[1]	= 3;
-    fit3Con.AddSubInvMassConstraint(2, sub, MASS_PI0);
+    fitter.AddSubInvMassConstraint(2, sub, MASS_PI0);
     sub[0]	= 4;
     sub[1]	= 5;
-    fit3Con.AddSubInvMassConstraint(2, sub, MASS_PI0);
+    fitter.AddSubInvMassConstraint(2, sub, MASS_PI0);
+
+    return kTRUE;
+}
+
+Bool_t    P3Meson::DoFit3Con(const GTreeMeson& meson)
+{
+    if(!fitInit(meson, fit3Con))
+        return kFALSE;
 
     if(fit3Con.Solve()<0)
-        return;
+        return kFALSE;
 
-    hist_fit3Con.Fill(meson.Meson(0).M(), misMass, tagger_time, tagger_channel);
-    hist_fit3Con.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger_time, tagger_channel);
+    //hist_fit3Con.Fill(meson.Meson(0).M(), misMass, tagger_time, tagger_channel);
+    //hist_fit3Con.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger_time, tagger_channel);
 
-    Double_t chiSq      = fit3Con.GetChi2();
-    Double_t conLevel   = fit3Con.ConfidenceLevel();
-    Double_t Pull[24];
+    conLevel   = fit3Con.ConfidenceLevel();
+    //Double_t Pull[24];
 
-    for(int i=0; i<24; i++)
+    /*for(int i=0; i<24; i++)
         Pull[i]   = fit3Con.Pull(i);
 
-    hist_fit3Con.FillFit(chiSq, conLevel, Pull, tagger_time, tagger_channel);
+    hist_fit3Con.FillFit(chiSq, conLevel, Pull, tagger_time, tagger_channel);*/
+
+    return kTRUE;
 }
 
 
@@ -154,7 +174,9 @@ Bool_t 	P3Meson::Write(TDirectory& curDir)
 
     raw.Write(curDir);
     cutIMevent.Write(curDir);
+    hist_fit3Con.Write(curDir);
     cutMMevent.Write(curDir);
+    hist_fit4Con.Write(curDir);
 
 	return kTRUE;
 }
@@ -168,6 +190,8 @@ void    P3Meson::Clear()
     time_cutMM.Reset();
     raw.Clear();
     cutIMevent.Clear();
+    hist_fit3Con.Clear();
     cutMMevent.Clear();
+    hist_fit4Con.Clear();
 }
 

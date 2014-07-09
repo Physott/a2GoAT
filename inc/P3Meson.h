@@ -46,10 +46,13 @@ private:
     TH2F*   GammaThetaRes;
     TH2F*   GammaPhiRes;
 
+    GKinFitterParticle  pho[6];
     Double_t    imSub[3];
     Double_t    misMass;
+    Double_t    conLevel;
 
-    void    fit(const GTreeMeson& meson, const Double_t tagger_time, const Double_t tagger_channel);
+    Bool_t  fitInit(const GTreeMeson& meson, GKinFitter &fitter);
+    Bool_t  DoFit3Con(const GTreeMeson& meson);
 
 protected:
 			
