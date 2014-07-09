@@ -20,14 +20,11 @@ private:
     TString name;
     Bool_t  isEtap;
 
-    TH1D 	time_raw;
     PHistEvent3Meson  raw;
 
-    TH1D 	time_cutIM;
     Double_t cutIM[3][2];
     PHistEvent3Meson  cutIMevent;
 
-    TH1D 	time_cutMM;
     Double_t cutMM[2];
     PHistEvent3Meson  cutMMevent;
 

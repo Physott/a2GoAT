@@ -3,6 +3,7 @@
 
 PHistEvent::PHistEvent(const TString& _Name)    :
     name(_Name),
+    time(TString(name).Append("_time").Data(), TString(name).Append(" tagger time").Data(),		1000,-500,500),
     IM(TString("_IM").Prepend(name), TString("IM ").Append(name), 1500, 0, 1500),
     MM(TString("_MM").Prepend(name), TString("MM ").Append(name), 1500, 0, 1500)
 {
@@ -23,6 +24,8 @@ void    PHistEvent::Write(TDirectory& dir)
         gDirectory->mkdir(name.Data());
         curDir  = dir.GetDirectory(name.Data());
     }
+    curDir->cd();
+    time.Write();
     IM.Write(*curDir);
     MM.Write(*curDir);
 }
@@ -55,6 +58,8 @@ void    PHistEvent3Meson::Write(TDirectory& dir)
         gDirectory->mkdir(name.Data());
         curDir  = dir.GetDirectory(name.Data());
     }
+    curDir->cd();
+    time.Write();
     IM.Write(*curDir);
     MM.Write(*curDir);
     sub0.Write(*curDir);
@@ -112,6 +117,8 @@ void    PHistEvent3MesonFit::Write(TDirectory& dir)
         gDirectory->mkdir(name.Data());
         curDir  = dir.GetDirectory(name.Data());
     }
+    curDir->cd();
+    time.Write();
     IM.Write(*curDir);
     MM.Write(*curDir);
     sub0.Write(*curDir);

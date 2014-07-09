@@ -1,6 +1,8 @@
 #ifndef __PHistEvent_h__
 #define __PHistEvent_h__
 
+#include <TH1D.h>
+
 #include "PHist.h"
 
 
@@ -9,6 +11,7 @@ class   PHistEvent
 protected:
     TString name;
 
+    TH1D	time;
     PHistD	IM;
     PHistD	MM;
 
@@ -25,11 +28,13 @@ public:
 
 void    PHistEvent::Clear()
 {
+    time.Reset();
     IM.Clear();
     MM.Clear();
 }
 void    PHistEvent::Fill(const Double_t invMass, const Double_t misMass, const Double_t taggerTime, const Int_t taggerChannel)
 {
+    time.Fill(taggerTime);
     IM.Fill(invMass, taggerTime, taggerChannel);
     MM.Fill(misMass, taggerTime, taggerChannel);
 }

@@ -4,12 +4,9 @@
 P3Meson::P3Meson(const TString &_Name, const Bool_t _IsEtap)    :
     name(_Name),
     isEtap(_IsEtap),
-    time_raw(TString(name).Append("_time_raw").Data(), TString(name).Append("_time_raw").Data(),		1000,-500,500),
     raw(TString(name).Append("_raw")),
-    time_cutIM(TString(name).Append("_time_cutIM").Data(), TString(name).Append("_time_cutIM").Data(),		1000,-500,500),
     cutIM({{110,155},{110,155},{110,155}}),
     cutIMevent(TString(name).Append("_cutIM")),
-    time_cutMM(TString(name).Append("_time_cutMM").Data(), TString(name).Append("_time_cutMM").Data(),		1000,-500,500),
     cutMM({850,1050}),
     cutMMevent(TString(name).Append("_cutMM")),
     cutFit3ConConfidenceLevel(0.1),
@@ -64,14 +61,12 @@ Bool_t	P3Meson::ProcessEvent(const GTreeMeson& meson, const GTreeTagger& tagger)
 
         for(int i=0; i<tagger.GetNTagged(); i++)
         {
-            time_raw.Fill(tagger.GetTagged_t(i));
             misMass = (tagger.GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - meson.Meson(0)).M();
             raw.Fill(im, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
             raw.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
 
             if(passIM)
             {
-                time_cutIM.Fill(tagger.GetTagged_t(i));
                 cutIMevent.Fill(im, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
                 cutIMevent.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
 
@@ -85,7 +80,6 @@ Bool_t	P3Meson::ProcessEvent(const GTreeMeson& meson, const GTreeTagger& tagger)
 
                     if(misMass>cutMM[0] && misMass<cutMM[1])
                     {
-                        time_cutMM.Fill(tagger.GetTagged_t(i));
                         cutMMevent.Fill(im, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
                         cutMMevent.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
 
@@ -168,9 +162,6 @@ Bool_t    P3Meson::DoFit3Con(const GTreeMeson& meson)
 Bool_t 	P3Meson::Write(TDirectory& curDir)
 {
     curDir.cd();
-    time_raw.Write();
-    time_cutIM.Write();
-    time_cutMM.Write();
 
     raw.Write(curDir);
     cutIMevent.Write(curDir);
@@ -185,9 +176,7 @@ Bool_t 	P3Meson::Write(TDirectory& curDir)
 void    P3Meson::Clear()
 {
     nFound  =0;
-    time_raw.Reset();
-    time_cutIM.Reset();
-    time_cutMM.Reset();
+
     raw.Clear();
     cutIMevent.Clear();
     hist_fit3Con.Clear();
