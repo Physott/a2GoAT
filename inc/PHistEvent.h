@@ -2,9 +2,11 @@
 #define __PHistEvent_h__
 
 #include <TH1D.h>
+#include <TLorentzVector.h>
 
 #include "PHist.h"
 
+class   GTreeTagger;
 
 class   PHistEvent
 {
@@ -21,6 +23,7 @@ public:
 
     inline  void    Clear();
     inline  void    Fill(const Double_t invMass, const Double_t misMass, const Double_t taggerTime, const Int_t taggerChannel);
+            void    Fill(const Double_t invMass, const TLorentzVector& particle, const GTreeTagger &tagger);
     virtual void    Write(TDirectory& dir);
 };
 
@@ -55,6 +58,7 @@ public:
 
     inline  void    Clear();
     inline  void    FillSubMesons(const Double_t invMassSub0, const Double_t invMassSub1, const Double_t invMassSub2, const Double_t taggerTime, const Int_t taggerChannel);
+            void    FillSubMesons(const Double_t invMassSub0, const Double_t invMassSub1, const Double_t invMassSub2, const GTreeTagger& tagger);
     virtual void    Write(TDirectory& dir);
 };
 
@@ -88,6 +92,7 @@ public:
 
     inline  void    Clear();
     inline  void    FillFit(const Double_t _ChiSq, const Double_t _ConfidenceLevel, const Double_t* _Pull, const Double_t taggerTime, const Int_t taggerChannel);
+            void    FillFit(const Double_t _ChiSq, const Double_t _ConfidenceLevel, const Double_t* _Pull, const GTreeTagger& tagger);
     virtual void    Write(TDirectory& dir);
 };
 

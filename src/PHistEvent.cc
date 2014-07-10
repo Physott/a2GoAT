@@ -1,4 +1,5 @@
 #include "PHistEvent.h"
+#include "GTreeTagger.h"
 
 
 PHistEvent::PHistEvent(const TString& _Name)    :
@@ -13,6 +14,18 @@ PHistEvent::PHistEvent(const TString& _Name)    :
 PHistEvent::~PHistEvent()
 {
 
+}
+
+void    PHistEvent::Fill(const Double_t invMass, const TLorentzVector &particle, const GTreeTagger &tagger)
+{
+    Double_t    misMass;
+    for(int i=0; i<tagger.GetNTagged(); i++)
+    {
+        misMass = (tagger.GetVectorProtonTarget(i) - particle).M();
+        time.Fill(tagger.GetTagged_t(i));
+        IM.Fill(invMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+        MM.Fill(misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+    }
 }
 
 void    PHistEvent::Write(TDirectory& dir)
@@ -47,6 +60,16 @@ PHistEvent3Meson::PHistEvent3Meson(const TString& _Name)    :
 PHistEvent3Meson::~PHistEvent3Meson()
 {
 
+}
+
+void    PHistEvent3Meson::FillSubMesons(const Double_t invMassSub0, const Double_t invMassSub1, const Double_t invMassSub2, const GTreeTagger& tagger)
+{
+    for(int i=0; i<tagger.GetNTagged(); i++)
+    {
+        sub0.Fill(invMassSub0, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+        sub1.Fill(invMassSub1, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+        sub2.Fill(invMassSub2, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+    }
 }
 
 void    PHistEvent3Meson::Write(TDirectory& dir)
@@ -106,6 +129,21 @@ PHistEvent3MesonFit::PHistEvent3MesonFit(const TString& _Name)    :
 PHistEvent3MesonFit::~PHistEvent3MesonFit()
 {
 
+}
+
+void    PHistEvent3MesonFit::FillFit(const Double_t _ChiSq, const Double_t _ConfidenceLevel, const Double_t* _Pull, const GTreeTagger& tagger)
+{
+    Double_t    misMass;
+    for(int i=0; i<tagger.GetNTagged(); i++)
+    {
+        ChiSq.Fill(_ChiSq, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+        ConfidenceLevel.Fill(_ConfidenceLevel, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+        for(int i=0; i<6; i++)
+        {
+            for(int k=0; k<4; k++)
+                Pull[i][k].Fill(_Pull[(4*i)+k], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+        }
+    }
 }
 
 void    PHistEvent3MesonFit::Write(TDirectory& dir)

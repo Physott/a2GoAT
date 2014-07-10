@@ -65,36 +65,33 @@ Bool_t  P3Meson::ReconstructEvent(const GTreeMeson& meson, const GTreeTagger& ta
         }
 
 
-        for(int i=0; i<tagger.GetNTagged(); i++)
+        raw.Fill(im, meson.Particle(0), tagger);
+        raw.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger);
+
+        if(passIM)
         {
-            misMass = (tagger.GetVectorProtonTarget(i) - meson.Meson(0)).M();
-            raw.Fill(im, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-            raw.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+            cutIMevent.Fill(im, meson.Particle(0), tagger);
+            cutIMevent.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger);
 
-            if(passIM)
+            if(passFit3Con)
             {
-                cutIMevent.Fill(im, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                cutIMevent.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                hist_fit3Con.Fill(im_fit, fittedMeson, tagger);
+                hist_fit3Con.FillSubMesons(imSub_fit[0], imSub_fit[1], imSub_fit[2], tagger);
+                for(int i=0; i<24; i++)
+                    Pull[i]   = fit3Con.Pull(i);
+                hist_fit3Con.FillFit(fit3Con.GetChi2(), conLevel, Pull, tagger);
 
-                if(passFit3Con)
+                if(conLevel>=cutFit3ConConfidenceLevel)
                 {
-                    hist_fit3Con.Fill(im_fit, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                    hist_fit3Con.FillSubMesons(imSub_fit[0], imSub_fit[1], imSub_fit[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                    hist_fit3Con_cutCL.Fill(im_fit, fittedMeson, tagger);
+                    hist_fit3Con_cutCL.FillSubMesons(imSub_fit[0], imSub_fit[1], imSub_fit[2], tagger);
                     for(int i=0; i<24; i++)
                         Pull[i]   = fit3Con.Pull(i);
-                    hist_fit3Con.FillFit(fit3Con.GetChi2(), conLevel, Pull, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                    hist_fit3Con_cutCL.FillFit(fit3Con.GetChi2(), conLevel, Pull, tagger);
 
-                    if(conLevel>=cutFit3ConConfidenceLevel)
-                    {
-                        hist_fit3Con_cutCL.Fill(im_fit, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                        hist_fit3Con_cutCL.FillSubMesons(imSub_fit[0], imSub_fit[1], imSub_fit[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                        for(int i=0; i<24; i++)
-                            Pull[i]   = fit3Con.Pull(i);
-                        hist_fit3Con_cutCL.FillFit(fit3Con.GetChi2(), conLevel, Pull, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-
-                        found   = true;
-                    }
+                    found   = true;
                 }
+
             }
         }
 
@@ -108,6 +105,10 @@ Bool_t  P3Meson::ReconstructEvent(const GTreeMeson& meson, const GTreeTagger& ta
 Bool_t  P3Meson::ReconstructTagger(const GTreeMeson& meson, const GTreeTagger& tagger)
 {
 
+    for(int i=0; i<tagger.GetNTagged(); i++)
+    {
+
+    }
 }
 
 Bool_t	P3Meson::ProcessEvent(const GTreeMeson& meson, const GTreeTagger& tagger)

@@ -53,7 +53,6 @@ private:
     GKinFitterParticle  pho[6];
     TLorentzVector      fittedMeson;
     TLorentzVector      fittedSubParticles[6];
-    Double_t    misMass;
     Double_t    conLevel;
 
     Bool_t  ReconstructEvent(const GTreeMeson& meson, const GTreeTagger &tagger);
