@@ -59,9 +59,9 @@ Bool_t  P3Meson::ReconstructEvent(const GTreeMeson& meson, const GTreeTagger& ta
         {
             passFit3Con = DoFit3Con(meson);
             im_fit  = fittedMeson.M();
-            imSub_fit[0]    = (fittedSubParticles[0]+fittedSubParticles[0]).M();
-            imSub_fit[1]    = (fittedSubParticles[2]+fittedSubParticles[1]).M();
-            imSub_fit[2]    = (fittedSubParticles[4]+fittedSubParticles[3]).M();
+            imSub_fit[0]    = (fittedSubParticles[0]+fittedSubParticles[1]).M();
+            imSub_fit[1]    = (fittedSubParticles[2]+fittedSubParticles[3]).M();
+            imSub_fit[2]    = (fittedSubParticles[4]+fittedSubParticles[5]).M();
         }
 
 
@@ -114,6 +114,10 @@ Bool_t  P3Meson::ReconstructTagger(const GTreeMeson& meson, const GTreeTagger& t
             cutMMevent.FillSubMesons(imSub_fit[0], imSub_fit[1], imSub_fit[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
 
             DoFit4Con(meson, tagger.GetVectorProtonTarget(i));
+            im_fit  = fittedMeson.M();
+            imSub_fit[0]    = (fittedSubParticles[0]+fittedSubParticles[1]).M();
+            imSub_fit[1]    = (fittedSubParticles[2]+fittedSubParticles[3]).M();
+            imSub_fit[2]    = (fittedSubParticles[4]+fittedSubParticles[5]).M();
 
             hist_fit4Con.Fill(im_fit, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
             hist_fit4Con.FillSubMesons(imSub_fit[0], imSub_fit[1], imSub_fit[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
@@ -140,82 +144,6 @@ Bool_t	P3Meson::ProcessEvent(const GTreeMeson& meson, const GTreeTagger& tagger)
         return kFALSE;
 
     return ReconstructTagger(meson, tagger);
-
-    /*
-    if(meson.GetNParticles()>0)
-    {
-        Double_t    im  = meson.Particle(0).M();
-        Double_t    imSub[3]    = {(meson.SubParticles(0, 0)+meson.SubParticles(0, 1)).M(),
-                                   (meson.SubParticles(0, 2)+meson.SubParticles(0, 3)).M(),
-                                   (meson.SubParticles(0, 4)+meson.SubParticles(0, 5)).M()};
-
-        if((imSub[0]>cutIM[0][0] && imSub[0]<cutIM[0][1]) && (imSub[1]>cutIM[1][0] && imSub[1]<cutIM[1][1]) && (imSub[2]>cutIM[2][0] && imSub[2]<cutIM[2][1]))
-            passIM  = true;
-        else
-            passIM  = false;
-
-        passFit3Con = DoFit3Con(meson);
-        Double_t    im_fit  = fit3Con.GetTotalFitParticle().Get4Vector().M();
-        Double_t    imSub_fit[3]= {(fit3Con.GetParticle(0).Get4Vector()+fit3Con.GetParticle(1).Get4Vector()).M(),
-                                   (fit3Con.GetParticle(2).Get4Vector()+fit3Con.GetParticle(3).Get4Vector()).M(),
-                                   (fit3Con.GetParticle(4).Get4Vector()+fit3Con.GetParticle(5).Get4Vector()).M()};
-        Double_t    Pull[24];
-
-        for(int i=0; i<tagger.GetNTagged(); i++)
-        {
-            misMass = (tagger.GetVector(i)+TLorentzVector(0,0,0,MASS_PROTON) - meson.Meson(0)).M();
-            raw.Fill(im, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-            raw.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-
-            if(passIM)
-            {
-                cutIMevent.Fill(im, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                cutIMevent.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-
-                if(passFit3Con)
-                {
-                    hist_fit3Con.Fill(im_fit, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                    hist_fit3Con.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                    for(int i=0; i<24; i++)
-                        Pull[i]   = fit3Con.Pull(i);
-                    hist_fit3Con.FillFit(fit3Con.GetChi2(), conLevel, Pull, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-
-                    if(conLevel>=cutFit3ConConfidenceLevel)
-                    {
-                        hist_fit3Con_cutCL.Fill(im_fit, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                        hist_fit3Con_cutCL.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                        for(int i=0; i<24; i++)
-                            Pull[i]   = fit3Con.Pull(i);
-                        hist_fit3Con_cutCL.FillFit(fit3Con.GetChi2(), conLevel, Pull, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-
-                        if(misMass>cutMM[0] && misMass<cutMM[1])
-                        {
-                            cutMMevent.Fill(im, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                            cutMMevent.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-
-                            passFit4Con = DoFit4Con(meson, tagger.GetVectorProtonTarget(i));
-
-                            hist_fit4Con.Fill(im_fit, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                            hist_fit4Con.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                            for(int i=0; i<24; i++)
-                                Pull[i]   = fit3Con.Pull(i);
-                            hist_fit4Con.FillFit(fit3Con.GetChi2(), conLevel, Pull, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                            if(conLevel>=cutFit4ConConfidenceLevel)
-                            {
-                                hist_fit4Con_cutCL.Fill(im_fit, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                                hist_fit4Con_cutCL.FillSubMesons(imSub[0], imSub[1], imSub[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                                for(int i=0; i<24; i++)
-                                    Pull[i]   = fit3Con.Pull(i);
-                                hist_fit4Con_cutCL.FillFit(fit3Con.GetChi2(), conLevel, Pull, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-
-                                nFound++;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }*/
 }
 
 Bool_t    P3Meson::fitInit(const GTreeMeson& meson, GKinFitter &fitter)
