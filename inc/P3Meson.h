@@ -28,12 +28,14 @@ private:
     Double_t cutMM[2];
     PHistEvent3Meson  cutMMevent;
 
-    Double_t            cutFit3ConConfidenceLevel;
     GKinFitter          fit3Con;
     PHistEvent3MesonFit hist_fit3Con;
-    Double_t            cutFit4ConConfidenceLevel;
+    Double_t            cutFit3ConConfidenceLevel;
+    PHistEvent3MesonFit hist_fit3Con_cutCL;
     GKinFitter          fit4Con;
     PHistEvent3MesonFit hist_fit4Con;
+    Double_t            cutFit4ConConfidenceLevel;
+    PHistEvent3MesonFit hist_fit4Con_cutCL;
 	
     Int_t 	nFound;
 
@@ -43,13 +45,23 @@ private:
     TH2F*   GammaThetaRes;
     TH2F*   GammaPhiRes;
 
-    GKinFitterParticle  pho[6];
+    Double_t    im;
     Double_t    imSub[3];
+    Double_t    im_fit;
+    Double_t    imSub_fit[3];
+    Double_t    Pull[24];
+    GKinFitterParticle  pho[6];
+    TLorentzVector      fittedMeson;
+    TLorentzVector      fittedSubParticles[6];
     Double_t    misMass;
     Double_t    conLevel;
 
+    Bool_t  ReconstructEvent(const GTreeMeson& meson, const GTreeTagger &tagger);
+    Bool_t  ReconstructTagger(const GTreeMeson& meson, const GTreeTagger &tagger);
+
     Bool_t  fitInit(const GTreeMeson& meson, GKinFitter &fitter);
     Bool_t  DoFit3Con(const GTreeMeson& meson);
+    Bool_t  DoFit4Con(const GTreeMeson& meson, const TLorentzVector &beamPlusTarget);
 
 protected:
 			
