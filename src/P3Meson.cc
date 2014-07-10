@@ -104,10 +104,33 @@ Bool_t  P3Meson::ReconstructEvent(const GTreeMeson& meson, const GTreeTagger& ta
 
 Bool_t  P3Meson::ReconstructTagger(const GTreeMeson& meson, const GTreeTagger& tagger)
 {
-
+    Double_t    misMass;
     for(int i=0; i<tagger.GetNTagged(); i++)
     {
+        misMass = (tagger.GetVectorProtonTarget(i) - fittedMeson).M();
+        if(misMass>cutMM[0] && misMass<cutMM[1])
+        {
+            cutMMevent.Fill(im_fit, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+            cutMMevent.FillSubMesons(imSub_fit[0], imSub_fit[1], imSub_fit[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
 
+            DoFit4Con(meson, tagger.GetVectorProtonTarget(i));
+
+            hist_fit4Con.Fill(im_fit, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+            hist_fit4Con.FillSubMesons(imSub_fit[0], imSub_fit[1], imSub_fit[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+            for(int i=0; i<24; i++)
+                Pull[i]   = fit4Con.Pull(i);
+            hist_fit4Con.FillFit(fit4Con.GetChi2(), conLevel, Pull, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+            if(conLevel>=cutFit4ConConfidenceLevel)
+            {
+                hist_fit4Con_cutCL.Fill(im_fit, misMass, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                hist_fit4Con_cutCL.FillSubMesons(imSub_fit[0], imSub_fit[1], imSub_fit[2], tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                for(int i=0; i<24; i++)
+                    Pull[i]   = fit4Con.Pull(i);
+                hist_fit4Con_cutCL.FillFit(fit4Con.GetChi2(), conLevel, Pull, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+
+                nFound++;
+            }
+        }
     }
 }
 
@@ -116,7 +139,7 @@ Bool_t	P3Meson::ProcessEvent(const GTreeMeson& meson, const GTreeTagger& tagger)
     if(!ReconstructEvent(meson, tagger))
         return kFALSE;
 
-
+    return ReconstructTagger(meson, tagger);
 
     /*
     if(meson.GetNParticles()>0)
@@ -271,7 +294,14 @@ Bool_t  P3Meson::DoFit4Con(const GTreeMeson& meson, const TLorentzVector& beamPl
     if(fit4Con.Solve()<0)
         return kFALSE;
 
-    conLevel   = fit4Con.ConfidenceLevel();
+    conLevel    = fit4Con.ConfidenceLevel();
+    fittedMeson = fit4Con.GetTotalFitParticle().Get4Vector();
+    fittedSubParticles[0] = fit4Con.GetParticle(0).Get4Vector();
+    fittedSubParticles[1] = fit4Con.GetParticle(1).Get4Vector();
+    fittedSubParticles[2] = fit4Con.GetParticle(2).Get4Vector();
+    fittedSubParticles[3] = fit4Con.GetParticle(3).Get4Vector();
+    fittedSubParticles[4] = fit4Con.GetParticle(4).Get4Vector();
+    fittedSubParticles[5] = fit4Con.GetParticle(5).Get4Vector();
 
     return kTRUE;
 }
