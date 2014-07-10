@@ -37,10 +37,10 @@ public:
 
 void    PProtonCheck::Clear()
 {
-    histFoundProtons.Clear();
+    histFoundProtons.Reset();
     histProtonAngleDiff.Clear();
     histSmallestProtonAngleDiff.Clear();
-    histCoplanarity.Clear();
+    histCoplanarity.Reset();
 }
 
 #endif
