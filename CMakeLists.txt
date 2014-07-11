@@ -89,6 +89,8 @@ add_executable(pi0-example
    inc/GTreeManager.h
    inc/GConfigFile.h
    inc/GScaCorHist.h
+   inc/GH1.h
+   inc/PHistBins.h
    inc/PPi0Example.h
    inc/PPhysics.h
    src/GTree.cc
@@ -105,6 +107,8 @@ add_executable(pi0-example
    src/GTreeManager.cc
    src/GConfigFile.cc
    src/GScaCorHist.cc
+   src/GH1.cc
+   src/PHistBins.cc
    src/PPi0Example.cc
    src/PPhysics.cc
    )
@@ -125,6 +129,8 @@ add_executable(eta-example
    inc/GTreeManager.h
    inc/GConfigFile.h
    inc/GScaCorHist.h
+   inc/GH1.h
+   inc/PHistBins.h
    inc/PEtaExample.h
    inc/PPhysics.h
    src/GTree.cc
@@ -141,6 +147,8 @@ add_executable(eta-example
    src/GTreeManager.cc
    src/GConfigFile.cc
    src/GScaCorHist.cc
+   src/GH1.cc
+   src/PHistBins.cc
    src/PEtaExample.cc
    src/PPhysics.cc
    )
