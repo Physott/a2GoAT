@@ -1,57 +1,76 @@
 #include "GH1.h"
+#include "GTreeTagger.h"
 
 
+Double_t    GH1::cutPromptMin  = -1000000;
+Double_t    GH1::cutPromptMax  =  1000000;
+TArrayD     GH1::cutRandMin;
+TArrayD     GH1::cutRandMax;
 
-GH1::GH1()
+GH1::GH1(const TString& _Name, const TString& _Title, const Int_t NumberOfBins) :
+    TNamed(_Name, _Title),
+    nBins(NumberOfBins),
+    rand("TClonesArray", GH1_MaxRandCuts)
+{
+
+}
+
+GH1::GH1(const char* _Name, const char* _Title, const Int_t NumberOfBins) :
+    TNamed(_Name, _Title),
+    nBins(NumberOfBins)
 {
 
 }
 
 GH1::~GH1()
 {
-    if(prompt)  delete  prompt;
-    if(rand[0]) delete  rand[0];
-    if(rand[1]) delete  rand[1];
-    if(result)  delete  result;
 }
 
 void    GH1::Clear()
 {
-    prompt->Reset();
-    rand[0]->Reset();
-    rand[1]->Reset();
-    result->Reset();
+    prompt.Clear("C");
+    rand.Clear("C");
+    //rand[0]->Reset();
+    //rand[1]->Reset();
 }
 
-void    GH1::Fill(const Double_t value, const Double_t taggerTime)
+void    GH1::Fill(const Double_t value, const Double_t taggerTime, const Int_t taggerChannel)
 {
-    if(taggerTime>cuts[0][0] && taggerTime<cuts[0][1])
+    if(taggerTime>=cutPromptMin && taggerTime<=cutPromptMax)
     {
-        prompt->Fill(value);
+        if(taggerChannel>=prompt.GetSize())
+            prompt.Expand(taggerChannel+1);
+        if(!prompt.UncheckedAt(taggerChannel))
+            AddPromptBin(taggerChannel);
+        ((TH1*)prompt[taggerChannel])->Fill(value);
     }
-    if(taggerTime>cuts[1][0] && taggerTime<cuts[1][1])
+
+    for(int i=0; i<cutRandMin.GetSize(); i++)
     {
-        rand[0]->Fill(value);
-    }
-    if(taggerTime>cuts[2][0] && taggerTime<cuts[2][1])
-    {
-        rand[1]->Fill(value);
+        if(taggerTime>=cutRandMin[i] && taggerTime<=cutRandMax[i])
+        {
+            if(i>=rand.GetSize())
+                rand.Expand(i+1);
+            if(!rand.UncheckedAt(i))
+                AddRandBin(taggerChannel, i);
+            if(taggerChannel>=((TClonesArray*)rand[i])->GetSize())
+                ((TClonesArray*)rand[i])->Expand(taggerChannel+1);
+            if(!(((TClonesArray*)rand[i])->UncheckedAt(i)))
+                AddRandBin(taggerChannel, i);
+            ((TH1*)prompt[taggerChannel])->Fill(value);
+        }
     }
 }
 
-void    GH1::Fill(const Int_t value, const Double_t taggerTime)
+void    GH1::Fill(const Int_t value, const Double_t taggerTime, const Int_t taggerChannel)
 {
-    if(taggerTime>cuts[0][0] && taggerTime<cuts[0][1])
+    if(taggerTime>cutPromptMin && taggerTime<cutPromptMax)
     {
-        prompt->Fill(value);
-    }
-    if(taggerTime>cuts[1][0] && taggerTime<cuts[1][1])
-    {
-        rand[0]->Fill(value);
-    }
-    if(taggerTime>cuts[2][0] && taggerTime<cuts[2][1])
-    {
-        rand[1]->Fill(value);
+        if(taggerChannel>=prompt.GetSize())
+            prompt.Expand(taggerChannel+1);
+        if(!prompt.UncheckedAt(taggerChannel))
+            AddPromptBin(taggerChannel);
+        ((TH1*)prompt[taggerChannel])->Fill(value);
     }
 }
 
@@ -67,7 +86,7 @@ void    GH1::Write(TDirectory& dir)
         curDir  = dir.GetDirectory("prompt");
     }
     curDir->cd();
-    prompt->Write();
+    prompt.Write();
 
 
     curDir  = dir.GetDirectory("rand");
@@ -78,39 +97,40 @@ void    GH1::Write(TDirectory& dir)
         curDir  = dir.GetDirectory("rand");
     }
     curDir->cd();
-    rand[0]->Write();
-    rand[1]->Write();
+    rand.Write();
 
     dir.cd();
-    result->Write();
+    //result->Write();
 }
 
 
 void	GH1::BackgroundSubtraction()
 {
-    result->Reset();
+    /*result->Reset();
     result->Add(prompt,1);
     result->Add(rand[0],-backgroundSubstractionFactor);
-    result->Add(rand[1],-backgroundSubstractionFactor);
+    result->Add(rand[1],-backgroundSubstractionFactor);*/
 }
-
-Double_t    GH1::cuts[3][2]  =
-{{-1000000, 1000000},
- {1, 0},
- {1, 0}
-};
 
 Double_t    GH1::backgroundSubstractionFactor  = 0;
 
-void    GH1::SetCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t Rand0Min, const Double_t Rand0Max, const Double_t Rand1Min, const Double_t Rand1Max)
+void    GH1::InitCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t RandMin, const Double_t RandMax)
 {
-    cuts[0][0]  = PromptMin;
-    cuts[0][1]  = PromptMax;
-    cuts[1][0]  = Rand0Min;
-    cuts[1][1]  = Rand0Max;
-    cuts[2][0]  = Rand1Min;
-    cuts[2][1]  = Rand1Max;
-    backgroundSubstractionFactor = (PromptMax - PromptMin)/((Rand0Max - Rand0Min) + (Rand1Max - Rand1Min));
+    cutPromptMin    = PromptMin;
+    cutPromptMax    = PromptMax;
+    cutRandMin.Set(1, &RandMin);
+    cutRandMax.Set(1, &RandMax);
+    backgroundSubstractionFactor = (PromptMax - PromptMin)/(RandMax - RandMin);
+}
+
+void    GH1::AddRandCut(const Double_t RandMin, const Double_t RandMax)
+{
+    cutRandMin.AddAt(RandMin, cutRandMin.GetSize());
+    cutRandMax.AddAt(RandMax, cutRandMax.GetSize());
+    backgroundSubstractionFactor = cutRandMax[0] - cutRandMin[0];
+    for(int i=1; i<cutRandMin.GetSize(); i++)
+        backgroundSubstractionFactor += cutRandMax[i] - cutRandMin[i];
+    backgroundSubstractionFactor    = (cutPromptMax - cutPromptMin)/backgroundSubstractionFactor;
 }
 
 
@@ -119,55 +139,75 @@ void    GH1::SetCuts(const Double_t PromptMin, const Double_t PromptMax, const D
 
 
 
-GH1D::GH1D(const TString& name, const TString& title, const Int_t nBins, const Double_t min, const Double_t max)
+
+
+GH1D::GH1D(const TString& name, const TString& title, const Int_t nBins, const Double_t min, const Double_t max) :
+    GH1(name, title, nBins),
+    minBin(min),
+    maxBin(max)
 {
-    gROOT->cd();
-    prompt  = new TH1D((TString(name).Prepend("prompt_")).Data(), (TString(title).Append(" (prompt)")).Data(), nBins, min, max);
-    if(!prompt)
-        printf("#ERROR GH1D::GH1D: Can not create History prompt");
-
-    rand[0]  = new TH1D((TString(name).Prepend(TString("rand0_"))).Data(), (TString(title).Append(TString("rand0"))).Data(), nBins, min, max);
-    if(!rand[0])
-            printf("#ERROR GH1D::GH1D: Can not create History prompt");
-    rand[1]  = new TH1D((TString(name).Prepend(TString("rand1_"))).Data(), (TString(title).Append(TString("rand1"))).Data(), nBins, min, max);
-    if(!rand[1])
-            printf("#ERROR GH1D::GH1D: Can not create History prompt");
-
-    result  = new TH1D(name, title, nBins, min, max);
-    if(!result)
-        printf("#ERROR GH1D::GH1D: Can not create History prompt");
+    prompt.SetClass("TH1D", GH1_MaxBins);
+}
+GH1D::GH1D(const char* name, const char* title, const Int_t nBins, const Double_t min, const Double_t max) :
+    GH1(name, title, nBins),
+    minBin(min),
+    maxBin(max)
+{
+    prompt.SetClass("TH1D", GH1_MaxBins);
 }
 
 GH1D::~GH1D()
 {
 }
 
-
-
-
-
-
-
-
-GH1I::GH1I(const TString& name, const TString& title, const Int_t nBins, const Int_t min, const Int_t max)
+Bool_t  GH1D::AddPromptBin(const Int_t channel)
 {
     gROOT->cd();
-    prompt  = new TH1I((TString(name).Prepend("prompt_")).Data(), (TString(title).Append(" (prompt)")).Data(), nBins, min, max);
-    if(!prompt)
-        printf("#ERROR GH1D::GH1D: Can not create History prompt");
+    new(prompt[channel]) TH1D((TString(GetName()).Prepend("prompt_")).Append(TString::Itoa(channel, 10).Prepend("_Bin")).Data(), (TString(GetTitle()).Append(TString::Itoa(channel, 10).Prepend(" channel ")).Append(" (prompt)")).Data(), nBins, minBin, maxBin);
+}
 
-    rand[0]  = new TH1I((TString(name).Prepend(TString("rand0_"))).Data(), (TString(title).Append(TString("rand0"))).Data(), nBins, min, max);
-    if(!rand[0])
-            printf("#ERROR GH1D::GH1D: Can not create History prompt");
-    rand[1]  = new TH1I((TString(name).Prepend(TString("rand1_"))).Data(), (TString(title).Append(TString("rand1"))).Data(), nBins, min, max);
-    if(!rand[1])
-            printf("#ERROR GH1D::GH1D: Can not create History prompt");
+Bool_t  GH1D::AddRandBin(const Int_t channel, const Int_t RandCut)
+{
+    gROOT->cd();
+    if(rand[RandCut])
+        new(rand[RandCut]) TClonesArray("TH1D", GH1_MaxBins);
+    new((*((TClonesArray*)rand[RandCut]))[channel]) TH1D((TString(GetName()).Prepend((TString::Itoa(RandCut,10).Prepend("rand")).Append("_"))).Append(TString::Itoa(channel, 10).Prepend("_Bin")).Data(), TString(GetTitle()).Append(TString::Itoa(channel, 10).Prepend(" channel ")).Append(TString::Itoa(RandCut,10).Prepend(" (rand")).Append(")").Data(), nBins, minBin, maxBin);
+}
 
-    result  = new TH1I(name, title, nBins, min, max);
-    if(!result)
-        printf("#ERROR GH1D::GH1D: Can not create History prompt");
+
+
+
+
+
+GH1I::GH1I(const TString& name, const TString& title, const Int_t nBins, const Int_t min, const Int_t max) :
+    GH1(name, title, nBins),
+    minBin(min),
+    maxBin(max)
+{
+    prompt.SetClass("TH1I", GH1_MaxBins);
+}
+GH1I::GH1I(const char* name, const char* title, const Int_t nBins, const Int_t min, const Int_t max) :
+    GH1(name, title, nBins),
+    minBin(min),
+    maxBin(max)
+{
+    prompt.SetClass("TH1I", GH1_MaxBins);
 }
 
 GH1I::~GH1I()
 {
+}
+
+Bool_t  GH1I::AddPromptBin(const Int_t channel)
+{
+    gROOT->cd();
+    new(prompt[channel]) TH1I((TString(GetName()).Prepend("prompt_")).Append(TString::Itoa(channel, 10).Prepend("_Bin")).Data(), (TString(GetTitle()).Append(TString::Itoa(channel, 10).Prepend(" channel ")).Append(" (prompt)")).Data(), nBins, minBin, maxBin);
+}
+
+Bool_t  GH1I::AddRandBin(const Int_t channel, const Int_t RandCut)
+{
+    gROOT->cd();
+    if(rand[RandCut])
+        new(rand[RandCut]) TClonesArray("TH1I", GH1_MaxBins);
+    new((*((TClonesArray*)rand[RandCut]))[channel]) TH1I((TString(GetName()).Prepend((TString::Itoa(RandCut,10).Prepend("rand")).Append("_"))).Append(TString::Itoa(channel, 10).Prepend("_Bin")).Data(), TString(GetTitle()).Append(TString::Itoa(channel, 10).Prepend(" channel ")).Append(TString::Itoa(RandCut,10).Prepend(" (rand")).Append(")").Data(), nBins, minBin, maxBin);
 }
