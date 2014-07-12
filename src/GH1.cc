@@ -168,6 +168,18 @@ void    GH1::Fill(const Int_t value, const Double_t taggerTime, const Int_t tagg
     }
 }
 
+void    GH1::Fill(const Double_t value, const GTreeTagger& tagger)
+{
+    for(int i=0; i<tagger.GetNTagged(); i++)
+        Fill(value, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+}
+
+void    GH1::Fill(const Int_t value, const GTreeTagger& tagger)
+{
+    for(int i=0; i<tagger.GetNTagged(); i++)
+        Fill(value, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+}
+
 TH1*    GH1::SumRand(const Int_t RandCut)
 {
     gROOT->cd();

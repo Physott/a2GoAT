@@ -49,6 +49,8 @@ public:
     virtual void    Clear();
     virtual void    Fill(const Double_t value, const Double_t taggerTime, const Int_t taggerChannel = 0);
     virtual void    Fill(const Int_t value, const Double_t taggerTime, const Int_t taggerChannel = 0);
+    virtual void    Fill(const Double_t value, const GTreeTagger& tagger);
+    virtual void    Fill(const Int_t value, const GTreeTagger& tagger);
             Int_t   GetNRandCuts()  const   {cutRandMin.size();}
     static  void    InitCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t RandMin, const Double_t RandMax);
     static  void    AddRandCut(const Double_t RandMin, const Double_t RandMax);
