@@ -1,25 +1,67 @@
 #include "GH1.h"
 #include "GTreeTagger.h"
 
+TDirectory& GH1::GetDirectory(TDirectory& dir, const char* name)
+{
+    TDirectory* curDir  = dir.GetDirectory(name);
+    if(!curDir)
+    {
+        dir.cd();
+        gDirectory->mkdir(name);
+        curDir  = dir.GetDirectory(name);
+    }
+    curDir->cd();
+    return *curDir;
+}
 
 Double_t    GH1::cutPromptMin  = -1000000;
 Double_t    GH1::cutPromptMax  =  1000000;
-TArrayD     GH1::cutRandMin;
-TArrayD     GH1::cutRandMax;
+std::vector<Double_t>     GH1::cutRandMin;
+std::vector<Double_t>     GH1::cutRandMax;
+Double_t    GH1::backgroundSubstractionFactor  = 0;
+
+void    GH1::InitCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t RandMin, const Double_t RandMax)
+{
+    cutPromptMin    = PromptMin;
+    cutPromptMax    = PromptMax;
+    cutRandMin.assign(1, RandMin);
+    cutRandMax.assign(1, RandMax);
+    backgroundSubstractionFactor = (PromptMax - PromptMin)/(RandMax - RandMin);
+}
+
+void    GH1::AddRandCut(const Double_t RandMin, const Double_t RandMax)
+{
+    cutRandMin.push_back(RandMin);
+    cutRandMax.push_back(RandMax);
+    backgroundSubstractionFactor = cutRandMax[0] - cutRandMin[0];
+    for(int i=1; i<cutRandMin.size(); i++)
+        backgroundSubstractionFactor += cutRandMax[i] - cutRandMin[i];
+    backgroundSubstractionFactor    = (cutPromptMax - cutPromptMin)/backgroundSubstractionFactor;
+}
+
+
+
+
+
 
 GH1::GH1(const TString& _Name, const TString& _Title, const Int_t NumberOfBins) :
     TNamed(_Name, _Title),
     nBins(NumberOfBins),
-    rand("TClonesArray", GH1_MaxRandCuts)
+    prompt(1),
+    rand(2)
 {
-
+    prompt.SetOwner();
+    rand.SetOwner();
 }
 
 GH1::GH1(const char* _Name, const char* _Title, const Int_t NumberOfBins) :
     TNamed(_Name, _Title),
-    nBins(NumberOfBins)
+    nBins(NumberOfBins),
+    prompt(1),
+    rand(2)
 {
-
+    prompt.SetOwner();
+    rand.SetOwner();
 }
 
 GH1::~GH1()
@@ -28,110 +70,269 @@ GH1::~GH1()
 
 void    GH1::Clear()
 {
-    prompt.Clear("C");
-    rand.Clear("C");
-    //rand[0]->Reset();
-    //rand[1]->Reset();
+    prompt.Clear();
+    rand.Clear();
+}
+
+void  GH1::AddBin(const Int_t channel)
+{
+    TH1*    hist = AddHistogram((TString(GetName()).Prepend("prompt_")).Append(TString::Itoa(channel, 10).Prepend("_Bin")).Data(), (TString(GetTitle()).Append(TString::Itoa(channel, 10).Prepend(" channel ")).Append(" (prompt)")).Data());
+    prompt.AddAtAndExpand(hist, channel);
+
+    while(rand.GetEntriesFast()<GetNRandCuts())
+    {
+        gROOT->cd();
+        TObjArray* array    = new TObjArray(channel+1);
+        rand.AddAtAndExpand(array, rand.GetEntriesFast());
+    }
+
+    for(int i=0; i<cutRandMin.size(); i++)
+    {
+        TH1*    hist = AddHistogram((TString(GetName()).Prepend((TString::Itoa(i,10).Prepend("rand")).Append("_"))).Append(TString::Itoa(channel, 10).Prepend("_Bin")).Data(), TString(GetTitle()).Append(TString::Itoa(channel, 10).Prepend(" channel ")).Append(TString::Itoa(i,10).Prepend(" (rand")).Append(")").Data());
+        ((TObjArray*)rand.At(i))->AddAtAndExpand(hist, channel);
+    }
+}
+
+TH1*	GH1::BackgroundSubtractionBin(const Int_t channel, const TH1* sumRand)
+{
+    gROOT->cd();
+    TH1*    hist    = AddHistogram(TString(GetName()).Append(TString::Itoa(channel, 10).Prepend("_Bin")).Data(), TString(GetTitle()).Append(TString::Itoa(channel, 10).Prepend(" channel ")).Data());
+    hist->Add((TH1*)(prompt.At(channel)));
+    hist->Add(sumRand, -backgroundSubstractionFactor);
+    return hist;
 }
 
 void    GH1::Fill(const Double_t value, const Double_t taggerTime, const Int_t taggerChannel)
 {
     if(taggerTime>=cutPromptMin && taggerTime<=cutPromptMax)
     {
-        if(taggerChannel>=prompt.GetSize())
-            prompt.Expand(taggerChannel+1);
-        if(!prompt.UncheckedAt(taggerChannel))
-            AddPromptBin(taggerChannel);
-        ((TH1*)prompt[taggerChannel])->Fill(value);
+        if(taggerChannel>=prompt.GetEntriesFast())
+        {
+            Int_t   start = prompt.GetEntriesFast();
+            for(int i=taggerChannel; i>=start; i--)
+                AddBin(i);
+        }
+        ((TH1*)prompt.At(taggerChannel))->Fill(value);
     }
 
-    for(int i=0; i<cutRandMin.GetSize(); i++)
+    for(int i=0; i<cutRandMin.size(); i++)
     {
         if(taggerTime>=cutRandMin[i] && taggerTime<=cutRandMax[i])
         {
-            if(i>=rand.GetSize())
-                rand.Expand(i+1);
-            if(!rand.UncheckedAt(i))
-                AddRandBin(taggerChannel, i);
-            if(taggerChannel>=((TClonesArray*)rand[i])->GetSize())
-                ((TClonesArray*)rand[i])->Expand(taggerChannel+1);
-            if(!(((TClonesArray*)rand[i])->UncheckedAt(i)))
-                AddRandBin(taggerChannel, i);
-            ((TH1*)prompt[taggerChannel])->Fill(value);
+            if(i>=rand.GetEntriesFast())
+            {
+                TObjArray*  array = new TObjArray(1);
+                rand.AddAtAndExpand(array, i);
+            }
+            if(taggerChannel>=((TObjArray*)rand.At(i))->GetEntriesFast())
+            {
+                Int_t   start = prompt.GetEntriesFast();
+                for(int i=taggerChannel; i>=start; i--)
+                    AddBin(i);
+            }
+            ((TH1*)(((TObjArray*)rand.At(i))->At(taggerChannel)))->Fill(value);
         }
     }
 }
 
 void    GH1::Fill(const Int_t value, const Double_t taggerTime, const Int_t taggerChannel)
 {
-    if(taggerTime>cutPromptMin && taggerTime<cutPromptMax)
+    if(taggerTime>=cutPromptMin && taggerTime<=cutPromptMax)
     {
-        if(taggerChannel>=prompt.GetSize())
-            prompt.Expand(taggerChannel+1);
-        if(!prompt.UncheckedAt(taggerChannel))
-            AddPromptBin(taggerChannel);
-        ((TH1*)prompt[taggerChannel])->Fill(value);
+        if(taggerChannel>=prompt.GetEntriesFast())
+        {
+            Int_t   start = prompt.GetEntriesFast();
+            for(int i=taggerChannel; i>=start; i--)
+                AddBin(i);
+        }
+        ((TH1*)prompt.At(taggerChannel))->Fill(value);
     }
+
+    for(int i=0; i<cutRandMin.size(); i++)
+    {
+        if(taggerTime>=cutRandMin[i] && taggerTime<=cutRandMax[i])
+        {
+            if(i>=rand.GetEntriesFast())
+            {
+                TObjArray*  array = new TObjArray(1);
+                rand.AddAtAndExpand(array, i);
+            }
+            if(taggerChannel>=((TObjArray*)rand.At(i))->GetEntriesFast())
+            {
+                Int_t   start = prompt.GetEntriesFast();
+                for(int i=taggerChannel; i>=start; i--)
+                    AddBin(i);
+            }
+            ((TH1*)(((TObjArray*)rand.At(i))->At(taggerChannel)))->Fill(value);
+        }
+    }
+}
+
+TH1*    GH1::SumRand(const Int_t RandCut)
+{
+    gROOT->cd();
+    TH1*    hist = AddHistogram((TString(GetName()).Prepend((TString::Itoa(RandCut,10).Prepend("rand")).Append("_"))).Data(), TString(GetTitle()).Append(TString::Itoa(RandCut,10).Prepend(" (rand")).Append(")").Data());
+
+    if(!rand.At(RandCut))
+        return 0;
+    TIter   iter((TObjArray*)rand.At(RandCut));
+    TH1*    help;
+    while(help = (TH1*)iter.Next())
+        hist->Add(help);
+    return hist;
+}
+
+TH1*    GH1::SumRandAll()
+{
+    gROOT->cd();
+    TH1*    hist    = AddHistogram((TString(GetName()).Prepend("randAll_")).Data(), TString(GetTitle()).Append(" (rand all)").Data());
+    for(int i=0; i<rand.GetEntriesFast(); i++)
+    {
+        TH1*    help = SumRand(i);
+        if(help)
+            hist->Add(help);
+    }
+    return hist;
+}
+
+TH1*    GH1::SumRandBin(const Int_t channel)
+{
+    gROOT->cd();
+    TH1*    hist    = AddHistogram((TString(GetName()).Prepend("randAll_")).Append(TString::Itoa(channel, 10).Prepend("_Bin")).Data(), TString(GetTitle()).Append(TString::Itoa(channel, 10).Prepend(" channel ")).Append(" (rand all)").Data());
+
+    TIter   iter(&rand);
+    TObjArray*    array;
+    while(array = (TObjArray*)iter.Next())
+        hist->Add((TH1*)array->At(channel));
+    return hist;
+}
+
+TH1*    GH1::SumPrompt()
+{
+    gROOT->cd();
+    TH1*    hist    = AddHistogram((TString(GetName()).Prepend("prompt_")).Data(), TString(GetTitle()).Append(" (prompt)").Data());
+
+    TIter   iter(&prompt);
+    TH1*    help;
+    while(help = (TH1*)iter.Next())
+        hist->Add(help);
+    return hist;
 }
 
 void    GH1::Write(TDirectory& dir)
 {
-    BackgroundSubtraction();
-
-    TDirectory* curDir  = dir.GetDirectory("prompt");
-    if(!curDir)
+    if(prompt.GetEntriesFast()>1)
     {
+        TH1* sum;
+        TH1* res;
+        for(int i=0; i<prompt.GetEntriesFast(); i++)
+        {
+            WriteBin(GetDirectory(dir, "bins"), i);
+            sum = SumRandBin(i);
+            GetDirectory(GetDirectory(dir, "bins"), "rand");
+            sum->Write();
+            res = BackgroundSubtractionBin(i, sum);
+            GetDirectory(dir, "bins");
+            res->Write();
+            sum->Delete();
+            res->Delete();
+        }
+        for(int i=0; i<rand.GetEntriesFast(); i++)
+        {
+            sum = SumRand(i);
+            GetDirectory(dir, "rand");
+            sum->Write();
+            sum->Delete();
+        }
+        sum = SumRandAll();
+        GetDirectory(dir, "rand");
+        sum->Write();
+        res = SumPrompt();
+        GetDirectory(dir, "prompt");
+        res->Write();
+        gROOT->cd();
+        TH1*    endResult    = AddHistogram(GetName(), GetTitle());
+        endResult->Add(res);
+        endResult->Add(sum, -backgroundSubstractionFactor);
         dir.cd();
-        gDirectory->mkdir("prompt");
-        curDir  = dir.GetDirectory("prompt");
+        endResult->Write();
+
+        sum->Delete();
+        res->Delete();
+        return;
     }
-    curDir->cd();
-    prompt.Write();
-
-
-    curDir  = dir.GetDirectory("rand");
-    if(!curDir)
+    else if(prompt.GetEntriesFast()==1)
     {
-        dir.cd();
-        gDirectory->mkdir("rand");
-        curDir  = dir.GetDirectory("rand");
+        if(!prompt.At(0))
+            return;
+        if(rand.GetEntriesFast()==0)
+        {
+            ((TH1*)prompt.At(0))->SetNameTitle(GetName(), GetTitle());
+            dir.cd();
+            ((TH1*)prompt.At(0))->Write();
+            return;
+        }
+        ((TH1*)prompt.At(0))->SetNameTitle((TString(GetName()).Prepend("prompt_")).Data(), (TString(GetTitle()).Append(" (prompt)")).Data());
+        GetDirectory(dir, "prompt");
+        ((TH1*)prompt.At(0))->Write();
+
+        TIter   iter(&rand);
+        TObjArray*    array;
+        Int_t i=-1;
+        while(array = (TObjArray*)iter.Next())
+        {
+            i++;
+            if(!array->At(0))
+                continue;
+            ((TH1*)(array->At(0)))->SetNameTitle((TString(GetName()).Prepend((TString::Itoa(i,10).Prepend("rand")).Append("_"))).Data(), TString(GetTitle()).Append(TString::Itoa(i,10).Prepend(" (rand")).Append(")").Data());
+            GetDirectory(dir, "rand");
+            ((TH1*)(array->At(0)))->Write();
+        }
+
+        if(rand.GetEntriesFast()>1)
+        {
+            TH1* sum = SumRandBin(0);
+            sum->SetNameTitle((TString(GetName()).Prepend("randAll_")).Data(), TString(GetTitle()).Append(" (rand all)").Data());
+            GetDirectory(dir, "rand");
+            sum->Write();
+            TH1* res = BackgroundSubtractionBin(0, sum);
+            res->SetNameTitle(GetName(), GetTitle());
+            dir.cd();
+            res->Write();
+            sum->Delete();
+            res->Delete();
+        }
+        else if(rand.GetEntriesFast()==1)
+        {
+            TH1* res = BackgroundSubtractionBin(0, ((TH1*)(((TObjArray*)rand.At(0))->At(0))));
+            res->SetNameTitle(GetName(), GetTitle());
+            dir.cd();
+            res->Write();
+            res->Delete();
+        }
     }
-    curDir->cd();
-    rand.Write();
-
-    dir.cd();
-    //result->Write();
 }
 
-
-void	GH1::BackgroundSubtraction()
+void    GH1::WriteBin(TDirectory& dir, const Int_t channel)
 {
-    /*result->Reset();
-    result->Add(prompt,1);
-    result->Add(rand[0],-backgroundSubstractionFactor);
-    result->Add(rand[1],-backgroundSubstractionFactor);*/
+    GetDirectory(dir, "prompt");
+    if(prompt.At(channel))
+        ((TH1*)prompt.At(channel))->Write();
+
+    TIter   iter(&rand);
+    TObjArray*    array;
+    Int_t i=-1;
+    while(array = (TObjArray*)iter.Next())
+    {
+        i++;
+        if(!array->At(channel))
+            continue;
+        GetDirectory(dir, "rand");
+        ((TH1*)(array->At(channel)))->Write();
+    }
 }
 
-Double_t    GH1::backgroundSubstractionFactor  = 0;
 
-void    GH1::InitCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t RandMin, const Double_t RandMax)
-{
-    cutPromptMin    = PromptMin;
-    cutPromptMax    = PromptMax;
-    cutRandMin.Set(1, &RandMin);
-    cutRandMax.Set(1, &RandMax);
-    backgroundSubstractionFactor = (PromptMax - PromptMin)/(RandMax - RandMin);
-}
-
-void    GH1::AddRandCut(const Double_t RandMin, const Double_t RandMax)
-{
-    cutRandMin.AddAt(RandMin, cutRandMin.GetSize());
-    cutRandMax.AddAt(RandMax, cutRandMax.GetSize());
-    backgroundSubstractionFactor = cutRandMax[0] - cutRandMin[0];
-    for(int i=1; i<cutRandMin.GetSize(); i++)
-        backgroundSubstractionFactor += cutRandMax[i] - cutRandMin[i];
-    backgroundSubstractionFactor    = (cutPromptMax - cutPromptMin)/backgroundSubstractionFactor;
-}
 
 
 
@@ -146,33 +347,26 @@ GH1D::GH1D(const TString& name, const TString& title, const Int_t nBins, const D
     minBin(min),
     maxBin(max)
 {
-    prompt.SetClass("TH1D", GH1_MaxBins);
 }
 GH1D::GH1D(const char* name, const char* title, const Int_t nBins, const Double_t min, const Double_t max) :
     GH1(name, title, nBins),
     minBin(min),
     maxBin(max)
 {
-    prompt.SetClass("TH1D", GH1_MaxBins);
 }
 
 GH1D::~GH1D()
 {
 }
 
-Bool_t  GH1D::AddPromptBin(const Int_t channel)
+TH1*    GH1D::AddHistogram(const TString& _Name, const TString& _Title)
 {
-    gROOT->cd();
-    new(prompt[channel]) TH1D((TString(GetName()).Prepend("prompt_")).Append(TString::Itoa(channel, 10).Prepend("_Bin")).Data(), (TString(GetTitle()).Append(TString::Itoa(channel, 10).Prepend(" channel ")).Append(" (prompt)")).Data(), nBins, minBin, maxBin);
+    TH1*    hist = new TH1D(_Name.Data(), _Title.Data(), nBins, minBin, maxBin);
+    return hist;
 }
 
-Bool_t  GH1D::AddRandBin(const Int_t channel, const Int_t RandCut)
-{
-    gROOT->cd();
-    if(rand[RandCut])
-        new(rand[RandCut]) TClonesArray("TH1D", GH1_MaxBins);
-    new((*((TClonesArray*)rand[RandCut]))[channel]) TH1D((TString(GetName()).Prepend((TString::Itoa(RandCut,10).Prepend("rand")).Append("_"))).Append(TString::Itoa(channel, 10).Prepend("_Bin")).Data(), TString(GetTitle()).Append(TString::Itoa(channel, 10).Prepend(" channel ")).Append(TString::Itoa(RandCut,10).Prepend(" (rand")).Append(")").Data(), nBins, minBin, maxBin);
-}
+
+
 
 
 
@@ -184,30 +378,22 @@ GH1I::GH1I(const TString& name, const TString& title, const Int_t nBins, const I
     minBin(min),
     maxBin(max)
 {
-    prompt.SetClass("TH1I", GH1_MaxBins);
 }
 GH1I::GH1I(const char* name, const char* title, const Int_t nBins, const Int_t min, const Int_t max) :
     GH1(name, title, nBins),
     minBin(min),
     maxBin(max)
 {
-    prompt.SetClass("TH1I", GH1_MaxBins);
 }
 
 GH1I::~GH1I()
 {
 }
 
-Bool_t  GH1I::AddPromptBin(const Int_t channel)
+TH1*    GH1I::AddHistogram(const TString& _Name, const TString& _Title)
 {
     gROOT->cd();
-    new(prompt[channel]) TH1I((TString(GetName()).Prepend("prompt_")).Append(TString::Itoa(channel, 10).Prepend("_Bin")).Data(), (TString(GetTitle()).Append(TString::Itoa(channel, 10).Prepend(" channel ")).Append(" (prompt)")).Data(), nBins, minBin, maxBin);
+    TH1*    hist = new TH1I(_Name.Data(), _Title.Data(), nBins, minBin, maxBin);
+    return hist;
 }
 
-Bool_t  GH1I::AddRandBin(const Int_t channel, const Int_t RandCut)
-{
-    gROOT->cd();
-    if(rand[RandCut])
-        new(rand[RandCut]) TClonesArray("TH1I", GH1_MaxBins);
-    new((*((TClonesArray*)rand[RandCut]))[channel]) TH1I((TString(GetName()).Prepend((TString::Itoa(RandCut,10).Prepend("rand")).Append("_"))).Append(TString::Itoa(channel, 10).Prepend("_Bin")).Data(), TString(GetTitle()).Append(TString::Itoa(channel, 10).Prepend(" channel ")).Append(TString::Itoa(RandCut,10).Prepend(" (rand")).Append(")").Data(), nBins, minBin, maxBin);
-}
