@@ -354,14 +354,14 @@ void    GH1::WriteBin(TDirectory& dir, const Int_t channel)
 
 
 
-GH1D::GH1D(const TString& name, const TString& title, const Int_t nBins, const Double_t min, const Double_t max) :
-    GH1(name, title, nBins),
+GH1D::GH1D(const TString& name, const TString& title, const Int_t NumberOfBins, const Double_t min, const Double_t max) :
+    GH1(name, title, NumberOfBins),
     minBin(min),
     maxBin(max)
 {
 }
-GH1D::GH1D(const char* name, const char* title, const Int_t nBins, const Double_t min, const Double_t max) :
-    GH1(name, title, nBins),
+GH1D::GH1D(const char* name, const char* title, const Int_t NumberOfBins, const Double_t min, const Double_t max) :
+    GH1(name, title, NumberOfBins),
     minBin(min),
     maxBin(max)
 {
@@ -385,14 +385,14 @@ TH1*    GH1D::AddHistogram(const TString& _Name, const TString& _Title)
 
 
 
-GH1I::GH1I(const TString& name, const TString& title, const Int_t nBins, const Int_t min, const Int_t max) :
-    GH1(name, title, nBins),
+GH1I::GH1I(const TString& name, const TString& title, const Int_t NumberOfBins, const Int_t min, const Int_t max) :
+    GH1(name, title, NumberOfBins),
     minBin(min),
     maxBin(max)
 {
 }
-GH1I::GH1I(const char* name, const char* title, const Int_t nBins, const Int_t min, const Int_t max) :
-    GH1(name, title, nBins),
+GH1I::GH1I(const char* name, const char* title, const Int_t NumberOfBins, const Int_t min, const Int_t max) :
+    GH1(name, title, NumberOfBins),
     minBin(min),
     maxBin(max)
 {
