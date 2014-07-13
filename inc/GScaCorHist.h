@@ -20,19 +20,21 @@ class   GScaCorHist
 private:
     Int_t   nCorrected;
 
+    static  void    WriteHistogram(TH1* hist, const TString& name, const TString& title);
+
 protected:
     TH1*    current;                //pointer to base class of corresponding type
     TH1*    accumulated;
+    TH1*    accumulatedCorrected;
 
 public:
     GScaCorHist();
     virtual ~GScaCorHist() = 0;
 
     virtual void    Clear(Option_t* option = "");
-    Int_t   GetNScalerReadCorrections() const   {return nCorrected;}
-            void    ScalerReadCorrection(const Double_t CorrectionFactor);
-    virtual Int_t	Write(const char* name = 0, Int_t option = 0, Int_t bufsize = 0) const;
-    virtual Int_t	Write(const char* name = 0, Int_t option = 0, Int_t bufsize = 0);
+            Int_t   GetNScalerReadCorrections() const   {return nCorrected;}
+            void    ScalerReadCorrection(const Double_t CorrectionFactor, TDirectory *dir = 0);
+    virtual void	Write(TDirectory *dir);
 };
 
 
@@ -40,7 +42,7 @@ public:
 
 
 
-class   GScaCorHist1D   : public TH1D, public GScaCorHist
+class   GScaCorHist1D   : public GScaCorHist, public TH1D
 {
 private:
 
@@ -51,8 +53,8 @@ public:
     virtual ~GScaCorHist1D();
 
     virtual void	Clear(Option_t* option = "")    {TH1D::Clear(option); GScaCorHist::Clear(option);}
-    virtual Int_t	Write(const char* name = 0, Int_t option = 0, Int_t bufsize = 0) const  {if(GetNScalerReadCorrections()>0) return GScaCorHist::Write(name, option, bufsize); return TH1D::Write(name, option, bufsize);}
-    virtual Int_t	Write(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)        {if(GetNScalerReadCorrections()>0) return GScaCorHist::Write(name, option, bufsize); return TH1D::Write(name, option, bufsize);}
+    //virtual Int_t	Write(const char* name = 0, Int_t option = 0, Int_t bufsize = 0);
+    virtual void	Write(TDirectory* dir)            {if(GetNScalerReadCorrections()>0) return GScaCorHist::Write(dir); TH1D::Write();}
 };
 
 
@@ -68,8 +70,8 @@ public:
     virtual ~GScaCorHist1I();
 
     virtual void	Clear(Option_t* option = "")    {TH1I::Clear(option); GScaCorHist::Clear(option);}
-    virtual Int_t	Write(const char* name = 0, Int_t option = 0, Int_t bufsize = 0) const  {if(GetNScalerReadCorrections()>0) return GScaCorHist::Write(name, option, bufsize); return TH1I::Write(name, option, bufsize);}
-    virtual Int_t	Write(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)        {if(GetNScalerReadCorrections()>0) return GScaCorHist::Write(name, option, bufsize); return TH1I::Write(name, option, bufsize);}
+    //virtual Int_t	Write(const char* name = 0, Int_t option = 0, Int_t bufsize = 0);
+    virtual void	Write(TDirectory* dir)            {if(GetNScalerReadCorrections()>0) return GScaCorHist::Write(dir); TH1I::Write();}
 };
 
 
