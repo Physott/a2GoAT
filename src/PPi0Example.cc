@@ -257,7 +257,9 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-PPi0Example::PPi0Example() 
+PPi0Example::PPi0Example() :
+    thd("thD", "thD", 2000, -1000.0, 1000.0),
+    thi("thI", "thI", 5, 0, 5)
 { 
 }
 
@@ -294,19 +296,27 @@ Bool_t	PPi0Example::Start()
     }
     SetAsPhysicsFile();
 
-	DefineHistograms();
+    //DefineHistograms();
 
     TraverseValidEvents();
-			
-    PostReconstruction();
-    WriteHistograms();
+
+    //PostReconstruction();
+    //WriteHistograms();
 	return kTRUE;
+}
+
+void    PPi0Example::ProcessScalerRead()
+{
+    thd.ScalerReadCorrection(5, file_out);
+    thi.ScalerReadCorrection(5, file_out);
 }
 
 void	PPi0Example::ProcessEvent()
 {
+    thd.Fill(pi0->Particle(0).Px());
+    thi.Fill(pi0->GetApparatus(0));
 	// Fill timing histogram (all PDG matching pi0)
-    FillTimePDG(*pi0,time_pi0);
+    /*FillTimePDG(*pi0,time_pi0);
 	
 	// Fill missing mass (all PDG matching pi0)
     MissingMassPDG(*pi0, MM_prompt_pi0, MM_random_pi0);
@@ -323,7 +333,7 @@ void	PPi0Example::ProcessEvent()
             FillMissingMass(*pi0, i, MM_prompt_pi0_n_2g, MM_random_pi0_n_2g);
         }
 
-	}
+    }*/
 }
 
 void  PPi0Example::PostReconstruction()
