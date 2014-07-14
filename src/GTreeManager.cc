@@ -8,6 +8,8 @@ using namespace std;
 
 
 GTreeManager::GTreeManager()    :
+    GHistManager(),
+    GConfigFile(),
     file_in(0),
     file_out(0),
     treeList(),
@@ -184,6 +186,8 @@ Bool_t  GTreeManager::Write()
 
     for(int l=0; l<writeList.GetEntries(); l++)
         ((GTree*)writeList[l])->Write();
+
+    GHistManager::WriteLinkedHistograms(file_out);
 
     isWritten   = kTRUE;
 

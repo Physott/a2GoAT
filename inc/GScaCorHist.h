@@ -7,6 +7,7 @@
 #include <TH1D.h>
 #include <TH1I.h>
 
+#include "GHistManager.h"
 
 
 TDirectory* GGetDirectory(TDirectory* dir, const char* name);
@@ -14,8 +15,7 @@ TDirectory* GGetDirectory(TDirectory* dir, const TString& name);
 
 
 
-
-class   GScaCorHist
+class   GScaCorHist : public GLinkedHist
 {
 private:
     Int_t   nCorrected;
@@ -28,7 +28,7 @@ protected:
     TH1*    accumulatedCorrected;
 
 public:
-    GScaCorHist();
+    GScaCorHist(const Bool_t linked = true);
     virtual ~GScaCorHist() = 0;
 
     virtual void    Clear(Option_t* option = "");
@@ -49,7 +49,7 @@ private:
 protected:
 
 public:
-    GScaCorHist1D(const TString& name, const TString& title, const Int_t nBins, const Double_t min, const Double_t max);
+    GScaCorHist1D(const TString& name, const TString& title, const Int_t nBins, const Double_t min, const Double_t max, const Bool_t linked = true);
     virtual ~GScaCorHist1D();
 
     virtual void	Clear(Option_t* option = "")    {TH1D::Clear(option); GScaCorHist::Clear(option);}
@@ -66,7 +66,7 @@ private:
 protected:
 
 public:
-    GScaCorHist1I(const TString& name, const TString& title, const Int_t nBins, const Int_t min, const Int_t max);
+    GScaCorHist1I(const TString& name, const TString& title, const Int_t nBins, const Int_t min, const Int_t max, const Bool_t linked = true);
     virtual ~GScaCorHist1I();
 
     virtual void	Clear(Option_t* option = "")    {TH1I::Clear(option); GScaCorHist::Clear(option);}

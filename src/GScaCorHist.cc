@@ -1,4 +1,5 @@
 #include "GScaCorHist.h"
+#include "GHistManager.h"
 
 
 
@@ -35,7 +36,8 @@ void    GScaCorHist::WriteHistogram(TH1* hist, const TString& name, const TStrin
 
 
 
-GScaCorHist::GScaCorHist() :
+GScaCorHist::GScaCorHist(const Bool_t linked) :
+    GLinkedHist(linked),
     nCorrected(0),
     current(0),
     accumulated(0),
@@ -102,8 +104,8 @@ void	GScaCorHist::Write(TDirectory* dir)
 
 
 
-GScaCorHist1D::GScaCorHist1D(const TString& name, const TString& title, const Int_t nBins, const Double_t min, const Double_t max) :
-    GScaCorHist(),
+GScaCorHist1D::GScaCorHist1D(const TString& name, const TString& title, const Int_t nBins, const Double_t min, const Double_t max, const Bool_t linked) :
+    GScaCorHist(linked),
     TH1D(name, title, nBins, min, max)
 {
     current = this;
@@ -130,8 +132,8 @@ Int_t	GScaCorHist1D::Write(const char* name, Int_t option, Int_t bufsize)
 
 
 
-GScaCorHist1I::GScaCorHist1I(const TString& name, const TString& title, const Int_t nBins, const Int_t min, const Int_t max) :
-    GScaCorHist(),
+GScaCorHist1I::GScaCorHist1I(const TString& name, const TString& title, const Int_t nBins, const Int_t min, const Int_t max, const Bool_t linked) :
+    GScaCorHist(linked),
     TH1I(name, title, nBins, min, max)
 {
     current = this;

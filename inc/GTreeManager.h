@@ -16,13 +16,14 @@
 #include "GTreeTrigger.h"
 #include "GTreeDetectorHits.h"
 #include "GTreeEventParameters.h"
+#include "GHistManager.h"
 
 
 #include <stdio.h>
 #include <TSystem.h>
 
 
-class  GTreeManager : public GConfigFile
+class  GTreeManager : public GHistManager, public GConfigFile
 {
 private:
     TFile*      file_in;
