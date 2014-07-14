@@ -47,8 +47,8 @@ public:
     virtual ~GH1()    = 0;
 
             void    Clear();
-            void    Fill(const Double_t value, const Double_t taggerTime, const Int_t taggerChannel = 0);
-            void    Fill(const Int_t value, const Double_t taggerTime, const Int_t taggerChannel = 0);
+            void    Fill(const Double_t value, const Double_t taggerTime = 0, const Int_t taggerChannel = 0);
+            void    Fill(const Int_t value, const Double_t taggerTime = 0, const Int_t taggerChannel = 0);
             void    Fill(const Double_t value, const GTreeTagger& tagger);
             void    Fill(const Int_t value, const GTreeTagger& tagger);
             Int_t   GetNRandCuts()  const   {cutRandMin.size();}

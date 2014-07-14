@@ -117,13 +117,13 @@ void    GH1::Fill(const Double_t value, const Double_t taggerTime, const Int_t t
 
     for(int i=0; i<cutRandMin.size(); i++)
     {
+        if(i>=rand.GetEntriesFast())
+        {
+            TObjArray*  array = new TObjArray(1);
+            rand.AddAtAndExpand(array, i);
+        }
         if(taggerTime>=cutRandMin[i] && taggerTime<=cutRandMax[i])
         {
-            if(i>=rand.GetEntriesFast())
-            {
-                TObjArray*  array = new TObjArray(1);
-                rand.AddAtAndExpand(array, i);
-            }
             if(taggerChannel>=((TObjArray*)rand.At(i))->GetEntriesFast())
             {
                 Int_t   start = prompt.GetEntriesFast();
@@ -150,13 +150,13 @@ void    GH1::Fill(const Int_t value, const Double_t taggerTime, const Int_t tagg
 
     for(int i=0; i<cutRandMin.size(); i++)
     {
+        if(i>=rand.GetEntriesFast())
+        {
+            TObjArray*  array = new TObjArray(1);
+            rand.AddAtAndExpand(array, i);
+        }
         if(taggerTime>=cutRandMin[i] && taggerTime<=cutRandMax[i])
         {
-            if(i>=rand.GetEntriesFast())
-            {
-                TObjArray*  array = new TObjArray(1);
-                rand.AddAtAndExpand(array, i);
-            }
             if(taggerChannel>=((TObjArray*)rand.At(i))->GetEntriesFast())
             {
                 Int_t   start = prompt.GetEntriesFast();
