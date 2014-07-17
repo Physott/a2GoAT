@@ -43,6 +43,7 @@ add_executable(MyGoAT
    inc/GTreeMeson.h
    inc/GTreeTrigger.h
    inc/GTreeEventParameters.h
+   inc/GHistManager.h
    inc/GTreeManager.h
    inc/GConfigFile.h
    inc/GDataChecks.h
@@ -60,6 +61,7 @@ add_executable(MyGoAT
    src/GTreeMeson.cc
    src/GTreeTrigger.cc
    src/GTreeEventParameters.cc
+   src/GHistManager.cc
    src/GTreeManager.cc
    src/GConfigFile.cc
    src/GDataChecks.cc
@@ -69,7 +71,49 @@ add_executable(MyGoAT
    src/GoAT.cc
    src/goat_main.cc
    )
+<<<<<<< HEAD
 target_link_libraries(MyGoAT ${ROOT_LIBRARIES})
+=======
+target_link_libraries(goat ${ROOT_LIBRARIES})
+
+add_executable(pi0-example
+   inc/GTree.h
+   inc/GTreeRawEvent.h
+   inc/GTreeDetectorHits.h
+   inc/GTreeTagger.h
+   inc/GTreeLinPol.h
+   inc/GTreeScaler.h
+   inc/GTreeParticle.h
+   inc/GTreeMeson.h
+   inc/GTreeTrigger.h
+   inc/GTreeEventParameters.h
+   inc/GHistManager.h
+   inc/GTreeManager.h
+   inc/GConfigFile.h
+   inc/GScaCorHist.h
+   inc/GH1.h
+   inc/PPi0Example.h
+   inc/PPhysics.h
+   src/GTree.cc
+   src/GTreeRawEvent.cc
+   src/GTreeDetectorHits.cc
+   src/GTreeTagger.cc
+   src/GTreeLinPol.cc
+   src/GTreeScaler.cc
+   src/GTreeParticle.cc
+   src/GTreeMeson.cc
+   src/GTreeTrigger.cc
+   src/GTreeEventParameters.cc
+   src/GHistManager.cc
+   src/GTreeManager.cc
+   src/GConfigFile.cc
+   src/GScaCorHist.cc
+   src/GH1.cc
+   src/PPi0Example.cc
+   src/PPhysics.cc
+   )
+target_link_libraries(pi0-example ${ROOT_LIBRARIES})
+>>>>>>> devA2
 
 add_executable(MyPhysics
    inc/GTree.h
@@ -82,12 +126,19 @@ add_executable(MyPhysics
    inc/GTreeMeson.h
    inc/GTreeTrigger.h
    inc/GTreeEventParameters.h
+   inc/GHistManager.h
    inc/GTreeManager.h
    inc/GConfigFile.h
+<<<<<<< HEAD
    inc/GKinFitter.h
    inc/GKinFitterParticle.h
    inc/PHist.h
    inc/PHistEvent.h
+=======
+   inc/GScaCorHist.h
+   inc/GH1.h
+   inc/PEtaExample.h
+>>>>>>> devA2
    inc/PPhysics.h
    inc/PProtonCheck.h
    inc/P3Meson.h
@@ -102,12 +153,19 @@ add_executable(MyPhysics
    src/GTreeMeson.cc
    src/GTreeTrigger.cc
    src/GTreeEventParameters.cc
+   src/GHistManager.cc
    src/GTreeManager.cc
    src/GConfigFile.cc
+<<<<<<< HEAD
    src/GKinFitter.cc
    src/GKinFitterParticle.cc
    src/PHist.cc
    src/PHistEvent.cc
+=======
+   src/GScaCorHist.cc
+   src/GH1.cc
+   src/PEtaExample.cc
+>>>>>>> devA2
    src/PPhysics.cc
    src/PProtonCheck.cc
    src/P3Meson.cc

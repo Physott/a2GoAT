@@ -16,13 +16,14 @@
 #include "GTreeTrigger.h"
 #include "GTreeDetectorHits.h"
 #include "GTreeEventParameters.h"
+#include "GHistManager.h"
 
 
 #include <stdio.h>
 #include <TSystem.h>
 
 
-class  GTreeManager : public GConfigFile
+class  GTreeManager : public GHistManager, public GConfigFile
 {
 private:
     TFile*      file_in;
@@ -38,6 +39,9 @@ private:
     UInt_t  currentScalerEntry;
 
     Int_t   countReconstructed;
+
+    Bool_t  TraverseValidEvents_AcquTreeFile();
+    Bool_t  TraverseValidEvents_GoATTreeFile();
 
 protected:
     TFile*          file_out;
@@ -71,7 +75,7 @@ protected:
     virtual Bool_t  Start() = 0;
             Bool_t  TraverseEntries(const UInt_t min, const UInt_t max);
             Bool_t  TraverseScalerEntries(const UInt_t min, const UInt_t max);
-            Bool_t  TraverseValidEvents();
+            Bool_t  TraverseValidEvents()   {if(IsAcquFile()) return TraverseValidEvents_AcquTreeFile(); return TraverseValidEvents_GoATTreeFile();}
             Bool_t  Write();
             Bool_t  Write(const TNamed* object);
 

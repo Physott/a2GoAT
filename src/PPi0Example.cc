@@ -257,8 +257,16 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-PPi0Example::PPi0Example() 
+PPi0Example::PPi0Example() :
+    thd("thD", "thD", 2000, -1000.0, 1000.0),
+    thi("thI", "thI", 5, 0, 5),
+    ghd("ghD", "ghD", 2000, -1000.0, 1000.0),
+    ghi("ghI", "ghI", 5, 0, 5)
 { 
+    GH1::InitCuts(-10, 10, -60, -40);
+    GH1::AddRandCut(-35, -15);
+    GH1::AddRandCut(15, 35);
+    GH1::AddRandCut(40, 60);
 }
 
 PPi0Example::~PPi0Example()
@@ -294,22 +302,33 @@ Bool_t	PPi0Example::Start()
     }
     SetAsPhysicsFile();
 
-	DefineHistograms();
+    //DefineHistograms();
 
-    TraverseEntries(0, pi0->GetNEntries());
-			
-    PostReconstruction();
-    WriteHistograms();
+    TraverseValidEvents();
+
+    ghd.Write(*file_out);
+    ghi.Write(*file_out);
+    //PostReconstruction();
+    //WriteHistograms();
 	return kTRUE;
+}
+
+void    PPi0Example::ProcessScalerRead()
+{
+    thd.ScalerReadCorrection(5, file_out);
+    thi.ScalerReadCorrection(5, file_out);
 }
 
 void	PPi0Example::ProcessEvent()
 {
-    if(GetEventNumber() == 0) N_pi0 = 0;
-    else if(GetEventNumber() % 100000 == 0) cout << "Event: "<< GetEventNumber() << " Total Pi0s found: " << N_pi0 << endl;
-
+    thd.Fill(pi0->Particle(0).Px());
+    thi.Fill(pi0->GetApparatus(0));
+    //ghd.Fill(pi0->Particle(0).Px(), tagger->GetTagged_t(0), tagger->GetTagged_ch(0));
+    //ghi.Fill(pi0->GetApparatus(0),  tagger->GetTagged_t(0), tagger->GetTagged_ch(0));
+    ghd.Fill(pi0->Particle(0).Px(), *tagger);
+    ghi.Fill(pi0->GetApparatus(0), *tagger);
 	// Fill timing histogram (all PDG matching pi0)
-    FillTimePDG(*pi0,time_pi0);
+    /*FillTimePDG(*pi0,time_pi0);
 	
 	// Fill missing mass (all PDG matching pi0)
     MissingMassPDG(*pi0, MM_prompt_pi0, MM_random_pi0);
@@ -326,7 +345,7 @@ void	PPi0Example::ProcessEvent()
             FillMissingMass(*pi0, i, MM_prompt_pi0_n_2g, MM_random_pi0_n_2g);
         }
 
-	}
+    }*/
 }
 
 void  PPi0Example::PostReconstruction()

@@ -7,10 +7,18 @@
 #include <string> 
 
 #include "PPhysics.h"
+#include "GScaCorHist.h"
+#include "GH1.h"
+
+
 
 class	PPi0Example : public PPhysics
 {
 private:
+    GScaCorHist1D thd;
+    GScaCorHist1I thi;
+    GH1D ghd;
+    GH1I ghi;
 
 	Double_t time;
 	TH1* 	time_pi0;
@@ -30,6 +38,7 @@ protected:
     virtual Bool_t  Start();
 
     virtual void    ProcessEvent();
+    virtual void    ProcessScalerRead();
 			void	PostReconstruction();
 
 			void	DefineHistograms();

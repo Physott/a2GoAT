@@ -9,15 +9,16 @@ class  GTreeDetectorHits    : public GTree
 {
 private:
     Int_t		nNaI_Hits;
-    Int_t*		NaI_Hits;
+    Int_t		NaI_Hits[720];
     Int_t		nPID_Hits;
-    Int_t*		PID_Hits;
+    Int_t		PID_Hits[24];
     Int_t		nWC_Hits;
-    Int_t*		WC_Hits;
+    Int_t		WC_Hits[860];
+    Int_t		nWC_Tracks;
     Int_t		nBaF2_PbWO4_Hits;
-    Int_t*		BaF2_PbWO4_Hits;
+    Int_t		BaF2_PbWO4_Hits[438];
     Int_t		nVeto_Hits;
-    Int_t*		Veto_Hits;
+    Int_t		Veto_Hits[438];
 
 protected:
     virtual void    SetBranchAdresses();
@@ -40,6 +41,7 @@ public:
             Int_t		GetNWC_Hits()       			const	{return nWC_Hits;}
     const	Int_t*		GetWC_Hits()                	const	{return WC_Hits;}
             Int_t		GetWC_Hits(const Int_t index)	const	{return WC_Hits[index];}
+            Int_t		GetNWC_Tracks()       			const	{return nWC_Tracks;}
 
             Int_t		GetNBaF2_PbWO4_Hits()                   const	{return nBaF2_PbWO4_Hits;}
     const	Int_t*		GetBaF2_PbWO4_Hits()                    const	{return BaF2_PbWO4_Hits;}

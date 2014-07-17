@@ -8,6 +8,8 @@ using namespace std;
 
 
 GTreeManager::GTreeManager()    :
+    GHistManager(),
+    GConfigFile(),
     file_in(0),
     file_out(0),
     treeList(),
@@ -185,6 +187,8 @@ Bool_t  GTreeManager::Write()
     for(int l=0; l<writeList.GetEntries(); l++)
         ((GTree*)writeList[l])->Write();
 
+    GHistManager::WriteLinkedHistograms(file_out);
+
     isWritten   = kTRUE;
 
     return kTRUE;
@@ -200,7 +204,7 @@ Bool_t  GTreeManager::Write(const TNamed* object)
 }
 
 
-Bool_t  GTreeManager::TraverseValidEvents()
+Bool_t  GTreeManager::TraverseValidEvents_AcquTreeFile()
 {
     if(!scalers->IsOpenForInput())
     {
@@ -261,7 +265,8 @@ Bool_t  GTreeManager::TraverseValidEvents()
 
     for(int i=1; i<GetNScalerEntries(); i++)
     {
-        scalers->GetEntry(i);
+        for(int l=0; l<readCorreleatedToScalerReadList.GetEntriesFast(); l++)
+            ((GTree*)readCorreleatedToScalerReadList[l])->GetEntry(i);
         if(scalers->GetEventNumber() - scalers->GetEventID() == shift)
         {
             currentScalerEntry = i;
@@ -280,6 +285,45 @@ Bool_t  GTreeManager::TraverseValidEvents()
 
     if(accepted)    delete accepted;
     return kTRUE;
+}
+
+Bool_t  GTreeManager::TraverseValidEvents_GoATTreeFile()
+{
+    if(!file_in)
+        return kFALSE;
+
+    Int_t   event       = 0;
+    Int_t   start       = 0;
+    Int_t   maxEvent    = GetNEntries();
+    for(int l=0; l<readList.GetEntriesFast(); l++)
+        ((GTree*)readList[l])->GetEntryFast(event);
+
+    cout << GetNScalerEntries() << " scaler reads. " << maxEvent << " events." << endl;
+
+    for(int i=0; i<GetNScalerEntries(); i++)
+    {
+        for(int l=0; l<readCorreleatedToScalerReadList.GetEntriesFast(); l++)
+            ((GTree*)readCorreleatedToScalerReadList[l])->GetEntry(i);
+        while(eventParameters->GetEventNumber()<scalers->GetEventNumber())
+        {
+            event++;
+            if(event>=maxEvent)
+                break;
+            for(int l=0; l<readList.GetEntriesFast(); l++)
+                ((GTree*)readList[l])->GetEntryFast(event);
+            ProcessEvent();
+        }
+        if(i!=0)
+        {
+            if(i%50 == 0)
+            {
+                cout << "\t" << i << " Scaler reads processed. Events from " << start << " to " << event << "." << endl;
+                start   = event;
+            }
+        }
+        ProcessScalerRead();
+    }
+    cout << "\t" << GetNScalerEntries() << " Scaler reads processed. Events from " << start << " to " << event << "." << endl;
 }
 
 UInt_t  GTreeManager::GetNEntries()       const
