@@ -3,7 +3,7 @@
 
 
 GH1Example::GH1Example()    :
-    test("test", "test", 1000, -500, 500)
+    taggerE("taggerE", "taggerE", 1500, 0, 1500)
 { 
     GHistBGSub::InitCuts(-20, 15, -100, -40);
     GHistBGSub::AddRandCut(35, 95);
@@ -32,7 +32,7 @@ Bool_t	GH1Example::Start()
 
 void	GH1Example::ProcessEvent()
 {
-    test.Fill(pi0->Particle(0).Px(), *tagger, kTRUE);
+    taggerE.Fill(pi0->Particle(0).E(), *tagger, kTRUE);
 }
 
 void	GH1Example::ProcessScalerRead()

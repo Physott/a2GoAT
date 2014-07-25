@@ -1,0 +1,65 @@
+#=======================================================================
+# Global Config file for a GoAT analysis
+#=======================================================================
+
+#-----------------------------------------------------------------------
+# General Setup
+#-----------------------------------------------------------------------
+
+Period-Macro:	100000
+
+#-----------------------------------------------------------------------
+# Particle Reconstruction
+#-----------------------------------------------------------------------
+Do-Particle-Reconstruction: 1
+
+#Cut-dE-E-CB-Proton: 	configfiles/cuts/CB_DeltaE-E_Proton.root Proton
+#Cut-dE-E-CB-Pion: 		configfiles/cuts/CB_DeltaE-E_Pion.root Pion
+#Cut-dE-E-TAPS-Pion: 	configfiles/cuts/TAPS_DeltaE-E.root	CutPiplus
+#Cut-dE-E-TAPS-Proton: 	configfiles/cuts/TAPS_DeltaE-E.root CutProton
+#Cut-dE-E-TAPS-Electron: configfiles/cuts/TAPS_DeltaE-E.root CutElectron
+
+Do-Meson-Reconstruction: 1
+Cut-IM-Width-Pi0: 20
+Cut-IM-Width-Eta: 44
+Cut-IM-Width-Eta-Prime: 60
+
+
+#-----------------------------------------------------------------------
+# Sorting Preferences
+#-----------------------------------------------------------------------
+# Just turn off a sort completely to ignore a sorting preference
+# Use +, - or = to set counters (ex. 3- will accept 3 or less)
+
+# Sort on number of raw particle tracks (total, CB, and TAPS)
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#					Total 	CB		TAPS
+SortRaw-NParticles: 2=		2=		0=
+
+
+# Sort on Trigger conditions (Crystal Ball Energy Sum)
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+SortRaw-CBEnergySum: 	100+
+
+
+# Sort on reconstructed particle properties
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Sort-NParticles: 	1=
+
+                                Type 	Number	Theta-min 	Theta-max
+Sort-Particle:	pi0		1=              0               180
+
+# Note: (I'll put this here while we don't have a manual)
+# the charged and neutral particle cuts are additional
+# particle property cuts and don't act as unique particles
+# ie: Here are two examples:
+# EX 1  nparticle cut (1=) with a proton cut (1=) and a charged cut (1=)
+# is redundant because the proton is charged
+#
+# EX 2  nparticle cut (1=) with an eta cut (1=) and a charged cut (1=)
+# makes sense because eta can decay to charged particles (marking the
+# eta as charged). Something like this should reject eta->6gamma... :)
+#
+#-----------------------------------------------------------------------
+# Activate physics analysis?
+#-----------------------------------------------------------------------

@@ -12,7 +12,7 @@
 class	GH1Example  : public GTreeManager
 {
 private:
-    GH1     test;
+    GH1     taggerE;
 
 protected:
     virtual Bool_t  Start();
