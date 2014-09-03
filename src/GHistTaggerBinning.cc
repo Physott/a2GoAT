@@ -23,14 +23,14 @@ void    GHistTaggerBinning::InitTaggerBinning(const Int_t min, const Int_t max)
 
 
 GHistTaggerBinning::GHistTaggerBinning() :
-    GHistScaCor(),
+    GHistThetaBinning(),
     bin()
 {
     bin.SetOwner();
 }
 
 GHistTaggerBinning::GHistTaggerBinning(const char* name, const char* title, Int_t nbinsx, Double_t xlow, Double_t xup, Bool_t linkHistogram) :
-    GHistScaCor(name, title, nbinsx, xlow, xup, linkHistogram),
+    GHistThetaBinning(name, title, nbinsx, xlow, xup, linkHistogram),
     bin()
 {
     bin.SetOwner();
@@ -43,7 +43,7 @@ GHistTaggerBinning::~GHistTaggerBinning()
 
 void    GHistTaggerBinning::CreateBin()
 {
-    GHistScaCor*    hist = new GHistScaCor(TString(GetName()).Append(GHTB_binNameSuffix).Append(TString::Itoa(bin.GetEntriesFast()+TaggerBinningRangeMin, 10)).Data(),
+    GHistThetaBinning*    hist = new GHistThetaBinning(TString(GetName()).Append(GHTB_binNameSuffix).Append(TString::Itoa(bin.GetEntriesFast()+TaggerBinningRangeMin, 10)).Data(),
                                            TString(GetTitle()).Append(GHTB_binTitleSuffix).Append(TString::Itoa(bin.GetEntriesFast()+TaggerBinningRangeMin, 10)).Data(),
                                            GetNbinsX(),
                                            GetXmin(),
@@ -60,12 +60,12 @@ void    GHistTaggerBinning::ExpandBin(const Int_t newSize)
 
 Bool_t	GHistTaggerBinning::Add(const GHistTaggerBinning* h, Double_t c)
 {
-    GHistScaCor::Add(h, c);
+    GHistThetaBinning::Add(h, c);
     for(int i=0; i<h->bin.GetEntriesFast(); i++)
     {
         if(i>=bin.GetEntriesFast())
             CreateBin();
-        ((GHistScaCor*)bin.At(i))->Add((GHistScaCor*)h->bin.At(i), c);
+        ((GHistThetaBinning*)bin.At(i))->Add((GHistThetaBinning*)h->bin.At(i), c);
     }
 }
 
@@ -73,34 +73,28 @@ void    GHistTaggerBinning::CalcResult()
 {
     if(bin.GetEntriesFast()==0)
     {
-        GHistScaCor::CalcResult();
+        GHistThetaBinning::CalcResult();
         return;
     }
 
-    //GHistScaCor::Reset();
+    //GHistThetaBinning::Reset();
     for(int i=0; i<bin.GetEntriesFast(); i++)
     {
-        ((GHistScaCor*)bin.At(i))->CalcResult();
-        GHistScaCor::Add((GHistScaCor*)bin.At(i));
+        ((GHistThetaBinning*)bin.At(i))->CalcResult();
+        GHistThetaBinning::Add((GHistThetaBinning*)bin.At(i));
     }
 }
 
-void    GHistTaggerBinning::Reset(Option_t* option)
-{
-    GHistScaCor::Reset(option);
-    bin.Clear();
-}
-
-Int_t   GHistTaggerBinning::Fill(const Double_t value, const Int_t taggerChannel)
+Int_t   GHistTaggerBinning::Fill(const Double_t value, const Int_t taggerChannel, const Double_t theta)
 {
     if(taggerChannel==-1)
-        return GHistScaCor::Fill(value);
+        return GHistThetaBinning::Fill(value, theta);
 
     if(TaggerBinningRangeMax==-1)
     {
         if(taggerChannel>=bin.GetEntriesFast())
             ExpandBin(taggerChannel+1);
-        return ((GHistScaCor*)bin.At(taggerChannel))->Fill(value);
+        return ((GHistThetaBinning*)bin.At(taggerChannel))->Fill(value, theta);
     }
     else
     {
@@ -108,33 +102,50 @@ Int_t   GHistTaggerBinning::Fill(const Double_t value, const Int_t taggerChannel
             return 0;
         if(taggerChannel>=(bin.GetEntriesFast()+TaggerBinningRangeMin))
             ExpandBin(taggerChannel+1-TaggerBinningRangeMin);
-        return ((GHistScaCor*)bin.At(taggerChannel-TaggerBinningRangeMin))->Fill(value);
+        return ((GHistThetaBinning*)bin.At(taggerChannel-TaggerBinningRangeMin))->Fill(value, theta);
     }
 }
 
-Int_t   GHistTaggerBinning::Fill(const Double_t value, const GTreeTagger& tagger, const Bool_t CreateHistogramsForTaggerBinning)
+Int_t   GHistTaggerBinning::Fill(const Double_t value, const GTreeTagger& tagger, const Double_t theta, const Bool_t CreateHistogramsForTaggerBinning, const Bool_t CreateHistogramsForThetaBinning)
 {
+    Int_t   res = 0;
     for(int i=0; i<tagger.GetNTagged(); i++)
     {
         if(CreateHistogramsForTaggerBinning)
-            Fill(value, tagger.GetTagged_ch(i));
+        {
+            if(CreateHistogramsForThetaBinning)
+                res += Fill(value, tagger.GetTagged_ch(i), theta);
+            else
+                res += Fill(value, tagger.GetTagged_ch(i), -1);
+        }
         else
-            Fill(value);
+        {
+            if(CreateHistogramsForThetaBinning)
+                res += Fill(value, -1, theta);
+            else
+                res += Fill(value, -1, -1);
+        }
     }
+}
+
+void    GHistTaggerBinning::Reset(Option_t* option)
+{
+    GHistThetaBinning::Reset(option);
+    bin.Clear();
 }
 
 void	GHistTaggerBinning::Scale(Double_t c1, Option_t* option)
 {
-    GHistScaCor::Scale(c1, option);
+    GHistThetaBinning::Scale(c1, option);
     for(int i=0; i<bin.GetEntriesFast(); i++)
-        ((GHistScaCor*)bin.At(i))->Scale(c1, option);
+        ((GHistThetaBinning*)bin.At(i))->Scale(c1, option);
 }
 
 void    GHistTaggerBinning::ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads)
 {
-    GHistScaCor::ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+    GHistThetaBinning::ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     for(int i=0; i<bin.GetEntriesFast(); i++)
-        ((GHistScaCor*)bin.At(i))->ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+        ((GHistThetaBinning*)bin.At(i))->ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
 }
 
 void    GHistTaggerBinning::PrepareWriteList(GHistWriteList* arr, const char *name)
@@ -142,7 +153,7 @@ void    GHistTaggerBinning::PrepareWriteList(GHistWriteList* arr, const char *na
     if(!arr)
         return;
 
-    GHistScaCor::PrepareWriteList(arr, name);
+    GHistThetaBinning::PrepareWriteList(arr, name);
     if(bin.GetEntriesFast()==0)
         return;
 
@@ -151,15 +162,15 @@ void    GHistTaggerBinning::PrepareWriteList(GHistWriteList* arr, const char *na
     {
         GHistWriteList* BinDir  = TaggerBinning->GetDirectory(TString(GHTB_chanelFolderName).Append(TString::Itoa(i+TaggerBinningRangeMin, 10)));
         if(name)
-            ((GHistScaCor*)bin.At(i))->PrepareWriteList(BinDir, TString(name).Append(GHTB_binNameSuffix).Append(TString::Itoa(i+TaggerBinningRangeMin, 10)));
+            ((GHistThetaBinning*)bin.At(i))->PrepareWriteList(BinDir, TString(name).Append(GHTB_binNameSuffix).Append(TString::Itoa(i+TaggerBinningRangeMin, 10)));
         else
-            ((GHistScaCor*)bin.At(i))->PrepareWriteList(BinDir);
+            ((GHistThetaBinning*)bin.At(i))->PrepareWriteList(BinDir);
     }
 }
 
 Int_t   GHistTaggerBinning::WriteWithoutCalcResult(const char* name, Int_t option, Int_t bufsize)
 {
-    Int_t res   = GHistScaCor::WriteWithoutCalcResult(name, option, bufsize);
+    Int_t res   = GHistThetaBinning::WriteWithoutCalcResult(name, option, bufsize);
     if(bin.GetEntriesFast()==0)
         return res;
 
@@ -170,17 +181,17 @@ Int_t   GHistTaggerBinning::WriteWithoutCalcResult(const char* name, Int_t optio
     for(int i=0; i<bin.GetEntriesFast(); i++)
     {
         dir->cd();
-        GetCreateDirectory(TString("Channel_").Append(TString::Itoa(i+TaggerBinningRangeMin, 10)).Data())->cd();
+        GetCreateDirectory(TString(GHTB_chanelFolderName).Append(TString::Itoa(i+TaggerBinningRangeMin, 10)).Data())->cd();
 
         if(name)
         {
             nameBuffer  = name;
-            nameBuffer.Append(GHTB_chanelFolderName);
+            nameBuffer.Append(GHTB_binTitleSuffix);
             nameBuffer.Append(TString::Itoa(i+TaggerBinningRangeMin, 10));
-            res += ((GHistScaCor*)bin.At(i))->WriteWithoutCalcResult(nameBuffer.Data(), option, bufsize);
+            res += ((GHistThetaBinning*)bin.At(i))->WriteWithoutCalcResult(nameBuffer.Data(), option, bufsize);
         }
         else
-            res += ((GHistScaCor*)bin.At(i))->WriteWithoutCalcResult(0, option, bufsize);
+            res += ((GHistThetaBinning*)bin.At(i))->WriteWithoutCalcResult(0, option, bufsize);
     }
 
     parentDir->cd();

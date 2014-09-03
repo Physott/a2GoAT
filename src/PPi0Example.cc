@@ -37,31 +37,16 @@ Bool_t	PPi0Example::Start()
 
 void	PPi0Example::ProcessEvent()
 {
-    // fill time diff (tagger - pi0), all pi0
-    FillTime(*pi0,time);
-
-    // fill missing mass, all pi0
-    FillMissingMass(*pi0,MM);
-
-    // fill invariant mass, all pi0
-    FillMass(*pi0,IM);
-
     // Some neutral decays
-    for (Int_t i = 0; i < pi0->GetNParticles(); i++)
+    for (Int_t i = 0; i < eta->GetNParticles(); i++)
     {
         // Fill MM for 2 photon decay
-        if ((pi0->GetNSubParticles(i) == 2) & (pi0->GetNSubPhotons(i) == 2))
+        for (Int_t t = 0; t < tagger->GetNTagged(); t++)
         {
-            // fill time diff (tagger - pi0), this pi0
-            FillTime(*pi0,i,time_2g);
-
-            // fill missing mass, this pi0
-            FillMissingMass(*pi0,i,MM_2g);
-
-            // fill invariant mass, this pi0
-            FillMass(*pi0,i,IM_2g);
+            time->Fill(tagger->GetTagged_t(t));
+            MM->Fill((tagger->GetVectorProtonTarget(t)-eta->Particle(i)).M(), tagger->GetTagged_t(t), tagger->GetTagged_ch(t), eta->Particle(i).Theta()*TMath::RadToDeg());
         }
-
+        IM->Fill(eta->Particle(i).M(), *tagger, eta->Particle(i).Theta(), kTRUE, kTRUE);
     }
 
 }
