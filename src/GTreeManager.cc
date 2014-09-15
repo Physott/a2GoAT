@@ -3,6 +3,7 @@
 #include <TROOT.h>
 #include <TSystemFile.h>
 #include <TSystemDirectory.h>
+#include <TFileCacheWrite.h>
 
 using namespace std;
 
@@ -139,6 +140,7 @@ Bool_t  GTreeManager::StartFile(const char* input_filename, const char* output_f
         return kFALSE;
     }
     cout << "Created output file " << file_out->GetName() << "!" << file_out->GetTitle() << endl;
+    TFileCacheWrite*    cache   = new TFileCacheWrite(file_out, 104857600);
 
     isWritten   = kFALSE;
     ClearLinkedHistograms();
@@ -148,6 +150,7 @@ Bool_t  GTreeManager::StartFile(const char* input_filename, const char* output_f
 
     if(!isWritten)
         Write();
+    cache->Flush();
 
     for(int l=0; l<treeList.GetEntries(); l++)
         ((GTree*)treeList[l])->Close();
@@ -157,6 +160,7 @@ Bool_t  GTreeManager::StartFile(const char* input_filename, const char* output_f
 
     if(file_in)    file_in->Close();
     if(file_out)    file_out->Close();
+    //delete  cache;
 
     return kTRUE;
 }
