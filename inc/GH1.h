@@ -3,8 +3,10 @@
 
 
 #include "GHistBGSub.h"
+#include "GHistScaCor2.h"
 
-#define GH1 GHistBGSub
+#define GH1 GHistScaCor
+#define GH2 GHistScaCor2
 
 
 #endif

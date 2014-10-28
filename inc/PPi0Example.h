@@ -7,35 +7,22 @@
 #include <string>
 
 #include "GTreeManager.h"
-#include "PPhysics.h"
+#include "GH1.h"
 
-class	PPi0Example  : public PPhysics
+class	PPi0Example : public GTreeManager
 {
 private:
-    GH1*	time;
-    GH1*	time_cut;
-    GH1*	time_2g;      
-    GH1*	time_2g_cut;   
-     
-    GH1*	IM;
-    GH1*	IM_2g;
+    GH1*	test1;
+    GH2*	test2;
 
-    GH1*	MM;
-    GH1*	MM_2g;
-
-    TH1*	TaggerAccScal;
-
-    string  	config;
 protected:
     virtual Bool_t  Start();
     virtual void    ProcessEvent();
     virtual void	ProcessScalerRead();
-    virtual Bool_t    Write();
 			
 public:
     PPi0Example();
     virtual ~PPi0Example();
-    virtual Bool_t  Init(const char* configfile);
 
 };
 #endif
