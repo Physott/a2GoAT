@@ -93,6 +93,7 @@ add_executable(pi0-example
    #inc/GHistBGSub.h
    inc/GHistScaCor.h
    inc/GHistScaCor2.h
+   inc/GHistScaCor3.h
    inc/GH1.h
    #inc/PPhysics.h
    inc/PPi0Example.h
@@ -113,6 +114,7 @@ add_executable(pi0-example
    #src/GHistBGSub.cc
    src/GHistScaCor.cc
    src/GHistScaCor2.cc
+   src/GHistScaCor3.cc
    #src/PPhysics.cc
    src/PPi0Example.cc
    src/pi0_example_main.cc
