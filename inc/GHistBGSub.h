@@ -2,6 +2,18 @@
 #define __GHistBGSub_h__
 
 
+#define GHBS_folderName         "BackgroundSubstraction"
+#define GHBS_randFolderName     "RandomWindows"
+#define GHBS_randNameSuffix     "_Rand"
+#define GHBS_randTitleSuffix    " Rand "
+#define GHBS_randSumNameSuffix  "_RandSum"
+#define GHBS_randSumTitleSuffix " RandSum"
+#define GHBS_promptNameSuffix   "_Prompt"
+#define GHBS_promptTitleSuffix  " Prompt"
+
+
+
+
 #include <TDirectory.h>
 
 #include "GHistScaCor.h"
@@ -9,14 +21,16 @@
 
 class   GTreeTagger;
 
-class  GHistBGSub  : public GHistScaCor  //prompt
+class  GHistBGSub  : public GHistLinked
 {
 private:
-    TObjArray   rand;
-    GHistScaCor randSum;
-    GHistScaCor prompt;
-
     Bool_t      writeWindows;
+
+protected:
+    GHistScaCor*    result;
+    GHistScaCor*    prompt;
+    GHistScaCor*    randSum;
+    TObjArray       rand;
 
     static  Double_t    cutPromptMin;
     static  Double_t    cutPromptMax;
@@ -25,8 +39,10 @@ private:
     static  Double_t    backgroundSubstractionFactor;
 
 
-    void    CreateRandBin();
-    void    ExpandRandBins(const Int_t newSize);
+    GHistBGSub(Bool_t linkHistogram);
+
+    virtual void    CreateRandBin();
+            void    ExpandRandBins(const Int_t newSize);
 
 public:
     GHistBGSub();
@@ -36,7 +52,7 @@ public:
     virtual Bool_t	Add(const GHistBGSub* h, Double_t c = 1);
     static  void    AddRandCut(const Double_t RandMin, const Double_t RandMax);
     virtual void    CalcResult();
-    virtual Int_t   Fill(const Double_t value)                                                                      {return GHistScaCor::Fill(value);}
+    virtual Int_t   Fill(const Double_t value)                                                                      {return result->Fill(value);}
     virtual Int_t   Fill(const Double_t value, const Double_t taggerTime);
     virtual Int_t   Fill(const Double_t value, const GTreeTagger& tagger);
     static  Int_t   GetNRandCuts()   {cutRandMin.size();}
