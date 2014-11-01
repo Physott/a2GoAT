@@ -3,8 +3,8 @@
 PPi0Example::PPi0Example()
 { 
     test1 	= new GH1("test1", 	"test1", 	1400, -700, 700);
-    test2 	= new GH2("test2", 	"test2", 	1400, -700, 700, 48, 0, 48);
-    test3 	= new GH3("test3", 	"test3", 	1400, -700, 700, 48, 0, 48, 180, 0, 180);
+    test2 	= new GH1("test2", 	"test2", 	1400, -700, 700);
+    test3 	= new GH1("test3", 	"test3", 	1400, -700, 700);
 }
 
 PPi0Example::~PPi0Example()
@@ -32,8 +32,8 @@ void	PPi0Example::ProcessEvent()
         test1->Fill(eta->Particle(0).M());
         for(int t=0; t<tagger->GetNTagged(); t++)
         {
-            test2->Fill(eta->Particle(0).M(), tagger->GetTagged_ch(t));
-            test3->Fill(eta->Particle(0).M(), tagger->GetTagged_ch(t), eta->Particle(0).Theta());
+            test2->Fill(eta->Particle(0).M(), tagger->GetTagged_t(t));
+            test3->Fill(eta->Particle(0).M(), *tagger);
         }
     }
 }
