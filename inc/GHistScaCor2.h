@@ -21,7 +21,7 @@ public:
     virtual ~GHistScaCor2();
 
     virtual Int_t	Fill(Double_t x);
-    virtual Int_t	Fill(Double_t x, Double_t y)        {return buffer->Fill(x, y);}
+    virtual Int_t	Fill(Double_t x, Double_t y)        {return ((TH2*)buffer)->Fill(x, y);}
             Int_t   GetNbinsY()                 const   {return accumulatedCorrected->GetNbinsY();}
             Int_t   GetYmin()                   const   {return accumulatedCorrected->GetYaxis()->GetXmin();}
             Int_t   GetYmax()                   const   {return accumulatedCorrected->GetYaxis()->GetXmax();}

@@ -26,7 +26,7 @@ public:
 
     virtual Int_t	Fill(Double_t x);
     virtual Int_t	Fill(Double_t x, Double_t y)                {return Fill(x);}
-    virtual Int_t	Fill(Double_t x, Double_t y, Double_t z)    {return buffer->Fill(x, y);}
+    virtual Int_t	Fill(Double_t x, Double_t y, Double_t z)    {return ((TH3*)buffer)->Fill(x, y, z);}
             Int_t   GetNbinsZ()                         const   {return accumulatedCorrected->GetNbinsZ();}
             Int_t   GetZmin()                           const   {return accumulatedCorrected->GetZaxis()->GetXmin();}
             Int_t   GetZmax()                           const   {return accumulatedCorrected->GetZaxis()->GetXmax();}
