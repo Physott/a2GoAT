@@ -60,7 +60,7 @@ Bool_t    GHistBGSub::IsRandom(const Double_t value)
 }
 
 GHistBGSub::GHistBGSub() :
-    GHistTaggerBinning(),
+    GHistScaCor(),
     rand(),
     randSum(),
     prompt()
@@ -69,7 +69,7 @@ GHistBGSub::GHistBGSub() :
 }
 
 GHistBGSub::GHistBGSub(const char* name, const char* title, Int_t nbinsx, Double_t xlow, Double_t xup, Bool_t linkHistogram) :
-    GHistTaggerBinning(name, title, nbinsx, xlow, xup, linkHistogram),
+    GHistScaCor(name, title, nbinsx, xlow, xup, linkHistogram),
     rand(),
     randSum(TString(name).Append(GHBS_randSumNameSuffix), TString(title).Append(GHBS_randSumTitleSuffix), nbinsx, xlow, xup, kFALSE),
     prompt(TString(name).Append(GHBS_promptNameSuffix), TString(title).Append(GHBS_promptTitleSuffix), nbinsx, xlow, xup, kFALSE)
@@ -83,45 +83,45 @@ GHistBGSub::~GHistBGSub()
 
 Bool_t	GHistBGSub::Add(const GHistBGSub* h, Double_t c)
 {
-    GHistTaggerBinning::Add((GHistTaggerBinning*)h, c);
+    GHistScaCor::Add((GHistScaCor*)h, c);
     for(int i=0; i<h->rand.GetEntriesFast(); i++)
     {
         if(i>=rand.GetEntriesFast())
             CreateRandBin();
-        ((GHistTaggerBinning*)rand.At(i))->Add((GHistTaggerBinning*)h->rand.At(i), c);
+        ((GHistScaCor*)rand.At(i))->Add((GHistScaCor*)h->rand.At(i), c);
     }
 }
 
 void    GHistBGSub::CalcResult()
 {
     prompt.CalcResult();
-    //GHistTaggerBinning::Reset();
-    GHistTaggerBinning::Add(&prompt);
+    //GHistScaCor::Reset();
+    GHistScaCor::Add(&prompt);
 
     if(rand.GetEntriesFast()==0)
         return;
 
     TIter   iter(&rand);
-    GHistTaggerBinning*    hist;
-    while(hist=(GHistTaggerBinning*)iter.Next())
+    GHistScaCor*    hist;
+    while(hist=(GHistScaCor*)iter.Next())
         hist->CalcResult();
 
     if(rand.GetEntriesFast()>1)
     {
         //randSum.Reset();
         TIter   iter(&rand);
-        GHistTaggerBinning*    hist;
-        while(hist=(GHistTaggerBinning*)iter.Next())
+        GHistScaCor*    hist;
+        while(hist=(GHistScaCor*)iter.Next())
             randSum.Add(hist);
-        GHistTaggerBinning::Add(&randSum, -backgroundSubstractionFactor);
+        GHistScaCor::Add(&randSum, -backgroundSubstractionFactor);
     }
     else
-        GHistTaggerBinning::Add((GHistTaggerBinning*)rand.At(0), -backgroundSubstractionFactor);
+        GHistScaCor::Add((GHistScaCor*)rand.At(0), -backgroundSubstractionFactor);
 }
 
 void    GHistBGSub::CreateRandBin()
 {
-    GHistTaggerBinning*    hist_rand = new GHistTaggerBinning(TString(GetName()).Append(GHBS_randNameSuffix).Append(TString::Itoa(rand.GetEntriesFast(), 10)).Data(),
+    GHistScaCor*    hist_rand = new GHistScaCor(TString(GetName()).Append(GHBS_randNameSuffix).Append(TString::Itoa(rand.GetEntriesFast(), 10)).Data(),
                                                     TString(GetTitle()).Append(GHBS_randTitleSuffix).Append(TString::Itoa(rand.GetEntriesFast(), 10)).Data(),
                                                     GetNbinsX(),
                                                     GetXmin(),
@@ -145,37 +145,19 @@ Int_t   GHistBGSub::Fill(const Double_t value, const Double_t taggerTime)
         if(i>=rand.GetEntriesFast())
             ExpandRandBins(i+1);
         if(taggerTime>=cutRandMin[i] && taggerTime<=cutRandMax[i])
-            return ((GHistTaggerBinning*)rand.At(i))->Fill(value);
+            return ((GHistScaCor*)rand.At(i))->Fill(value);
     }
 }
 
-Int_t   GHistBGSub::Fill(const Double_t value, const Double_t taggerTime, const Int_t taggerChannel)
-{
-    if(taggerTime>=cutPromptMin && taggerTime<=cutPromptMax)
-        return prompt.Fill(value, taggerChannel);
-    for(int i=0; i<GetNRandCuts(); i++)
-    {
-        if(i>=rand.GetEntriesFast())
-            ExpandRandBins(i+1);
-        if(taggerTime>=cutRandMin[i] && taggerTime<=cutRandMax[i])
-            return ((GHistTaggerBinning*)rand.At(i))->Fill(value, taggerChannel);
-    }
-}
-
-Int_t   GHistBGSub::Fill(const Double_t value, const GTreeTagger& tagger, const Bool_t DoTaggerBinning)
+Int_t   GHistBGSub::Fill(const Double_t value, const GTreeTagger& tagger)
 {
     for(int i=0; i<tagger.GetNTagged(); i++)
-    {
-        if(DoTaggerBinning == kTRUE)
-            Fill(value, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-        else
-            Fill(value, tagger.GetTagged_t(i));
-    }
+        Fill(value, tagger.GetTagged_t(i));
 }
 
 void    GHistBGSub::Reset(Option_t* option)
 {
-    GHistTaggerBinning::Reset(option);
+    GHistScaCor::Reset(option);
     rand.Clear();
     randSum.Reset(option);
     prompt.Reset(option);
@@ -184,9 +166,9 @@ void    GHistBGSub::Reset(Option_t* option)
 
 void    GHistBGSub::ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads)
 {
-    GHistTaggerBinning::ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+    GHistScaCor::ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     for(int i=0; i<rand.GetEntriesFast(); i++)
-        ((GHistTaggerBinning*)rand.At(i))->ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+        ((GHistScaCor*)rand.At(i))->ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     randSum.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     prompt.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
 }
@@ -200,14 +182,14 @@ void    GHistBGSub::PrepareWriteList(GHistWriteList* arr, const char *name)
     if(name)
     {
         if(GetNRandCuts()==0 || rand.GetEntriesFast()==0)
-            return GHistTaggerBinning::PrepareWriteList(arr, name);
-        GHistTaggerBinning::PrepareWriteList(arr, name);
+            return GHistScaCor::PrepareWriteList(arr, name);
+        GHistScaCor::PrepareWriteList(arr, name);
     }
     else
     {
         if(GetNRandCuts()==0 || rand.GetEntriesFast()==0)
-            return GHistTaggerBinning::PrepareWriteList(arr);
-        GHistTaggerBinning::PrepareWriteList(arr);
+            return GHistScaCor::PrepareWriteList(arr);
+        GHistScaCor::PrepareWriteList(arr);
     }
 
     GHistWriteList* BackgroundSubstraction  = arr->GetDirectory(TString(GHBS_folderName));
@@ -243,10 +225,10 @@ void    GHistBGSub::PrepareWriteList(GHistWriteList* arr, const char *name)
                 nameBuffer  = name;
                 nameBuffer.Append(GHBS_randNameSuffix);
                 nameBuffer.Append(TString::Itoa(i, 10));
-                ((GHistTaggerBinning*)rand.At(i))->PrepareWriteList(subRandWindow, nameBuffer.Data());
+                ((GHistScaCor*)rand.At(i))->PrepareWriteList(subRandWindow, nameBuffer.Data());
             }
             else
-                ((GHistTaggerBinning*)rand.At(i))->PrepareWriteList(subRandWindow);
+                ((GHistScaCor*)rand.At(i))->PrepareWriteList(subRandWindow);
         }
     }
     else
@@ -255,10 +237,10 @@ void    GHistBGSub::PrepareWriteList(GHistWriteList* arr, const char *name)
         {
             nameBuffer  = name;
             nameBuffer.Append(GHBS_randNameSuffix);
-            ((GHistTaggerBinning*)rand.At(0))->PrepareWriteList(RandWindow, nameBuffer.Data());
+            ((GHistScaCor*)rand.At(0))->PrepareWriteList(RandWindow, nameBuffer.Data());
         }
         else
-            ((GHistTaggerBinning*)rand.At(0))->PrepareWriteList(RandWindow);
+            ((GHistScaCor*)rand.At(0))->PrepareWriteList(RandWindow);
     }
 }
 
@@ -269,13 +251,13 @@ Int_t    GHistBGSub::WriteWithoutCalcResult(const char* name, Int_t option, Int_
     {
         if(GetNRandCuts()==0)
             return prompt.Write(name, option, bufsize);
-        res += GHistTaggerBinning::Write(name, option, bufsize);
+        res += GHistScaCor::Write(name, option, bufsize);
     }
     else
     {
         if(GetNRandCuts()==0)
             return prompt.Write(0, option, bufsize);
-        res += GHistTaggerBinning::Write(0, option, bufsize);
+        res += GHistScaCor::Write(0, option, bufsize);
     }
 
     TDirectory* parentDir   = gDirectory;

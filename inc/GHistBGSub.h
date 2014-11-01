@@ -4,17 +4,17 @@
 
 #include <TDirectory.h>
 
-#include "GHistTaggerBinning.h"
+#include "GHistScaCor.h"
 
 
 class   GTreeTagger;
 
-class  GHistBGSub  : public GHistTaggerBinning  //prompt
+class  GHistBGSub  : public GHistScaCor  //prompt
 {
 private:
     TObjArray           rand;
-    GHistTaggerBinning  randSum;
-    GHistTaggerBinning  prompt;
+    GHistScaCor  randSum;
+    GHistScaCor  prompt;
 
     static  Double_t    cutPromptMin;
     static  Double_t    cutPromptMax;
@@ -24,7 +24,7 @@ private:
 
             void    CreateRandBin();
             void    ExpandRandBins(const Int_t newSize);
-    static  void    WriteHistogram(GHistTaggerBinning *hist, const char* name, const char* title, TDirectory* dir = 0);
+    static  void    WriteHistogram(GHistScaCor *hist, const char* name, const char* title, TDirectory* dir = 0);
 
 public:
     GHistBGSub();
@@ -34,10 +34,9 @@ public:
     virtual Bool_t	Add(const GHistBGSub* h, Double_t c = 1);
     static  void    AddRandCut(const Double_t RandMin, const Double_t RandMax);
     virtual void    CalcResult();
-    virtual Int_t   Fill(const Double_t value)                                                                      {return GHistTaggerBinning::Fill(value);}
+    virtual Int_t   Fill(const Double_t value)                                                                      {return GHistScaCor::Fill(value);}
     virtual Int_t   Fill(const Double_t value, const Double_t taggerTime);
-    virtual Int_t   Fill(const Double_t value, const Double_t taggerTime, const Int_t taggerChannel);
-    virtual Int_t   Fill(const Double_t value, const GTreeTagger& tagger, const Bool_t DoTaggerBinning = kFALSE);
+    virtual Int_t   Fill(const Double_t value, const GTreeTagger& tagger);
     static  Int_t   GetNRandCuts()   {cutRandMin.size();}
     static  void    InitCuts(const Double_t PromptMin, const Double_t PromptMax, const Double_t RandMin, const Double_t RandMax);
     static  Bool_t  IsPrompt(const Double_t value);
