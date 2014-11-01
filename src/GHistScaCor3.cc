@@ -65,7 +65,13 @@ void    GHistScaCor3::CreateSingleScalerRead()
 
 Int_t	GHistScaCor3::Fill(Double_t x)
 {
-    std::cout << "WARNING: You tried to fill a 2 dim. Hist with only 1 value." << std::endl;
+    std::cout << "ERROR: You tried to fill a 3 dim. Hist with only 1 value." << std::endl;
+    return 0;
+}
+
+Int_t	GHistScaCor3::Fill(Double_t x, Double_t y)
+{
+    std::cout << "ERROR: You tried to fill a 3 dim. Hist with only 2 values." << std::endl;
     return 0;
 }
 

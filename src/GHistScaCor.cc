@@ -4,6 +4,7 @@
 
 
 
+
 GHistScaCor::GHistScaCor(const Bool_t linkHistogram) :
     GHistLinked(linkHistogram),
     buffer(0),
@@ -86,14 +87,15 @@ Bool_t	GHistScaCor::Add(const GHistScaCor *h, Double_t c)
             std::cout << "ERROR: GHistScaCor::Add. Tried to add a corrected and an uncorrected GHistScaCor" << std::endl;
             return kFALSE;
         }
-        corrected   = h->corrected;
     }
 
     if(h->corrected==kFALSE)
     {
+        corrected   = kFALSE;
         buffer->Add(h->buffer, c);
         return kTRUE;
     }
+    corrected   = kTRUE;
 
     buffer->Add(h->buffer, c);
     accumulated->Add(h->accumulated, c);
