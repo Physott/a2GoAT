@@ -7,6 +7,7 @@ PPi0Example::PPi0Example()
     test3 	= new GH1("test3", 	"test3", 	1400, -700, 700);
 
     GHistBGSub::InitCuts(-20, 20, -500, -30);
+    GHistBGSub::AddRandCut(30, 500);
 }
 
 PPi0Example::~PPi0Example()
