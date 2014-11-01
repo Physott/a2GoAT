@@ -1,10 +1,12 @@
 #include "PPi0Example.h"
 
 PPi0Example::PPi0Example()
-{ 
+{
     test1 	= new GH1("test1", 	"test1", 	1400, -700, 700);
     test2 	= new GH1("test2", 	"test2", 	1400, -700, 700);
     test3 	= new GH1("test3", 	"test3", 	1400, -700, 700);
+
+    GHistBGSub::InitCuts(-20, 20, -500, -30);
 }
 
 PPi0Example::~PPi0Example()
