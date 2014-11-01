@@ -11,7 +11,8 @@ GHistScaCor::GHistScaCor(const Bool_t linkHistogram) :
     accumulatedCorrected(0),
     singleScalerReads(),
     singleScalerReadsCorrected(),
-    corrected(kFALSE)
+    corrected(kFALSE),
+    writeUncorrected(kTRUE)
 {
     singleScalerReads.SetOwner();
     singleScalerReadsCorrected.SetOwner();
@@ -24,7 +25,8 @@ GHistScaCor::GHistScaCor() :
     accumulatedCorrected(new TH1D()),
     singleScalerReads(),
     singleScalerReadsCorrected(),
-    corrected(kFALSE)
+    corrected(kFALSE),
+    writeUncorrected(kTRUE)
 {
     buffer->SetDirectory(0);
     accumulated->SetDirectory(0);
@@ -45,7 +47,8 @@ GHistScaCor::GHistScaCor(const char* name, const char* title, const Int_t nbinsx
     accumulatedCorrected(new TH1D(name, title, nbinsx, xlow, xup)),
     singleScalerReads(128),
     singleScalerReadsCorrected(128),
-    corrected(kFALSE)
+    corrected(kFALSE),
+    writeUncorrected(kTRUE)
 {
     buffer->SetDirectory(0);
     accumulated->SetDirectory(0);
@@ -208,6 +211,9 @@ void    GHistScaCor::PrepareWriteList(GHistWriteList* arr, const char *name)
         arr->AddHistogram(accumulatedCorrected, accumulatedCorrected->GetName());
     }
 
+    if(writeUncorrected==kFALSE)
+        return;
+
     GHistWriteList* ScalerCorrection    = arr->GetDirectory(TString(GHSC_folderName));
     if(name)
     {
@@ -250,11 +256,10 @@ Int_t   GHistScaCor::WriteWithoutCalcResult(const char* name, Int_t option, Int_
             return buffer->Write(accumulatedCorrected->GetName(), option, bufsize);
     }
 
-    Int_t   ret = 0;
-    if(name)
-        ret += accumulatedCorrected->Write(name, option, bufsize);
-    else
-        ret += accumulatedCorrected->Write(0, option, bufsize);
+    Int_t   ret = accumulatedCorrected->Write(name, option, bufsize);
+
+    if(writeUncorrected==kFALSE)
+        return ret;
 
     TDirectory* parentDir   = gDirectory;
     TDirectory* dir         = GetCreateDirectory(GHSC_folderName);

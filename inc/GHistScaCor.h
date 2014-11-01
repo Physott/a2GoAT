@@ -30,6 +30,7 @@ class   GHistScaCor : public GHistLinked
 {
 private:
     Bool_t      corrected;
+    Bool_t      writeUncorrected;
 
 protected:
     TH1*        buffer;
@@ -64,6 +65,7 @@ public:
     virtual void	Scale(Double_t c1 = 1, Option_t* option = "");
     virtual void    ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads = kFALSE);
     virtual void	SetBins(Int_t nx, Double_t xmin, Double_t xmax);
+            void    SetWriteUncorrected(const Bool_t value)                                             {writeUncorrected = value;}
     virtual Int_t   WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0);
 };
 
