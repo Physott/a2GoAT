@@ -137,6 +137,15 @@ void    GHistScaCor::CreateSingleScalerRead()
     singleScalerReadsCorrected.Add(cor);
 }
 
+Bool_t  GHistScaCor::IsEmpty()
+{
+    if(accumulatedCorrected->GetEntries()!=0)
+        return kFALSE;
+    if(buffer->GetEntries()!=0)
+        return kFALSE;
+    return kTRUE;
+}
+
 void    GHistScaCor::Reset(Option_t* option)
 {
     buffer->SetDirectory(0);

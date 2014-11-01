@@ -140,6 +140,22 @@ void    GHistBGSub::ExpandRandBins(const Int_t newSize)
         CreateRandBin();
 }
 
+Bool_t  GHistBGSub::IsEmpty()
+{
+    if(GHistScaCor::IsEmpty()==kFALSE)
+        return kFALSE;
+    if(prompt.IsEmpty()==kFALSE)
+        return kFALSE;
+    if(randSum.IsEmpty()==kFALSE)
+        return kFALSE;
+    for(int i=0; i<rand.GetEntriesFast(); i++)
+    {
+        if(((GHistScaCor*)rand.At(i))->IsEmpty()==kFALSE)
+            return kFALSE;
+    }
+    return kTRUE;
+}
+
 Int_t   GHistBGSub::Fill(const Double_t value, const Double_t taggerTime)
 {
     if(taggerTime>=cutPromptMin && taggerTime<=cutPromptMax)

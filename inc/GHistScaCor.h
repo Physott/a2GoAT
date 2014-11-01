@@ -61,6 +61,7 @@ public:
             Int_t   GetXmin()                   const   {return accumulatedCorrected->GetXaxis()->GetXmin();}
             Int_t   GetXmax()                   const   {return accumulatedCorrected->GetXaxis()->GetXmax();}
             Bool_t  IsCorrected()               const   {return corrected;}
+    virtual Bool_t  IsEmpty();
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void    Reset(Option_t* option = "");
     virtual void	Scale(Double_t c1 = 1, Option_t* option = "");
