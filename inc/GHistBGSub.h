@@ -12,9 +12,11 @@ class   GTreeTagger;
 class  GHistBGSub  : public GHistScaCor  //prompt
 {
 private:
-    TObjArray           rand;
-    GHistScaCor  randSum;
-    GHistScaCor  prompt;
+    TObjArray   rand;
+    GHistScaCor randSum;
+    GHistScaCor prompt;
+
+    Bool_t      writeWindows;
 
     static  Double_t    cutPromptMin;
     static  Double_t    cutPromptMax;
@@ -22,9 +24,9 @@ private:
     static  std::vector<Double_t> cutRandMax;
     static  Double_t    backgroundSubstractionFactor;
 
-            void    CreateRandBin();
-            void    ExpandRandBins(const Int_t newSize);
-    static  void    WriteHistogram(GHistScaCor *hist, const char* name, const char* title, TDirectory* dir = 0);
+
+    void    CreateRandBin();
+    void    ExpandRandBins(const Int_t newSize);
 
 public:
     GHistBGSub();
@@ -44,6 +46,7 @@ public:
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void    Reset(Option_t* option = "");
     virtual void    ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads = kFALSE);
+            void    SetWriteWindows(const Bool_t value)                                                         {writeWindows = value;}
     virtual Int_t   WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0);
 };
 

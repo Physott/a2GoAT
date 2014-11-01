@@ -63,7 +63,8 @@ GHistBGSub::GHistBGSub() :
     GHistScaCor(),
     rand(),
     randSum(),
-    prompt()
+    prompt(),
+    writeWindows(kTRUE)
 {
     rand.SetOwner();
 }
@@ -72,7 +73,8 @@ GHistBGSub::GHistBGSub(const char* name, const char* title, Int_t nbinsx, Double
     GHistScaCor(name, title, nbinsx, xlow, xup, linkHistogram),
     rand(),
     randSum(TString(name).Append(GHBS_randSumNameSuffix), TString(title).Append(GHBS_randSumTitleSuffix), nbinsx, xlow, xup, kFALSE),
-    prompt(TString(name).Append(GHBS_promptNameSuffix), TString(title).Append(GHBS_promptTitleSuffix), nbinsx, xlow, xup, kFALSE)
+    prompt(TString(name).Append(GHBS_promptNameSuffix), TString(title).Append(GHBS_promptTitleSuffix), nbinsx, xlow, xup, kFALSE),
+    writeWindows(kTRUE)
 {
     rand.SetOwner();
 }
@@ -84,6 +86,8 @@ GHistBGSub::~GHistBGSub()
 Bool_t	GHistBGSub::Add(const GHistBGSub* h, Double_t c)
 {
     GHistScaCor::Add((GHistScaCor*)h, c);
+    prompt.Add(&h->prompt, c);
+    randSum.Add(&h->randSum, c);
     for(int i=0; i<h->rand.GetEntriesFast(); i++)
     {
         if(i>=rand.GetEntriesFast())
@@ -178,7 +182,6 @@ void    GHistBGSub::PrepareWriteList(GHistWriteList* arr, const char *name)
     if(!arr)
         return;
 
-    Int_t   res = 0;
     if(name)
     {
         if(GetNRandCuts()==0 || rand.GetEntriesFast()==0)
@@ -191,6 +194,9 @@ void    GHistBGSub::PrepareWriteList(GHistWriteList* arr, const char *name)
             return GHistScaCor::PrepareWriteList(arr);
         GHistScaCor::PrepareWriteList(arr);
     }
+
+    if(writeWindows==kFALSE)
+        return;
 
     GHistWriteList* BackgroundSubstraction  = arr->GetDirectory(TString(GHBS_folderName));
     GHistWriteList* PromptWindow            = BackgroundSubstraction->GetDirectory(TString(GHBS_promptFolderName));
@@ -259,6 +265,9 @@ Int_t    GHistBGSub::WriteWithoutCalcResult(const char* name, Int_t option, Int_
             return prompt.Write(0, option, bufsize);
         res += GHistScaCor::Write(0, option, bufsize);
     }
+
+    if(writeWindows==kFALSE)
+        return res;
 
     TDirectory* parentDir   = gDirectory;
     TDirectory* dir         = GetCreateDirectory(GHBS_folderName);
