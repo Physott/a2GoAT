@@ -98,17 +98,10 @@ Bool_t	GHistBGSub::Add(const GHistBGSub* h, Double_t c)
 
 void    GHistBGSub::CalcResult()
 {
-    prompt.CalcResult();
-    //GHistScaCor::Reset();
     GHistScaCor::Add(&prompt);
 
     if(rand.GetEntriesFast()==0)
         return;
-
-    TIter   iter(&rand);
-    GHistScaCor*    hist;
-    while(hist=(GHistScaCor*)iter.Next())
-        hist->CalcResult();
 
     if(rand.GetEntriesFast()>1)
     {
