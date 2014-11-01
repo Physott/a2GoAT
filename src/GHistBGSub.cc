@@ -171,7 +171,7 @@ Int_t   GHistBGSub::Fill(const Double_t value, const GTreeTagger& tagger)
 void    GHistBGSub::Reset(Option_t* option)
 {
     GHistScaCor::Reset(option);
-    rand.Clear();
+    rand.Clear("C");
     randSum.Reset(option);
     prompt.Reset(option);
 }
