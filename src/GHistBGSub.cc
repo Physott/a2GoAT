@@ -5,9 +5,7 @@ using namespace std;
 
 
 #define GHBS_folderName         "BackgroundSubstraction"
-#define GHBS_randFolderName     "RandomWindow"
-#define GHBS_subRandFolderName  "RandWin_"
-#define GHBS_promptFolderName   "PromptWindow"
+#define GHBS_randFolderName     "RandomWindows"
 #define GHBS_randNameSuffix     "_Rand"
 #define GHBS_randTitleSuffix    " Rand "
 #define GHBS_randSumNameSuffix  "_RandSum"
@@ -208,42 +206,41 @@ void    GHistBGSub::PrepareWriteList(GHistWriteList* arr, const char *name)
         return;
 
     GHistWriteList* BackgroundSubstraction  = arr->GetDirectory(TString(GHBS_folderName));
-    GHistWriteList* PromptWindow            = BackgroundSubstraction->GetDirectory(TString(GHBS_promptFolderName));
 
     TString nameBuffer;
     if(name)
     {
         nameBuffer  = name;
         nameBuffer.Append(GHBS_promptNameSuffix);
-        prompt.PrepareWriteList(PromptWindow, nameBuffer.Data());
+        prompt.PrepareWriteList(BackgroundSubstraction, nameBuffer.Data());
     }
     else
-        prompt.PrepareWriteList(PromptWindow);
+        prompt.PrepareWriteList(BackgroundSubstraction);
 
-    GHistWriteList* RandWindow              = BackgroundSubstraction->GetDirectory(TString(GHBS_randFolderName));
     if(rand.GetEntriesFast()>1)
     {
+        GHistWriteList* RandWindow  = BackgroundSubstraction->GetDirectory(TString(GHBS_randFolderName));
+
         if(name)
         {
             nameBuffer  = name;
             nameBuffer.Append(GHBS_randSumNameSuffix);
-            randSum.PrepareWriteList(RandWindow, nameBuffer.Data());
+            randSum.PrepareWriteList(BackgroundSubstraction, nameBuffer.Data());
         }
         else
-            randSum.PrepareWriteList(RandWindow);
+            randSum.PrepareWriteList(BackgroundSubstraction);
 
         for(int i=0; i<rand.GetEntriesFast(); i++)
         {
-            GHistWriteList* subRandWindow = RandWindow->GetDirectory(TString(GHBS_subRandFolderName).Append(TString::Itoa(i, 10)));
             if(name)
             {
                 nameBuffer  = name;
                 nameBuffer.Append(GHBS_randNameSuffix);
                 nameBuffer.Append(TString::Itoa(i, 10));
-                ((GHistScaCor*)rand.At(i))->PrepareWriteList(subRandWindow, nameBuffer.Data());
+                ((GHistScaCor*)rand.At(i))->PrepareWriteList(RandWindow, nameBuffer.Data());
             }
             else
-                ((GHistScaCor*)rand.At(i))->PrepareWriteList(subRandWindow);
+                ((GHistScaCor*)rand.At(i))->PrepareWriteList(RandWindow);
         }
     }
     else
@@ -252,10 +249,10 @@ void    GHistBGSub::PrepareWriteList(GHistWriteList* arr, const char *name)
         {
             nameBuffer  = name;
             nameBuffer.Append(GHBS_randNameSuffix);
-            ((GHistScaCor*)rand.At(0))->PrepareWriteList(RandWindow, nameBuffer.Data());
+            ((GHistScaCor*)rand.At(0))->PrepareWriteList(BackgroundSubstraction, nameBuffer.Data());
         }
         else
-            ((GHistScaCor*)rand.At(0))->PrepareWriteList(RandWindow);
+            ((GHistScaCor*)rand.At(0))->PrepareWriteList(BackgroundSubstraction);
     }
 }
 
@@ -281,7 +278,7 @@ Int_t    GHistBGSub::WriteWithoutCalcResult(const char* name, Int_t option, Int_
     TDirectory* parentDir   = gDirectory;
     TDirectory* dir         = GetCreateDirectory(GHBS_folderName);
     dir->cd();
-    GetCreateDirectory(GHBS_promptFolderName)->cd();
+
     TString nameBuffer;
     if(name)
     {
@@ -292,8 +289,6 @@ Int_t    GHistBGSub::WriteWithoutCalcResult(const char* name, Int_t option, Int_
     else
         res += prompt.Write(0, option, bufsize);
 
-    dir->cd();
-    dir = GetCreateDirectory(GHBS_randFolderName);
     dir->cd();
     if(rand.GetEntriesFast()>1)
     {
@@ -306,11 +301,10 @@ Int_t    GHistBGSub::WriteWithoutCalcResult(const char* name, Int_t option, Int_
         else
             res += randSum.Write(0, option, bufsize);
 
+        dir = GetCreateDirectory(GHBS_randFolderName);
         for(int i=0; i<rand.GetEntriesFast(); i++)
         {
             dir->cd();
-            GetCreateDirectory(TString(GHBS_subRandFolderName).Append(TString::Itoa(i, 10)).Data())->cd();
-
             if(name)
             {
                 nameBuffer  = name;
