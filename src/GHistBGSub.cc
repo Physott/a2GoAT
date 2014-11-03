@@ -243,7 +243,7 @@ void    GHistBGSub::PrepareWriteList(GHistWriteList* arr, const char *name)
                 ((GHistScaCor*)rand.At(i))->PrepareWriteList(RandWindow);
         }
     }
-    else
+    else if(rand.GetEntriesFast()>0)
     {
         if(name)
         {
@@ -316,7 +316,7 @@ Int_t    GHistBGSub::WriteWithoutCalcResult(const char* name, Int_t option, Int_
                 res += ((GHistScaCor*)rand.At(i))->Write(0, option, bufsize);
         }
     }
-    else
+    else if(rand.GetEntriesFast()>0)
     {
         if(name)
         {
