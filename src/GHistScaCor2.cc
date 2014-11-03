@@ -14,6 +14,10 @@ GHistScaCor2::GHistScaCor2() :
     buffer                  = new TH2D();
     accumulated             = new TH2D();
     accumulatedCorrected    = new TH2D();
+
+    buffer->SetDirectory(0);
+    accumulated->SetDirectory(0);
+    accumulatedCorrected->SetDirectory(0);
 }
 
 GHistScaCor2::GHistScaCor2(const char* name, const char* title, const Int_t nbinsx, const Double_t xlow, const Double_t xup, const Int_t nbinsy, const Double_t ylow, const Double_t yup, const Bool_t linkHistogram) :
@@ -26,6 +30,10 @@ GHistScaCor2::GHistScaCor2(const char* name, const char* title, const Int_t nbin
                                        TString(title).Append(GHSC_accumulatedTitleSuffix).Data(),
                                        nbinsx, xlow, xup, nbinsy, ylow, yup);
     accumulatedCorrected    = new TH2D(name, title, nbinsx, xlow, xup, nbinsy, ylow, yup);
+
+    buffer->SetDirectory(0);
+    accumulated->SetDirectory(0);
+    accumulatedCorrected->SetDirectory(0);
 }
 
 GHistScaCor2::~GHistScaCor2()
