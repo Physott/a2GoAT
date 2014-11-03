@@ -14,6 +14,10 @@ GHistScaCor3::GHistScaCor3() :
     buffer                  = new TH3D();
     accumulated             = new TH3D();
     accumulatedCorrected    = new TH3D();
+
+    buffer->SetDirectory(0);
+    accumulated->SetDirectory(0);
+    accumulatedCorrected->SetDirectory(0);
 }
 
 GHistScaCor3::GHistScaCor3(const char* name, const char* title, const Int_t nbinsx, const Double_t xlow, const Double_t xup, const Int_t nbinsy, const Double_t ylow, const Double_t yup, const Int_t nbinsz, const Double_t zlow, const Double_t zup, const Bool_t linkHistogram) :
@@ -26,6 +30,10 @@ GHistScaCor3::GHistScaCor3(const char* name, const char* title, const Int_t nbin
                                        TString(title).Append(GHSC_accumulatedTitleSuffix).Data(),
                                        nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup);
     accumulatedCorrected    = new TH3D(name, title, nbinsx, xlow, xup, nbinsy, ylow, yup, nbinsz, zlow, zup);
+
+    buffer->SetDirectory(0);
+    accumulated->SetDirectory(0);
+    accumulatedCorrected->SetDirectory(0);
 }
 
 GHistScaCor3::~GHistScaCor3()
