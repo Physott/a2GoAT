@@ -89,7 +89,7 @@ add_executable(pi0-example
    inc/GHistManager.h
    inc/GTreeManager.h
    inc/GConfigFile.h
-   #inc/GHistTaggerBinning.h
+   inc/GHistTaggerBinning.h
    inc/GHistScaCor.h
    inc/GHistScaCor2.h
    inc/GHistScaCor3.h
@@ -112,7 +112,7 @@ add_executable(pi0-example
    src/GHistManager.cc
    src/GTreeManager.cc
    src/GConfigFile.cc
-   #src/GHistTaggerBinning.cc
+   src/GHistTaggerBinning.cc
    src/GHistScaCor.cc
    src/GHistScaCor2.cc
    src/GHistScaCor3.cc

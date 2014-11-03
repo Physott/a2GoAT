@@ -10,30 +10,28 @@
 
 
 
-
-Int_t   GHistTaggerBinning::TaggerBinningRangeMin = 0;
-Int_t   GHistTaggerBinning::TaggerBinningRangeMax = -1;
-
-void    GHistTaggerBinning::InitTaggerBinning(const Int_t min, const Int_t max)
+GHistTaggerBinning::GHistTaggerBinning(Bool_t linkHistogram) :
+    GHistLinked(linkHistogram),
+    sum(0),
+    array(0)
 {
-    TaggerBinningRangeMin = min;
-    TaggerBinningRangeMax = max;
 }
-
-
 
 GHistTaggerBinning::GHistTaggerBinning() :
-    GHistScaCor(),
-    bin()
+    GHistLinked(),
+    sum(new GHistBGSub()),
+    array(new GHistBGSub2())
 {
-    bin.SetOwner();
 }
 
-GHistTaggerBinning::GHistTaggerBinning(const char* name, const char* title, Int_t nbinsx, Double_t xlow, Double_t xup, Bool_t linkHistogram) :
-    GHistScaCor(name, title, nbinsx, xlow, xup, linkHistogram),
-    bin()
+GHistTaggerBinning::GHistTaggerBinning(const char* name, const char* title,
+                                       const Int_t nbinsx, const Double_t xlow, const Double_t xup,
+                                       const Int_t nTaggerBins,
+                                       const Bool_t linkHistogram) :
+    GHistLinked(linkHistogram),
+    sum(new GHistBGSub(name, title, nbinsx, xlow, xup, kFALSE)),
+    array(new GHistBGSub2(name, title, nbinsx, xlow, xup, nTaggerBins, 0, nTaggerBins, kFALSE))
 {
-    bin.SetOwner();
 }
 
 GHistTaggerBinning::~GHistTaggerBinning()
@@ -41,44 +39,21 @@ GHistTaggerBinning::~GHistTaggerBinning()
 
 }
 
-void    GHistTaggerBinning::CreateBin()
-{
-    GHistScaCor*    hist = new GHistScaCor(TString(GetName()).Append(GHTB_binNameSuffix).Append(TString::Itoa(bin.GetEntriesFast()+TaggerBinningRangeMin, 10)).Data(),
-                                           TString(GetTitle()).Append(GHTB_binTitleSuffix).Append(TString::Itoa(bin.GetEntriesFast()+TaggerBinningRangeMin, 10)).Data(),
-                                           GetNbinsX(),
-                                           GetXmin(),
-                                           GetXmax(),
-                                           kFALSE);
-    bin.Add(hist);
-}
-
-void    GHistTaggerBinning::ExpandBin(const Int_t newSize)
-{
-    while(bin.GetEntriesFast()<newSize)
-        CreateBin();
-}
-
 Bool_t	GHistTaggerBinning::Add(const GHistTaggerBinning* h, Double_t c)
 {
-    GHistScaCor::Add(h, c);
-    for(int i=0; i<h->bin.GetEntriesFast(); i++)
-    {
-        if(i>=bin.GetEntriesFast())
-            CreateBin();
-        ((GHistScaCor*)bin.At(i))->Add((GHistScaCor*)h->bin.At(i), c);
-    }
+    sum->Add(h->sum, c);
+    array->Add(h->array, c);
 }
 
 void    GHistTaggerBinning::CalcResult()
 {
-    for(int i=0; i<bin.GetEntriesFast(); i++)
-        GHistScaCor::Add((GHistScaCor*)bin.At(i));
+    //sum->Add(h->sum, c);
 }
 
 void    GHistTaggerBinning::Reset(Option_t* option)
 {
-    GHistScaCor::Reset(option);
-    bin.Clear();
+    sum->Reset(option);
+    array->Reset(option);
 }
 
 Int_t   GHistTaggerBinning::Fill(const Double_t value, const Int_t taggerChannel)
