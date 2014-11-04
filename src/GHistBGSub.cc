@@ -97,6 +97,19 @@ Bool_t	GHistBGSub::Add(const GHistBGSub* h, Double_t c)
     }
 }
 
+Bool_t	GHistBGSub::Add(const GHistScaCor* _result, const GHistScaCor* _prompt, const GHistScaCor* _randSum, const TObjArray& _rand, const Double_t c)
+{
+    result->Add(_result, c);
+    prompt->Add(_prompt, c);
+    randSum->Add(_randSum, c);
+    for(int i=0; i<_rand.GetEntriesFast(); i++)
+    {
+        if(i>=rand.GetEntriesFast())
+            CreateRandBin();
+        ((GHistScaCor*)rand.At(i))->Add((GHistScaCor*)_rand.At(i), c);
+    }
+}
+
 void    GHistBGSub::CalcResult()
 {
     result->Add(prompt);

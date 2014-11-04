@@ -50,6 +50,7 @@ public:
     virtual ~GHistBGSub();
 
     virtual Bool_t	Add(const GHistBGSub* h, Double_t c = 1);
+    virtual Bool_t	Add(const GHistScaCor* _result, const GHistScaCor* _prompt, const GHistScaCor* _randSum, const TObjArray& _rand, const Double_t c = 1);
     static  void    AddRandCut(const Double_t RandMin, const Double_t RandMax);
     virtual void    CalcResult();
     virtual Int_t   Fill(const Double_t value)                                                                      {return result->Fill(value);}

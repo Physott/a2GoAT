@@ -81,21 +81,43 @@ Int_t   GHistBGSub2::Fill(const Double_t x, const Double_t y, const GTreeTagger&
 GHistBGSub*    GHistBGSub2::ProjectionX(const char* name, Int_t firstybin, Int_t lastybin, Option_t* option)
 {
     GHistBGSub*    ret = new GHistBGSub(name, name, result->GetNbinsX(), result->GetXmin(), result->GetXmax(), kFALSE);
-    ret->result->Add(((TH2D*)result)->ProjectionX());
-    ret->prompt->Add(((TH2D*)prompt)->ProjectionX());
-    ret->randSum->Add(((TH2D*)randSum)->ProjectionX());
+    GHistScaCor*   help1   = ((GHistScaCor2*)result)->ProjectionX("_presult", firstybin, lastybin, option);
+    GHistScaCor*   help2   = ((GHistScaCor2*)prompt)->ProjectionX("_pprompt", firstybin, lastybin, option);
+    GHistScaCor*   help3   = ((GHistScaCor2*)randSum)->ProjectionX("_prandsum", firstybin, lastybin, option);
+    TObjArray      arr;
+    arr.SetOwner();
+    GHistScaCor**  helpArr   = new GHistScaCor*[rand.GetEntriesFast()];
     for(int i=0; i<rand.GetEntriesFast(); i++)
-        ((GHistScaCor*)rand.At(i))->Add((GHistScaCor*)rand.At(i)->ProjectionX());
+    {
+        helpArr[i]   = ((GHistScaCor2*)rand.At(i))->ProjectionX(TString("_prand").Append(TString().Itoa(i, 10)), firstybin, lastybin, option);
+        arr.AddAtFree(helpArr[i]);
+    }
+    ret->Add(help1, help2, help3, arr);
+    if(help1)   delete help1;
+    if(help2)   delete help2;
+    if(help3)   delete help3;
+    arr.Clear("C");
     return ret;
 }
 
 GHistBGSub*   GHistBGSub2::ProjectionY(const char* name, Int_t firstxbin, Int_t lastxbin, Option_t* option)
 {
-    GHistBGSub*    ret = new GHistBGSub(name, name, result->GetNbinsY(), result->GetYaxis()->GetXmin(), result->GetYaxis()->GetXmax(), kFALSE);
-    ret->result->Add(((TH2D*)result)->ProjectionY());
-    ret->prompt->Add(((TH2D*)prompt)->ProjectionY());
-    ret->randSum->Add(((TH2D*)randSum)->ProjectionY());
+    GHistBGSub*    ret = new GHistBGSub(name, name, ((GHistScaCor2*)result)->GetNbinsY(), ((GHistScaCor2*)result)->GetYmin(), ((GHistScaCor2*)result)->GetYmax(), kFALSE);
+    GHistScaCor*   help1   = ((GHistScaCor2*)result)->ProjectionY("_presult", firstxbin, lastxbin, option);
+    GHistScaCor*   help2   = ((GHistScaCor2*)prompt)->ProjectionY("_pprompt", firstxbin, lastxbin, option);
+    GHistScaCor*   help3   = ((GHistScaCor2*)randSum)->ProjectionY("_prandsum", firstxbin, lastxbin, option);
+    TObjArray      arr;
+    arr.SetOwner();
+    GHistScaCor**  helpArr   = new GHistScaCor*[rand.GetEntriesFast()];
     for(int i=0; i<rand.GetEntriesFast(); i++)
-        ((GHistScaCor*)rand.At(i))->Add((GHistScaCor*)rand.At(i)->ProjectionY());
+    {
+        helpArr[i]   = ((GHistScaCor2*)rand.At(i))->ProjectionY(TString("_prand").Append(TString().Itoa(i, 10)), firstxbin, lastxbin, option);
+        arr.AddAtFree(helpArr[i]);
+    }
+    ret->Add(help1, help2, help3, arr);
+    if(help1)   delete help1;
+    if(help2)   delete help2;
+    if(help3)   delete help3;
+    arr.Clear("C");
     return ret;
 }

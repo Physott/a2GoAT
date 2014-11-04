@@ -87,9 +87,9 @@ void	GHistScaCor2::SetBins(Int_t nx, Double_t xmin, Double_t xmax, Int_t ny, Dou
 GHistScaCor*    GHistScaCor2::ProjectionX(const char* name, Int_t firstybin, Int_t lastybin, Option_t* option)
 {
     GHistScaCor*    ret = new GHistScaCor(name, name, buffer->GetNbinsX(), buffer->GetXaxis()->GetXmin(), buffer->GetXaxis()->GetXmax(), kFALSE);
-    TH1D*   help1   = ((TH2D*)buffer)->ProjectionX();
-    TH1D*   help2   = ((TH2D*)accumulated)->ProjectionX();
-    TH1D*   help3   = ((TH2D*)accumulatedCorrected)->ProjectionX();
+    TH1D*   help1   = ((TH2D*)buffer)->ProjectionX("_pbuf", firstybin, lastybin, option);
+    TH1D*   help2   = ((TH2D*)accumulated)->ProjectionX("_pacc", firstybin, lastybin, option);
+    TH1D*   help3   = ((TH2D*)accumulatedCorrected)->ProjectionX("_pacccor", firstybin, lastybin, option);
     ret->Add(help1, help2, help3);
     if(help1)   delete help1;
     if(help2)   delete help2;
@@ -100,9 +100,9 @@ GHistScaCor*    GHistScaCor2::ProjectionX(const char* name, Int_t firstybin, Int
 GHistScaCor*   GHistScaCor2::ProjectionY(const char* name, Int_t firstxbin, Int_t lastxbin, Option_t* option)
 {
     GHistScaCor*    ret = new GHistScaCor(name, name, buffer->GetNbinsY(), buffer->GetYaxis()->GetXmin(), buffer->GetYaxis()->GetXmax(), kFALSE);
-    TH1D*   help1   = ((TH2D*)buffer)->ProjectionY();
-    TH1D*   help2   = ((TH2D*)accumulated)->ProjectionY();
-    TH1D*   help3   = ((TH2D*)accumulatedCorrected)->ProjectionY();
+    TH1D*   help1   = ((TH2D*)buffer)->ProjectionY("_pbuf", firstxbin, lastxbin, option);
+    TH1D*   help2   = ((TH2D*)accumulated)->ProjectionY("_pacc", firstxbin, lastxbin, option);
+    TH1D*   help3   = ((TH2D*)accumulatedCorrected)->ProjectionY("_pacccor", firstxbin, lastxbin, option);
     ret->Add(help1, help2, help3);
     if(help1)   delete help1;
     if(help2)   delete help2;
