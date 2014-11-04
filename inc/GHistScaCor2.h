@@ -26,6 +26,9 @@ public:
             Int_t   GetYmin()                   const   {return accumulatedCorrected->GetYaxis()->GetXmin();}
             Int_t   GetYmax()                   const   {return accumulatedCorrected->GetYaxis()->GetXmax();}
     virtual void	SetBins(Int_t nx, Double_t xmin, Double_t xmax, Int_t ny, Double_t ymin, Double_t ymax);
+
+    virtual GHistScaCor*    ProjectionX(const char* name = "_px", Int_t firstybin = 0, Int_t lastybin = -1, Option_t* option = "");
+    virtual GHistScaCor*    ProjectionY(const char* name = "_px", Int_t firstxbin = 0, Int_t lastxbin = -1, Option_t* option = "");
 };
 
 

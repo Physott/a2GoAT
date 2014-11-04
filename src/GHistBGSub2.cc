@@ -77,3 +77,25 @@ Int_t   GHistBGSub2::Fill(const Double_t x, const Double_t y, const GTreeTagger&
         Fill(x, y, tagger.GetTagged_t(i));
 }
 
+
+GHistBGSub*    GHistBGSub2::ProjectionX(const char* name, Int_t firstybin, Int_t lastybin, Option_t* option)
+{
+    GHistBGSub*    ret = new GHistBGSub(name, name, result->GetNbinsX(), result->GetXmin(), result->GetXmax(), kFALSE);
+    ret->result->Add(((TH2D*)result)->ProjectionX());
+    ret->prompt->Add(((TH2D*)prompt)->ProjectionX());
+    ret->randSum->Add(((TH2D*)randSum)->ProjectionX());
+    for(int i=0; i<rand.GetEntriesFast(); i++)
+        ((GHistScaCor*)rand.At(i))->Add((GHistScaCor*)rand.At(i)->ProjectionX());
+    return ret;
+}
+
+GHistBGSub*   GHistBGSub2::ProjectionY(const char* name, Int_t firstxbin, Int_t lastxbin, Option_t* option)
+{
+    GHistBGSub*    ret = new GHistBGSub(name, name, result->GetNbinsY(), result->GetYaxis()->GetXmin(), result->GetYaxis()->GetXmax(), kFALSE);
+    ret->result->Add(((TH2D*)result)->ProjectionY());
+    ret->prompt->Add(((TH2D*)prompt)->ProjectionY());
+    ret->randSum->Add(((TH2D*)randSum)->ProjectionY());
+    for(int i=0; i<rand.GetEntriesFast(); i++)
+        ((GHistScaCor*)rand.At(i))->Add((GHistScaCor*)rand.At(i)->ProjectionY());
+    return ret;
+}
