@@ -62,6 +62,7 @@ public:
     static  Bool_t  IsRandom(const Double_t value);
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void    Reset(Option_t* option = "");
+    virtual void	Scale(Double_t c1 = 1, Option_t* option = "");
     virtual void    ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads = kFALSE);
             void    SetWriteWindows(const Bool_t value)                                                         {writeWindows = value;}
     virtual Int_t   WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0);

@@ -177,6 +177,14 @@ void    GHistBGSub::Reset(Option_t* option)
     prompt->Reset(option);
 }
 
+void    GHistBGSub::Scale(Double_t c1, Option_t* option)
+{
+    result->Scale(c1, option);
+    for(int i=0; i<rand.GetEntriesFast(); i++)
+        ((GHistScaCor*)rand.At(i))->Scale(c1, option);
+    randSum->Scale(c1, option);
+    prompt->Scale(c1, option);
+}
 
 void    GHistBGSub::ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads)
 {
