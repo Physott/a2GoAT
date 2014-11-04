@@ -8,13 +8,14 @@
 
 #include "GTreeManager.h"
 #include "GH1.h"
+#include "GHistTaggerBinning.h"
 
 class	PPi0Example : public GTreeManager
 {
 private:
-    GH1*	test1;
-    GH3*	test2;
-    GH3*	test3;
+    GHistTaggerBinning*	test1;
+    GHistTaggerBinning*	test2;
+    GHistTaggerBinning*	test3;
 
 protected:
     virtual Bool_t  Start();
