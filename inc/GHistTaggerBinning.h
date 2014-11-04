@@ -32,8 +32,9 @@ public:
     const   GHistBGSub*     GetArray()  const   {return array;}
     const   GHistBGSub*     GetSum()    const   {return sum;}
     static  void            InitTaggerBinning(const Int_t min, const Int_t max);
-    virtual Int_t           Fill(const Double_t value)                              {return sum->Fill(value);}
-    virtual Int_t           Fill(const Double_t value, const Int_t taggerChannel)   {return array->Fill(value, taggerChannel);}
+    virtual Int_t           Fill(const Double_t value)                                                          {return sum->Fill(value);}
+    virtual Int_t           Fill(const Double_t value, const Int_t taggerChannel)                               {return ((GHistBGSub2*)array)->Fill(value, taggerChannel);}
+    virtual Int_t           Fill(const Double_t value, const Int_t taggerChannel, const Int_t taggerTime)       {return ((GHistBGSub2*)array)->Fill(value, taggerChannel, taggerTime);}
     virtual Int_t           Fill(const Double_t value, const GTreeTagger& tagger, const Bool_t CreateHistogramsForTaggerBinning = kFALSE);
     virtual void            PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void            Reset(Option_t* option = "")                    {sum->Reset(option); array->Reset(option);}
