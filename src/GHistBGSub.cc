@@ -86,7 +86,7 @@ GHistBGSub::~GHistBGSub()
 
 Bool_t	GHistBGSub::Add(const GHistBGSub* h, Double_t c)
 {
-    result->Add((GHistScaCor*)h, c);
+    result->Add(h->result, c);
     prompt->Add(h->prompt, c);
     randSum->Add(h->randSum, c);
     for(int i=0; i<h->rand.GetEntriesFast(); i++)
