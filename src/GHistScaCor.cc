@@ -78,11 +78,12 @@ GHistScaCor::~GHistScaCor()
     }
 }
 
-Bool_t	GHistScaCor::Add(const TH1* _buffer, const TH1* _accumulated, const TH1* _accumulatedCorrected, Double_t c)
+Bool_t	GHistScaCor::Add(const TH1* _buffer, const TH1* _accumulated, const TH1* _accumulatedCorrected, const Bool_t CorrectedInput, const Double_t c)
 {
     buffer->Add(_buffer, c);
     accumulated->Add(_accumulated, c);
     accumulatedCorrected->Add(_accumulatedCorrected, c);
+    corrected   = CorrectedInput;
 }
 
 Bool_t	GHistScaCor::Add(const GHistScaCor *h, Double_t c)

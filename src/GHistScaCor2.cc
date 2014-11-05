@@ -90,7 +90,13 @@ GHistScaCor*    GHistScaCor2::ProjectionX(const char* name, Int_t firstybin, Int
     TH1D*   help1   = ((TH2D*)buffer)->ProjectionX("_pbuf", firstybin, lastybin, option);
     TH1D*   help2   = ((TH2D*)accumulated)->ProjectionX("_pacc", firstybin, lastybin, option);
     TH1D*   help3   = ((TH2D*)accumulatedCorrected)->ProjectionX("_pacccor", firstybin, lastybin, option);
-    ret->Add(help1, help2, help3);
+    std::cout << help1->GetName() << "   " << help1->Integral() << std::endl;
+    std::cout << buffer->GetName() << "   " << buffer->Integral() << std::endl;
+    std::cout << help2->GetName() << "   " << help2->Integral() << std::endl;
+    std::cout << accumulated->GetName() << "   " << accumulated->Integral() << std::endl;
+    std::cout << help3->GetName() << "   " << help3->Integral() << std::endl;
+    std::cout << accumulatedCorrected->GetName() << "   " << accumulatedCorrected->Integral() << std::endl << std::endl;
+    ret->Add(help1, help2, help3, IsCorrected());
     if(help1)   delete help1;
     if(help2)   delete help2;
     if(help3)   delete help3;
@@ -103,7 +109,7 @@ GHistScaCor*   GHistScaCor2::ProjectionY(const char* name, Int_t firstxbin, Int_
     TH1D*   help1   = ((TH2D*)buffer)->ProjectionY("_pbuf", firstxbin, lastxbin, option);
     TH1D*   help2   = ((TH2D*)accumulated)->ProjectionY("_pacc", firstxbin, lastxbin, option);
     TH1D*   help3   = ((TH2D*)accumulatedCorrected)->ProjectionY("_pacccor", firstxbin, lastxbin, option);
-    ret->Add(help1, help2, help3);
+    ret->Add(help1, help2, help3, IsCorrected());
     if(help1)   delete help1;
     if(help2)   delete help2;
     if(help3)   delete help3;
