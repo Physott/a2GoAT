@@ -50,6 +50,9 @@ void    GHistTaggerBinning::CalcResult()
     sum->Add(help);
     if(help)
         delete help;
+
+    sum->CalcResult();
+    array->CalcResult();
 }
 
 Int_t   GHistTaggerBinning::Fill(const Double_t value, const GTreeTagger& tagger, const Bool_t CreateHistogramsForTaggerBinning)
