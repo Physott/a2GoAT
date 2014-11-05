@@ -13,10 +13,12 @@ class   GTreeTagger;
 class  GHistTaggerBinning  : public GHistLinked
 {
 private:
+
+protected:
     GHistBGSub* sum;
     GHistBGSub* array;
 
-protected:
+
     GHistTaggerBinning(Bool_t linkHistogram);
 
 public:
@@ -31,7 +33,6 @@ public:
     virtual void            CalcResult();
     const   GHistBGSub*     GetArray()  const   {return array;}
     const   GHistBGSub*     GetSum()    const   {return sum;}
-    static  void            InitTaggerBinning(const Int_t min, const Int_t max);
     virtual Int_t           Fill(const Double_t value)                                                          {return sum->Fill(value);}
     virtual Int_t           Fill(const Double_t value, const Int_t taggerChannel)                               {return ((GHistBGSub2*)array)->Fill(value, taggerChannel);}
     virtual Int_t           Fill(const Double_t value, const Int_t taggerChannel, const Int_t taggerTime)       {return ((GHistBGSub2*)array)->Fill(value, taggerChannel, taggerTime);}
