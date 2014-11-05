@@ -213,18 +213,11 @@ void    GHistBGSub::PrepareWriteList(GHistWriteList* arr, const char *name)
     if(!arr)
         return;
 
-    if(name)
-    {
-        if(GetNRandCuts()==0)
-            return prompt->PrepareWriteList(arr, name);
-        result->PrepareWriteList(arr, name);
-    }
-    else
-    {
-        if(GetNRandCuts()==0)
-            return prompt->PrepareWriteList(arr);
-        result->PrepareWriteList(arr);
-    }
+    if(GetNRandCuts()==0)
+        return prompt->PrepareWriteList(arr, name);
+    else if(rand.GetEntriesFast()==0)
+        return result->PrepareWriteList(arr, name);
+    result->PrepareWriteList(arr, name);
 
     if(writeWindows==kFALSE)
         return;
@@ -267,7 +260,7 @@ void    GHistBGSub::PrepareWriteList(GHistWriteList* arr, const char *name)
                 ((GHistScaCor*)rand.At(i))->PrepareWriteList(RandWindow);
         }
     }
-    else if(rand.GetEntriesFast()>0)
+    else
     {
         if(name)
         {
