@@ -132,8 +132,8 @@ void    GHistBGSub::CalcResult()
 
 void    GHistBGSub::CreateRandBin()
 {
-    GHistScaCor*    hist_rand = new GHistScaCor(TString(GetName()).Append(GHBS_randNameSuffix).Append(TString::Itoa(rand.GetEntriesFast(), 10)).Data(),
-                                                    TString(GetTitle()).Append(GHBS_randTitleSuffix).Append(TString::Itoa(rand.GetEntriesFast(), 10)).Data(),
+    GHistScaCor*    hist_rand = new GHistScaCor(TString(result->GetName()).Append(GHBS_randNameSuffix).Append(TString::Itoa(rand.GetEntriesFast(), 10)).Data(),
+                                                    TString(result->GetTitle()).Append(GHBS_randTitleSuffix).Append(TString::Itoa(rand.GetEntriesFast(), 10)).Data(),
                                                     result->GetNbinsX(),
                                                     result->GetXmin(),
                                                     result->GetXmax(),
