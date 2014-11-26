@@ -7,10 +7,10 @@
 #include "GHistManager.h"
 #include "GH1.h"
 #include "GKinFitter.h"
-#include "GKinFitterParticle.h"
+#include "GKinFitterWithProton.h"
 
 
-
+/*
 class	GFit
 {
 private:
@@ -218,7 +218,7 @@ public:
 
 
 
-
+*/
 
 
 
@@ -229,17 +229,35 @@ class   GHistFit    : public    GHistLinked
 private:
     Int_t       nPulls;
     GH1         im;
+    GH1         im_sub0;
+    GH1         im_sub1;
+    GH1         im_sub2;
     GH1         chiSq;
     GH1         confidenceLevel;
+    GH1         vertex_X;
+    GH1         vertex_Y;
+    GH1         vertex_Z;
+    GH1         vertex_sub0_X;
+    GH1         vertex_sub0_Y;
+    GH1         vertex_sub0_Z;
+    GH1         vertex_sub1_X;
+    GH1         vertex_sub1_Y;
+    GH1         vertex_sub1_Z;
+    GH1         vertex_sub2_X;
+    GH1         vertex_sub2_Y;
+    GH1         vertex_sub2_Z;
     GHistBGSub2 pulls;
+
 public:
     GHistFit(const char* name, const char* title, const Int_t _NPulls, Bool_t linkHistogram= kTRUE);
     ~GHistFit();
 
     virtual void        CalcResult();
     virtual Int_t       Fill(Double_t x)                {}
-    virtual Int_t       Fill(GFit& fitter, const Double_t taggerTime);
-    virtual Int_t       Fill(GFit& fitter, const Double_t taggerTime, const Int_t taggerChannel);
+    virtual Int_t       Fill(GKinFitter& fitter, const Double_t taggerTime);
+    virtual Int_t       Fill(GKinFitter& fitter, const Double_t taggerTime, const Int_t taggerChannel);
+    virtual Int_t       Fill(GKinFitterWithProton& fitter, const Double_t taggerTime);
+    virtual Int_t       Fill(GKinFitterWithProton& fitter, const Double_t taggerTime, const Int_t taggerChannel);
     virtual void        PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void        Reset(Option_t* option = "");
     virtual void        ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads = kFALSE);

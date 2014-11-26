@@ -20,18 +20,12 @@ private:
 
     GHistEvent3Mesons   hist_raw;
     GHistEvent3Mesons   hist_SubImCut;
-    GHistFit            hist_SubImCut_fit3;
-    GHistFit            hist_SubImCut_fit4;
-    GHistFit            hist_SubImCut_fit4Beam;
+    GHistFit            hist_SubImCut_fit;
 
     GHistEvent3Mesons   hist_MMCut;
-    GHistFit            hist_fit3;
-    GHistFit            hist_fit4;
-    GHistFit            hist_fit4Beam;
+    GHistFit            hist_fit;
 
-    GFit3Constraints        fit3;
-    GFit4Constraints        fit4;
-    GFit4ConstraintsBeam    fit4Beam;
+    GKinFitter          fit;
 
 protected:
 
@@ -65,24 +59,12 @@ private:
 
     GHistEvent3Mesons   hist_raw;
     GHistEvent3Mesons   hist_SubImCut;
-    GHistFit            hist_SubImCut_fit3;
-    GHistFit            hist_SubImCut_fit4;
-    GHistFit            hist_SubImCut_fit4Beam;
-    GHistFit            hist_SubImCut_fit4Proton;
-    GHistFit            hist_SubImCut_fit4BeamProton;
+    GHistFit            hist_SubImCut_fit;
 
     GHistEvent3Mesons   hist_MMCut;
-    GHistFit            hist_fit3;
-    GHistFit            hist_fit4;
-    GHistFit            hist_fit4Beam;
-    GHistFit            hist_fit4Proton;
-    GHistFit            hist_fit4BeamProton;
+    GHistFit            hist_fit;
 
-    GFit3Constraints            fit3;
-    GFit4Constraints            fit4;
-    GFit4ConstraintsBeam        fit4Beam;
-    GFit4ConstraintsProton      fit4Proton;
-    GFit4ConstraintsBeamProton  fit4BeamProton;
+    GKinFitterWithProton        fit;
 
 protected:
 

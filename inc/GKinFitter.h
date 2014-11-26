@@ -4,7 +4,7 @@
 #include "TMatrixD.h"
 #include "TMath.h"
 #include "TLorentzVector.h"
-
+/*
 #include "GKinFitterParticle.h"
 
 class GKinFitter 
@@ -62,65 +62,50 @@ public:
     void Reset()            {ResetConstraints();ResetParticles();ResetMatrices();}
 	void Debug();
 };
-
+*/
 
 #define GMyTrackM_CBRadius  1
-#define GMyTrackM_nParameters  6
-#define GMyTrackH_nParameters  7
-#define GMyTrackW_nParameters  7
-#define GMyKinFitter_fNvar  7
-#define GMyKinFitter_l      1
+#define GMyTrackM_nParameters  33
+#define GMyTrackH_nParameters  40
+#define GMyTrackW_nParameters  40
 
 class GMyTrackM
 {
 private:
-    Double_t    e;
-    Double_t    theta;
-    Double_t    phi;
-    Double_t    mass;
-    TVector3    vertex;
-    Double_t    de;
-    Double_t    dtheta;
-    Double_t    dphi;
-    TVector3    dvertex;
+    Double_t    p[33];
+    Double_t    dp[33];
 
 public:
-    GMyTrackM(const Double_t E, const Double_t Theta, const Double_t Phi, const Double_t Mass, const TVector3& Vertex, const Double_t DE, const Double_t DTheta, const Double_t DPhi, const TVector3& DVertex);
+    GMyTrackM(const Double_t beamEnergy, const TLorentzVector& p0, const TLorentzVector& p1, const TLorentzVector& p2, const TLorentzVector& p3, const TLorentzVector& p4, const TLorentzVector& p5);
     ~GMyTrackM();
 
-    TMatrixD    GetParametersH()    const;
-    TMatrixD    GetCovarianceH()    const;
+    TMatrixD    GetParametersH()            const;
+    TMatrixD    GetDerivatedParametersH()   const;
+    TMatrixD    GetCovarianceH()            const;
 };
 
 
 class GMyTrackH
 {
 private:
-    TVector3    helpVertex;
-    Double_t    e;
-    Double_t    mass;
-    TVector3    vertex;
+    Double_t    p[40];
     TMatrixD    cm;
 
 public:
     GMyTrackH(const GMyTrackM& m);
     ~GMyTrackH();
 
-    TMatrixD    GetParametersW()    const;
-    TMatrixD    GetCovarianceW()    const;
+    TMatrixD    GetParametersW()            const;
+    TMatrixD    GetDerivatedParametersW()   const;
+    TMatrixD    GetCovarianceW()            const;
 };
 
 
-
-class   GMyKinFitter
+class   GKinFitter
 {
 private:
-    Int_t nPart; //Number of particles
     Int_t nPar; //Number of parameters=Npart*fNvar
     Int_t nCon; //Number of constraints
-    Int_t fNparti; //count Number of particles added
-    Int_t fNpari; //count Number of particles added
-    Int_t fNconi; // countNumber of constraints added
     Int_t fNiter; // Number of times Solve has been called
     TMatrixD fmAlpha0;	//original parameters
     TMatrixD fmAlpha;  	//fitted parameters
@@ -130,18 +115,35 @@ private:
     TMatrixD fmd;      	//Vector of evaluated constraints
     TMatrixD fmlamda;  	//Vector of lagrangian multipliers
     TMatrixD fmV_D;    	//Covariance matrix of constraints (TO BE INVERTED)
-    TMatrixD fT;     	//Overall transforamtin matrix from Spherical->Cart
+    Double_t fchi2;
     TLorentzVector fPtot;
+    Bool_t          solved;
+
 protected:
     static  TMatrixD    ConvertMtoH(const Double_t* pIn, const Double_t* dpIn, Double_t* pOut);
     static  TMatrixD    ConvertHtoW(const Double_t* pIn, const TMatrixD& dp, const Double_t mass, Double_t *pOut);
 
-public:
-    GMyKinFitter(const Int_t npart, const Int_t ncon);
-    ~GMyKinFitter();
+    void    Constraints();
 
-    void    AddParticle(const Double_t* p, const Double_t* dp);
-    void    Reset();
+public:
+    GKinFitter();
+    ~GKinFitter();
+
+    Double_t        ConfidenceLevel()       {return TMath::Prob(fchi2,4);}//Note should be Ncon-Nunknowns
+    Double_t        GetChi2()               {return fchi2;}
+    TLorentzVector  GetEta();
+    TLorentzVector  GetEtap();
+    TLorentzVector  GetPi0a();
+    TLorentzVector  GetPi0b();
+    Double_t        GetPull(const Int_t i)  {return (fmAlpha0[i][0]-fmAlpha[i][0])/sqrt(fmV_Alpha0[i][i]-fmV_Alpha[i][i]);}
+    TVector3        GetVertex()             {return TVector3(fmAlpha[0][0], fmAlpha[1][0], fmAlpha[2][0]);}
+    TVector3        GetVertex_sub0()        {return TVector3(fmAlpha[0][0] + fmAlpha[3][0], fmAlpha[1][0] + fmAlpha[4][0], fmAlpha[2][0] + fmAlpha[5][0]);}
+    TVector3        GetVertex_sub1()        {return TVector3(fmAlpha[0][0] + fmAlpha[6][0], fmAlpha[1][0] + fmAlpha[5][0], fmAlpha[2][0] + fmAlpha[6][0]);}
+    TVector3        GetVertex_sub2()        {return TVector3(fmAlpha[0][0] + fmAlpha[9][0], fmAlpha[1][0] + fmAlpha[10][0], fmAlpha[2][0] + fmAlpha[11][0]);}
+    Bool_t          IsSolved()              {return solved;}
+    void            Set(const Double_t beamEnergy, const TLorentzVector& p0, const TLorentzVector& p1, const TLorentzVector& p2, const TLorentzVector& p3, const TLorentzVector& p4, const TLorentzVector& p5);
+    void            Reset();
+    Bool_t          Solve();
 };
 
 #endif
