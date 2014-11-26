@@ -144,6 +144,7 @@ public:
     void            Set(const Double_t beamEnergy, const TLorentzVector& p0, const TLorentzVector& p1, const TLorentzVector& p2, const TLorentzVector& p3, const TLorentzVector& p4, const TLorentzVector& p5);
     void            Reset();
     Bool_t          Solve();
+    Bool_t          ReSolve();
 };
 
 #endif

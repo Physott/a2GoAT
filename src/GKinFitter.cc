@@ -646,7 +646,7 @@ TMatrixD    GMyTrackH::GetParametersW()    const
         ret[i][0]  = p[i];
 
     Double_t    help;
-    help    = TMath::Sqrt((p[15]*p[15])-(MASS_PROTON*MASS_PROTON));
+    help    =  p[15]-MASS_PROTON;
     help    /= TMath::Sqrt((p[12]*p[12])+(p[13]*p[13])+(p[14]*p[14]));
     ret[12][0]   = help * p[12];
     ret[13][0]   = help * p[13];
@@ -728,6 +728,14 @@ TMatrixD    GMyTrackH::GetCovarianceW()    const
     return dp * cm * dpT;
 }
 
+
+
+
+
+
+
+
+
 GKinFitter::GKinFitter()    :
     nPar(40),
     nCon(4),
@@ -764,15 +772,19 @@ void GKinFitter::Constraints()
     all     -= eta;
     all     -= pi0a;
     all     -= pi0b;
-    //all.Print();
-    //TLorentzVector(fmAlpha0[12][0], fmAlpha0[13][0], fmAlpha0[14][0], fmAlpha0[15][0]).Print();
-    //std::cout << all.M() << std::endl;
-
+    /*all.Print();
+    (all-TLorentzVector(fmAlpha0[12][0], fmAlpha0[13][0], fmAlpha0[14][0], fmAlpha0[15][0])).Print();
+    TLorentzVector(fmAlpha0[12][0], fmAlpha0[13][0], fmAlpha0[14][0], fmAlpha0[15][0]).Print();
+    TLorentzVector(fmAlpha0[12][0], fmAlpha0[13][0], fmAlpha0[14][0], fmAlpha0[15][0]).Print();
+    std::cout << all.M() << "   " << (all-TLorentzVector(fmAlpha0[12][0], fmAlpha0[13][0], fmAlpha0[14][0], fmAlpha0[15][0])).M() << "   " << TLorentzVector(fmAlpha0[12][0], fmAlpha0[13][0], fmAlpha0[14][0], fmAlpha0[15][0]).M() << "   " << std::endl;
+    std::cout << eta.M() << "   " << pi0a.M() << "   " << pi0b.M() << "   " << std::endl;
+    std::cout << TLorentzVector(fmAlpha0[16][0], fmAlpha0[17][0], fmAlpha0[18][0], fmAlpha0[19][0]).M() << "   " << TLorentzVector(fmAlpha0[20][0], fmAlpha0[21][0], fmAlpha0[22][0], fmAlpha0[23][0]).M() << "   " << TLorentzVector(fmAlpha0[24][0], fmAlpha0[25][0], fmAlpha0[26][0], fmAlpha0[27][0]).M() << "   " << std::endl;
+*/
   //d matrix (evaluate constraint eqn.)
     fmd[0][0]   =   eta.M2() - (MASS_ETA*MASS_ETA);
     fmd[1][0]   =   pi0a.M2() - (MASS_PI0*MASS_PI0);
     fmd[2][0]   =   pi0b.M2() - (MASS_PI0*MASS_PI0);
-    fmd[3][0]   =   all.M2() + (MASS_PROTON*MASS_PROTON);
+    fmd[3][0]   =   all.M2() - (MASS_PROTON*MASS_PROTON);
 
   //D matrix (derivitives of constraint eqn)
     for(int i=0; i<4; i++)
@@ -903,4 +915,14 @@ Bool_t  GKinFitter::Solve()
 
   return kTRUE;
 
+}
+
+Bool_t  GKinFitter::ReSolve()
+{
+    fmAlpha0    = fmAlpha;
+    fmV_Alpha0  = fmV_Alpha;
+
+    Constraints();
+
+    return Solve();
 }
