@@ -402,13 +402,13 @@ GMyTrackM::GMyTrackM(const Double_t beamEnergy, const TLorentzVector& p0, const 
     dp[6]    = 0.1;          dp[7]    = 0.1;          dp[8]    = 0.1;          //pi0a travel length
     dp[9]    = 0.1;          dp[10]   = 0.1;          dp[11]   = 0.1;          //pi0b travel length
 
-    dp[12]   =  2;       dp[13]   = 0.01;   dp[14]   = 0.01;
-    dp[15]   = 10;       dp[16]   = 0.05;   dp[17]   = 0.05;
-    dp[18]   = 10;       dp[19]   = 0.05;   dp[20]   = 0.05;
-    dp[21]   = 10;       dp[22]   = 0.05;   dp[23]   = 0.05;
-    dp[24]   = 10;       dp[25]   = 0.05;   dp[26]   = 0.05;
-    dp[27]   = 10;       dp[28]   = 0.05;   dp[29]   = 0.05;
-    dp[30]   = 10;       dp[31]   = 0.05;   dp[32]   = 0.05;
+    dp[12]   =  1;       dp[13]   = 0.01;   dp[14]   = 0.01;
+    dp[15]   = 5;       dp[16]   = 0.05;   dp[17]   = 0.05;
+    dp[18]   = 5;       dp[19]   = 0.05;   dp[20]   = 0.05;
+    dp[21]   = 5;       dp[22]   = 0.05;   dp[23]   = 0.05;
+    dp[24]   = 5;       dp[25]   = 0.05;   dp[26]   = 0.05;
+    dp[27]   = 5;       dp[28]   = 0.05;   dp[29]   = 0.05;
+    dp[30]   = 5;       dp[31]   = 0.05;   dp[32]   = 0.05;
 }
 
 GMyTrackM::~GMyTrackM()

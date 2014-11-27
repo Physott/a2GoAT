@@ -72,7 +72,7 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeTagger& tagge
 
             if(fit.Solve()>0)
             {
-                if(fit.ConfidenceLevel()>=0)
+                if(fit.ConfidenceLevel()>0.1)
                 {
                     if(CreateHistogramsForTaggerBinning==kTRUE)
                         hist_SubImCut_fit.Fill(fit, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
@@ -90,7 +90,7 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeTagger& tagge
 
                 if(fit.IsSolved()==kTRUE)
                 {
-                    if(fit.ConfidenceLevel()<0.1)
+                    if(fit.ConfidenceLevel()>0.1)
                     {
                         if(CreateHistogramsForTaggerBinning==kTRUE)
                             hist_fit.Fill(fit, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
@@ -247,7 +247,7 @@ void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, const GTreeParticl
 
                 if(fit.IsSolved()==kTRUE)
                 {
-                    if(fit.ConfidenceLevel()<0.1)
+                    if(fit.ConfidenceLevel()>0.1)
                     {
                         if(CreateHistogramsForTaggerBinning==kTRUE)
                             hist_fit.Fill(fit, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
