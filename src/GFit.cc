@@ -427,13 +427,13 @@ void        GHistFit::CalcResult()
 
 Int_t       GHistFit::Fill(GKinFitter& fitter, const Double_t taggerTime)
 {
-    im.Fill(fitter.GetEtap().M(), taggerTime);
+    /*im.Fill(fitter.GetEtap().M(), taggerTime);
     im_sub0.Fill(fitter.GetEta().M(), taggerTime);
     im_sub1.Fill(fitter.GetPi0a().M(), taggerTime);
-    im_sub2.Fill(fitter.GetPi0b().M(), taggerTime);
+    im_sub2.Fill(fitter.GetPi0b().M(), taggerTime);*/
     chiSq.Fill(fitter.GetChi2(), taggerTime);
     confidenceLevel.Fill(fitter.ConfidenceLevel(), taggerTime);
-    vertex_X.Fill(fitter.GetVertex().X(), taggerTime);
+    /*vertex_X.Fill(fitter.GetVertex().X(), taggerTime);
     vertex_Y.Fill(fitter.GetVertex().Y(), taggerTime);
     vertex_Z.Fill(fitter.GetVertex().Z(), taggerTime);
     vertex_sub0_X.Fill(fitter.GetVertex_sub0().X(), taggerTime);
@@ -444,20 +444,20 @@ Int_t       GHistFit::Fill(GKinFitter& fitter, const Double_t taggerTime)
     vertex_sub1_Z.Fill(fitter.GetVertex_sub1().Z(), taggerTime);
     vertex_sub2_X.Fill(fitter.GetVertex_sub2().X(), taggerTime);
     vertex_sub2_Y.Fill(fitter.GetVertex_sub2().Y(), taggerTime);
-    vertex_sub2_Z.Fill(fitter.GetVertex_sub2().Z(), taggerTime);
+    vertex_sub2_Z.Fill(fitter.GetVertex_sub2().Z(), taggerTime);*/
     for(int i=0; i<nPulls; i++)
         pulls.Fill(fitter.GetPull(i), i);
 }
 
 Int_t       GHistFit::Fill(GKinFitter& fitter, const Double_t taggerTime, const Int_t taggerChannel)
 {
-    im.Fill(fitter.GetEtap().M(), taggerTime, taggerChannel);
+    /*im.Fill(fitter.GetEtap().M(), taggerTime, taggerChannel);
     im_sub0.Fill(fitter.GetEta().M(), taggerTime);
     im_sub1.Fill(fitter.GetPi0a().M(), taggerTime);
-    im_sub2.Fill(fitter.GetPi0b().M(), taggerTime);
+    im_sub2.Fill(fitter.GetPi0b().M(), taggerTime);*/
     chiSq.Fill(fitter.GetChi2(), taggerTime);
     confidenceLevel.Fill(fitter.ConfidenceLevel(), taggerTime);
-    vertex_X.Fill(fitter.GetVertex().X(), taggerTime);
+    /*vertex_X.Fill(fitter.GetVertex().X(), taggerTime);
     vertex_Y.Fill(fitter.GetVertex().Y(), taggerTime);
     vertex_Z.Fill(fitter.GetVertex().Z(), taggerTime);
     vertex_sub0_X.Fill(fitter.GetVertex_sub0().X(), taggerTime);
@@ -468,7 +468,7 @@ Int_t       GHistFit::Fill(GKinFitter& fitter, const Double_t taggerTime, const 
     vertex_sub1_Z.Fill(fitter.GetVertex_sub1().Z(), taggerTime);
     vertex_sub2_X.Fill(fitter.GetVertex_sub2().X(), taggerTime);
     vertex_sub2_Y.Fill(fitter.GetVertex_sub2().Y(), taggerTime);
-    vertex_sub2_Z.Fill(fitter.GetVertex_sub2().Z(), taggerTime);
+    vertex_sub2_Z.Fill(fitter.GetVertex_sub2().Z(), taggerTime);*/
     for(int i=0; i<nPulls; i++)
         pulls.Fill(fitter.GetPull(i), i);
 }
@@ -700,13 +700,13 @@ void        GHistFit2::CalcResult()
 
 Int_t       GHistFit2::Fill(GKinFitter& fitter, const Double_t taggerTime)
 {
-    im.Fill(fitter.GetEtap().M(), count, taggerTime);
+    /*im.Fill(fitter.GetEtap().M(), count, taggerTime);
     im_sub0.Fill(fitter.GetEta().M(), count, taggerTime);
     im_sub1.Fill(fitter.GetPi0a().M(), count, taggerTime);
-    im_sub2.Fill(fitter.GetPi0b().M(), count, taggerTime);
+    im_sub2.Fill(fitter.GetPi0b().M(), count, taggerTime);*/
     chiSq.Fill(fitter.GetChi2(), count, taggerTime);
     confidenceLevel.Fill(fitter.ConfidenceLevel(), count, taggerTime);
-    vertex_X.Fill(fitter.GetVertex().X(), count, taggerTime);
+    /*vertex_X.Fill(fitter.GetVertex().X(), count, taggerTime);
     vertex_Y.Fill(fitter.GetVertex().Y(), count, taggerTime);
     vertex_Z.Fill(fitter.GetVertex().Z(), count, taggerTime);
     vertex_sub0_X.Fill(fitter.GetVertex_sub0().X(), count, taggerTime);
@@ -717,7 +717,7 @@ Int_t       GHistFit2::Fill(GKinFitter& fitter, const Double_t taggerTime)
     vertex_sub1_Z.Fill(fitter.GetVertex_sub1().Z(), count, taggerTime);
     vertex_sub2_X.Fill(fitter.GetVertex_sub2().X(), count, taggerTime);
     vertex_sub2_Y.Fill(fitter.GetVertex_sub2().Y(), count, taggerTime);
-    vertex_sub2_Z.Fill(fitter.GetVertex_sub2().Z(), count, taggerTime);
+    vertex_sub2_Z.Fill(fitter.GetVertex_sub2().Z(), count, taggerTime);*/
     switch(count)
     {
     case 0:
@@ -746,13 +746,13 @@ Int_t       GHistFit2::Fill(GKinFitter& fitter, const Double_t taggerTime)
 
 Int_t       GHistFit2::Fill(GKinFitter& fitter, const Double_t taggerTime, const Int_t taggerChannel)
 {
-    im.Fill(fitter.GetEtap().M(), count, taggerTime);
+    /*im.Fill(fitter.GetEtap().M(), count, taggerTime);
     im_sub0.Fill(fitter.GetEta().M(), count, taggerTime);
     im_sub1.Fill(fitter.GetPi0a().M(), count, taggerTime);
-    im_sub2.Fill(fitter.GetPi0b().M(), count, taggerTime);
+    im_sub2.Fill(fitter.GetPi0b().M(), count, taggerTime);*/
     chiSq.Fill(fitter.GetChi2(), count, taggerTime);
     confidenceLevel.Fill(fitter.ConfidenceLevel(), count, taggerTime);
-    vertex_X.Fill(fitter.GetVertex().X(), count, taggerTime);
+    /*vertex_X.Fill(fitter.GetVertex().X(), count, taggerTime);
     vertex_Y.Fill(fitter.GetVertex().Y(), count, taggerTime);
     vertex_Z.Fill(fitter.GetVertex().Z(), count, taggerTime);
     vertex_sub0_X.Fill(fitter.GetVertex_sub0().X(), count, taggerTime);
@@ -763,7 +763,7 @@ Int_t       GHistFit2::Fill(GKinFitter& fitter, const Double_t taggerTime, const
     vertex_sub1_Z.Fill(fitter.GetVertex_sub1().Z(), count, taggerTime);
     vertex_sub2_X.Fill(fitter.GetVertex_sub2().X(), count, taggerTime);
     vertex_sub2_Y.Fill(fitter.GetVertex_sub2().Y(), count, taggerTime);
-    vertex_sub2_Z.Fill(fitter.GetVertex_sub2().Z(), count, taggerTime);
+    vertex_sub2_Z.Fill(fitter.GetVertex_sub2().Z(), count, taggerTime);*/
     switch(count)
     {
     case 0:

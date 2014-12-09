@@ -68,7 +68,7 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeTagger& tagge
                 hist_SubImCut.Fill(im, mm, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
 
             //std::cout << "here  "; tagger.GetVectorProtonTarget(i).Print();
-            fit.Set(tagger.GetVectorProtonTarget(i).E(), meson.SubPhotons(0, 0), meson.SubPhotons(0, 1), meson.SubPhotons(0, 2), meson.SubPhotons(0, 3), meson.SubPhotons(0, 4), meson.SubPhotons(0, 5));
+            //fit.Set(tagger.GetVectorProtonTarget(i).E(), meson.SubPhotons(0, 0), meson.SubPhotons(0, 1), meson.SubPhotons(0, 2), meson.SubPhotons(0, 3), meson.SubPhotons(0, 4), meson.SubPhotons(0, 5));
 
             if(fit.Solve()>0)
             {
@@ -88,7 +88,7 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeTagger& tagge
                 else
                     hist_MMCut.Fill(im, mm, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
 
-                if(fit.IsSolved()==kTRUE)
+                /*if(fit.IsSolved()==kTRUE)
                 {
                     if(fit.ConfidenceLevel()>0.1)
                     {
@@ -97,7 +97,7 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeTagger& tagge
                         else
                             hist_fit.Fill(fit, tagger.GetTagged_t(i));
                     }
-                }
+                }*/
             }
         }
     }
