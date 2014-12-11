@@ -59,6 +59,10 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeTagger& tagge
         (sub_im_1>100 && sub_im_1<170) &&
         (sub_im_2>100 && sub_im_2<170))
     {
+        GKinFitterPolarToCartesian  converter;
+        for(int i=0; i<6; i++)
+            converter.Set(i, meson.SubPhotons(0, i).E(), meson.SubPhotons(0, i).Theta(), meson.SubPhotons(0, i).Phi(), 10, TMath::DegToRad()*3, TMath::DegToRad()*3);
+
         for(int i=0; i<tagger.GetNTagged(); i++)
         {
             mm  = (tagger.GetVectorProtonTarget(i)-meson.Particle(0)).M();if(CreateHistogramsForTaggerBinning==kTRUE)
@@ -68,7 +72,9 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeTagger& tagge
                 hist_SubImCut.Fill(im, mm, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
 
             //std::cout << "here  "; tagger.GetVectorProtonTarget(i).Print();
-            //fit.Set(tagger.GetVectorProtonTarget(i).E(), meson.SubPhotons(0, 0), meson.SubPhotons(0, 1), meson.SubPhotons(0, 2), meson.SubPhotons(0, 3), meson.SubPhotons(0, 4), meson.SubPhotons(0, 5));
+
+            converter.Set(tagger.GetPhotonBeam_E(i), 2);
+            fit.Set(converter);
 
             if(fit.Solve()>0)
             {

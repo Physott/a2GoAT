@@ -6,7 +6,8 @@
 #include "TLorentzVector.h"
 
 
-#define GKinFitterPolarToCartesian_CBRadius  1
+#define GKinFitter_CBRadius     0.258
+#define GKinFitter_RadiatorDist 10.45
 
 class GKinFitterPolarToCartesian
 {
@@ -61,7 +62,7 @@ private:
     //TMatrixD fmd;      	//Vector of evaluated constraints
     //TMatrixD fmlamda;  	//Vector of lagrangian multipliers
     //TMatrixD fmV_D;    	//Covariance matrix of constraints (TO BE INVERTED)
-    Double_t fchi2;
+    Double_t chi2;
     //TLorentzVector fPtot;
     //Bool_t          solved;
 
@@ -77,7 +78,17 @@ private:
     TMatrixD        Get_g_Derivated_Par(const Int_t index_k, const TMatrixD x, const TMatrixD u);
     TMatrixD        Get_g_Derivated_Unk(const Int_t index_k, const TMatrixD x, const TMatrixD u);*/
 
-    TMatrixD    Get_lv(const TMatrixD x, const TMatrixD u);
+    void        Get_lv(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret);
+    void        Get_lv_Derivated_Par(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret);
+    void        Get_lv_Derivated_Unk(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret);
+
+    void        Get_g(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret);
+    void        Get_g_Derivated_Par(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret);
+    void        Get_g_Derivated_Unk(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret);
+    void        Get_r(const TMatrixD& x, const TMatrixD& u, const TMatrixD& g_Derivated_Par, const TMatrixD& g, TMatrixD& ret);
+    void        Get_S(const TMatrixD& g_Derivated_Par, TMatrixD& ret);
+    Double_t    Calc_Chi2(const TMatrixD& x, const TMatrixD& g);
+    Bool_t      SolveStep(const TMatrixD& x, const TMatrixD& u, TMatrixD &new_x, TMatrixD &new_u, Double_t& chiSq);
 
 protected:
     static  TMatrixD    ConvertMtoH(const Double_t* pIn, const Double_t* dpIn, Double_t* pOut);
@@ -89,8 +100,8 @@ public:
     GKinFitter();
     ~GKinFitter();
 
-    Double_t        ConfidenceLevel()       {return TMath::Prob(fchi2,4);}//Note should be Ncon-Nunknowns
-    Double_t        GetChi2()               {return fchi2;}
+    Double_t        ConfidenceLevel()       {return TMath::Prob(chi2,4);}//Note should be Ncon-Nunknowns
+    Double_t        GetChi2()               {return chi2;}
     TLorentzVector  GetEta();
     TLorentzVector  GetEtap();
     TLorentzVector  GetPi0a();
