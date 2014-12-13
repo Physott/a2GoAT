@@ -194,6 +194,7 @@ add_executable(MyPhysics
    inc/GHistTaggerBinning2.h
    inc/GH1.h
    #inc/GKinFitterParticle.h
+   inc/GKinFitterConverter.h
    inc/GKinFitter.h
    inc/GKinFitterWithProton.h
    inc/GFit.h
@@ -224,6 +225,7 @@ add_executable(MyPhysics
    src/GHistTaggerBinning.cc
    src/GHistTaggerBinning2.cc
    #src/GKinFitterParticle.cc
+   src/GKinFitterConverter.cc
    src/GKinFitter.cc
    src/GKinFitterWithProton.cc
    src/GFit.cc

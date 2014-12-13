@@ -14,215 +14,13 @@
 #define MASS_PROTON 938.272046
 
 
-GKinFitterPolarToCartesian::GKinFitterPolarToCartesian()
-{
-
-}
-
-GKinFitterPolarToCartesian::~GKinFitterPolarToCartesian()
-{
-}
-
-void    GKinFitterPolarToCartesian::Set(const Double_t beamEnergy, const Double_t delta_beamEnergy)
-{
-    p[0]   = beamEnergy;
-
-    dp[0]   = delta_beamEnergy;
-}
-
-void    GKinFitterPolarToCartesian::Set(const Int_t particleIndex, const Double_t E, const Double_t theta, const Double_t phi, const Double_t delta_E, const Double_t delta_theta, const Double_t delta_phi)
-{
-    p[(particleIndex*3) +1]   = E;
-    p[(particleIndex*3) +2]   = theta;
-    p[(particleIndex*3) +3]   = phi;
-
-    dp[(particleIndex*3) +1]   = delta_E;
-    dp[(particleIndex*3) +2]   = delta_theta;
-    dp[(particleIndex*3) +3]   = delta_phi;
-}
-
-TMatrixD    GKinFitterPolarToCartesian::GetParametersH()    const
-{
-    TMatrixD    ret(25,1);
-
-    ret[0][0]   = p[0];
-
-    for(int i=0; i<6; i++)
-    {
-        ret[(i*4)+1][0]  = GKinFitter_CBRadius * TMath::Sin(p[(i*3)+2]) * TMath::Cos(p[(i*3)+3]);
-        ret[(i*4)+2][0]  = GKinFitter_CBRadius * TMath::Sin(p[(i*3)+2]) * TMath::Sin(p[(i*3)+3]);
-        ret[(i*4)+3][0]  = GKinFitter_CBRadius * TMath::Cos(p[(i*3)+2]);
-        ret[(i*4)+4][0]  = p[(i*3)+1];
-    }
-
-    return ret;
-}
-
-TMatrixD    GKinFitterPolarToCartesian::GetDerivatedParametersH()    const
-{
-    TMatrixD    ret(25,19);
-    for(int i=0; i<25; i++)
-    {
-        for(int j=0; j<19; j++)
-            ret[i][j]   = 0;
-    }
-
-    ret[0][0]  = 1;
-
-    for(int i=0; i<6; i++)
-    {
-        ret[(i*4)+1][(i*3)+2] =   GKinFitter_CBRadius * TMath::Cos(p[(i*3)+2]) * TMath::Cos(p[(i*3)+3]);
-        ret[(i*4)+1][(i*3)+3] = - GKinFitter_CBRadius * TMath::Sin(p[(i*3)+2]) * TMath::Sin(p[(i*3)+3]);
-        ret[(i*4)+2][(i*3)+2] =   GKinFitter_CBRadius * TMath::Cos(p[(i*3)+2]) * TMath::Sin(p[(i*3)+3]);
-        ret[(i*4)+2][(i*3)+3] =   GKinFitter_CBRadius * TMath::Sin(p[(i*3)+2]) * TMath::Cos(p[(i*3)+3]);
-        ret[(i*4)+3][(i*3)+2] = - GKinFitter_CBRadius * TMath::Sin(p[(i*3)+2]);
-        ret[(i*4)+4][(i*3)+2] =   p[(i*3)+1];
-    }
-
-    return ret;
-}
-
-TMatrixD    GKinFitterPolarToCartesian::GetCovarianceH()    const
-{
-    TMatrixD    cm(19, 19);
-    for(int i=0; i<19; i++)
-    {
-        for(int j=0; j<19; j++)
-        {
-            if(i==j)
-                cm[i][j]   = dp[i] * dp[i];
-            else
-                cm[i][j]   = 0;
-        }
-    }
-
-    TMatrixD    dp(GetDerivatedParametersH());
-    TMatrixD    dpT(dp);
-    dpT.T();
-
-    return dp * cm * dpT;
-}
-
-
-
-/*
-GMyTrackH::GMyTrackH(const GKinFitterPolarToCartesian& m):
-    cm(40,40)
-{
-    TMatrixD    help(m.GetParametersH());
-    for(int i=0; i<40; i++)
-        p[i]    = help[i][0];
-
-    cm  = m.GetCovarianceH();
-}
-
-GMyTrackH::~GMyTrackH()
-{
-
-}
-
-TMatrixD    GMyTrackH::GetParametersW()    const
-{
-
-    TMatrixD    ret(40,1);
-
-    for(int i=0; i<12; i++)
-        ret[i][0]  = p[i];
-
-    Double_t    help;
-    help    =  p[15]-MASS_PROTON;
-    help    /= TMath::Sqrt((p[12]*p[12])+(p[13]*p[13])+(p[14]*p[14]));
-    ret[12][0]   = help * p[12];
-    ret[13][0]   = help * p[13];
-    ret[14][0]   = help * p[14];
-    ret[15][0]   = p[15];
-
-    for(int i=0; i<6; i++)
-    {
-        help    = p[4*i+19];
-        help    /= TMath::Sqrt((p[4*i+16]*p[4*i+16])+(p[4*i+17]*p[4*i+17])+(p[4*i+18]*p[4*i+18]));
-        ret[4*i+16][0]   = help * p[4*i+16];
-        ret[4*i+17][0]   = help * p[4*i+17];
-        ret[4*i+18][0]   = help * p[4*i+18];
-        ret[4*i+19][0]   = p[4*i+19];
-    }
-
-    //std::cout << "first W  ";
-    //TLorentzVector(ret[12][0], ret[13][0], ret[14][0], ret[15][0]).Print();
-    return ret;
-}
-
-TMatrixD    GMyTrackH::GetDerivatedParametersW()    const
-{
-    TMatrixD    ret(40,40);
-    for(int i=0; i<40; i++)
-    {
-        for(int j=0; j<40; j++)
-            ret[i][j]   = 0;
-    }
-
-    for(int i=0; i<12; i++)
-        ret[i][i]  = 1;
-
-    Double_t    help;
-    Double_t    r;
-    help    = TMath::Sqrt((p[15]*p[15])-(MASS_PROTON*MASS_PROTON));
-    r       = TMath::Sqrt((p[12]*p[12])+(p[13]*p[13])+(p[14]*p[14]));
-    ret[12][12]   = help * ((p[13]*p[13])+(p[14]*p[14])) /(r*r*r);
-    ret[12][13]   = -help * p[12] * p[13] /(r*r*r);
-    ret[12][14]   = -help * p[12] * p[14] /(r*r*r);
-    ret[12][15]   = p[15] * p[12] /(help*r);
-    ret[13][12]   = -help * p[13] * p[12] /(r*r*r);
-    ret[13][13]   = help * ((p[12]*p[12])+(p[14]*p[14])) /(r*r*r);
-    ret[13][14]   = -help * p[13] * p[14] /(r*r*r);
-    ret[13][15]   = p[15] * p[13] /(help*r);
-    ret[14][12]   = -help * p[14] * p[12] /(r*r*r);
-    ret[14][13]   = -help * p[14] * p[13] /(r*r*r);
-    ret[14][14]   = help * ((p[12]*p[12])+(p[13]*p[13])) /(r*r*r);
-    ret[14][15]   = p[15] * p[14] /(help*r);
-    ret[15][15]   = 1;
-
-    for(int i=0; i<6; i++)
-    {
-        r       = TMath::Sqrt((p[4*i+16]*p[4*i+16])+(p[4*i+17]*p[4*i+17])+(p[4*i+18]*p[4*i+18]));
-        ret[4*i+16][4*i+16]   = p[4*i+19] * ((p[4*i+17]*p[4*i+17])+(p[4*i+18]*p[4*i+18])) /(r*r*r);
-        ret[4*i+16][4*i+17]   = -p[4*i+19] * p[4*i+16] * p[4*i+17] /(r*r*r);
-        ret[4*i+16][4*i+18]   = -p[4*i+19] * p[4*i+16] * p[4*i+18] /(r*r*r);
-        ret[4*i+16][4*i+19]   = p[4*i+16] /r;
-        ret[4*i+17][4*i+16]   = -p[4*i+19] * p[4*i+17] * p[4*i+16] /(r*r*r);
-        ret[4*i+17][4*i+17]   = p[4*i+19] * ((p[4*i+16]*p[4*i+16])+(p[4*i+18]*p[4*i+18])) /(r*r*r);
-        ret[4*i+17][4*i+18]   = -p[4*i+19] * p[4*i+17] * p[4*i+18] /(r*r*r);
-        ret[4*i+17][4*i+19]   = p[4*i+17] /r;
-        ret[4*i+18][4*i+16]   = -p[4*i+19] * p[4*i+18] * p[4*i+16] /(r*r*r);
-        ret[4*i+18][4*i+17]   = -p[4*i+19] * p[4*i+18] * p[4*i+17] /(r*r*r);
-        ret[4*i+18][4*i+18]   = p[4*i+19] * ((p[4*i+16]*p[4*i+16])+(p[4*i+17]*p[4*i+17])) /(r*r*r);
-        ret[4*i+18][4*i+19]   = p[4*i+18] /r;
-        ret[4*i+19][4*i+19]   = 1;
-    }
-
-    return ret;
-}
-
-TMatrixD    GMyTrackH::GetCovarianceW()    const
-{
-    TMatrixD    dp(GetDerivatedParametersW());
-    TMatrixD    dpT(dp);
-    dpT.T();
-
-    return dp * cm * dpT;
-}*/
-
-
-
-
-
 
 
 
 
 GKinFitter::GKinFitter()    :
     nPar((6*4)+1),
-    nUnk(5),
+    nUnk(3),
     nCon(1+3),
     fNiter(0),
     par0(nPar,1),
@@ -247,330 +45,354 @@ GKinFitter::~GKinFitter()
 
 }
 
-void    GKinFitter::Get_lv(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret)
+Double_t    GKinFitter::GetReactionPx(const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
 {
-    Double_t    helpX = u[0][0]-u[3][0];
-    Double_t    helpY = u[1][0]-u[4][0];
-    Double_t    helpZ = u[2][0]+GKinFitter_RadiatorDist;
-    Double_t    r     = TMath::Sqrt((helpX*helpX)+(helpY*helpY)+(helpZ*helpZ));
-
-    ret[0][0]   = helpX * x[0][0] / r;
-    ret[1][0]   = helpY * x[0][0] / r;
-    ret[2][0]   = helpZ * x[0][0] / r;
-    ret[3][0]   = x[0][0];
-
-    for(int i=0; i<6; i++)
+    Double_t h[7] = {u[0][0],u[1][0],u[2][0], x[0][0],0,0,-10500};
+    if(derivate_i<0)
+        return GKinFitter4VectorX().DoEval(h);
+    return GKinFitter4VectorX().DoDerivative(h, derivate_i);
+}
+Double_t    GKinFitter::GetReactionPy(const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    Double_t h[7] = {u[0][0],u[1][0],u[2][0], x[0][0],0,0,-10500};
+    if(derivate_i<0)
+        return GKinFitter4VectorY().DoEval(h);
+    return GKinFitter4VectorY().DoDerivative(h, derivate_i);
+}
+Double_t    GKinFitter::GetReactionPz(const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    Double_t h[7] = {u[0][0],u[1][0],u[2][0], x[0][0],0,0,-10500};
+    if(derivate_i<0)
+        return GKinFitter4VectorZ().DoEval(h);
+    return GKinFitter4VectorZ().DoDerivative(h, derivate_i);
+}
+Double_t    GKinFitter::GetPhotonPx(const Int_t i, const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    Double_t h[7] = {x[(4*i)+1][0],x[(4*i)+2][0],x[(4*i)+3][0], x[(4*i)+4][0],u[0][0],u[1][0],u[2][0]};
+    if(derivate_i<0)
+        return GKinFitter4VectorX().DoEval(h);
+    return GKinFitter4VectorX().DoDerivative(h, derivate_i);
+}
+Double_t    GKinFitter::GetPhotonPy(const Int_t i, const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    Double_t h[7] = {x[(4*i)+1][0],x[(4*i)+2][0],x[(4*i)+3][0], x[(4*i)+4][0],u[0][0],u[1][0],u[2][0]};
+    if(derivate_i<0)
+        return GKinFitter4VectorY().DoEval(h);
+    return GKinFitter4VectorY().DoDerivative(h, derivate_i);
+}
+Double_t    GKinFitter::GetPhotonPz(const Int_t i, const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    Double_t h[7] = {x[(4*i)+1][0],x[(4*i)+2][0],x[(4*i)+3][0], x[(4*i)+4][0],u[0][0],u[1][0],u[2][0]};
+    if(derivate_i<0)
+        return GKinFitter4VectorZ().DoEval(h);
+    return GKinFitter4VectorZ().DoDerivative(h, derivate_i);
+}
+Double_t    GKinFitter::GetConstraint(const Int_t i, const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    switch(i)
     {
-        helpX = x[(4*i)+1][0]-u[0][0];
-        helpY = x[(4*i)+2][0]-u[1][0];
-        helpZ = x[(4*i)+3][0]-u[2][0];
-        r     = TMath::Sqrt((helpX*helpX)+(helpY*helpY)+(helpZ*helpZ));
-
-        ret[(4*i)+4][0]   = helpX * x[(4*i)+4][0] / r;
-        ret[(4*i)+5][0]   = helpY * x[(4*i)+4][0] / r;
-        ret[(4*i)+6][0]   = helpZ * x[(4*i)+4][0] / r;
-        ret[(4*i)+7][0]   = x[(4*i)+4][0];
+    case 0:
+        {
+            Double_t    h[9] = {GetPhotonPx(0, x, u), GetPhotonPy(0, x, u), GetPhotonPz(0, x, u), GetPhotonE(0, x),
+                                GetPhotonPx(1, x, u), GetPhotonPy(1, x, u), GetPhotonPz(1, x, u), GetPhotonE(1, x), MASS_ETA};
+            if(derivate_i<0)
+                return GKinFitterConstrainInvMass().DoEval(h);
+            else
+                return GKinFitterConstrainInvMass().DoDerivative(h, derivate_i);
+        }
+    case 1:
+        {
+            Double_t    h[9] = {GetPhotonPx(2, x, u), GetPhotonPy(2, x, u), GetPhotonPz(2, x, u), GetPhotonE(2, x),
+                                GetPhotonPx(3, x, u), GetPhotonPy(3, x, u), GetPhotonPz(3, x, u), GetPhotonE(3, x), MASS_PI0};
+            if(derivate_i<0)
+                return GKinFitterConstrainInvMass().DoEval(h);
+            else
+                return GKinFitterConstrainInvMass().DoDerivative(h, derivate_i);
+        }
+    case 2:
+        {
+            Double_t    h[9] = {GetPhotonPx(4, x, u), GetPhotonPy(4, x, u), GetPhotonPz(4, x, u), GetPhotonE(4, x),
+                                GetPhotonPx(5, x, u), GetPhotonPy(5, x, u), GetPhotonPz(5, x, u), GetPhotonE(5, x), MASS_PI0};
+            if(derivate_i<0)
+                return GKinFitterConstrainInvMass().DoEval(h);
+            else
+                return GKinFitterConstrainInvMass().DoDerivative(h, derivate_i);
+        }
+    case 3:
+        {
+            Double_t    h[29] = {GetReactionPx(x, u),  GetReactionPy(x, u),  GetReactionPz(x, u),  GetReactionE(x),
+                                 GetPhotonPx(0, x, u), GetPhotonPy(0, x, u), GetPhotonPz(0, x, u), GetPhotonE(0, x),
+                                 GetPhotonPx(1, x, u), GetPhotonPy(1, x, u), GetPhotonPz(1, x, u), GetPhotonE(1, x),
+                                 GetPhotonPx(2, x, u), GetPhotonPy(2, x, u), GetPhotonPz(2, x, u), GetPhotonE(2, x),
+                                 GetPhotonPx(3, x, u), GetPhotonPy(3, x, u), GetPhotonPz(3, x, u), GetPhotonE(3, x),
+                                 GetPhotonPx(4, x, u), GetPhotonPy(4, x, u), GetPhotonPz(4, x, u), GetPhotonE(4, x),
+                                 GetPhotonPx(5, x, u), GetPhotonPy(5, x, u), GetPhotonPz(5, x, u), GetPhotonE(5, x)};
+            if(derivate_i<0)
+                return GKinFitterConstrainInvMass().DoEval(h);
+            else
+                return GKinFitterConstrainInvMass().DoDerivative(h, derivate_i);
+        }
+    case 4:
+        {
+            Double_t    h[9] = {GetReactionPx(x, u),  GetReactionPy(x, u),  GetReactionPz(x, u),  GetReactionE(x), MASS_PROTON};
+            if(derivate_i<0)
+                return GKinFitterConstrainBeam().DoEval(h);
+            else
+                return GKinFitterConstrainBeam().DoDerivative(h, derivate_i);
+        }
     }
 }
 
-void        GKinFitter::Get_lv_Derivated_Par(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret)
+Double_t    GKinFitter::GetReactionPx_DeriPar(const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
 {
-    Double_t    helpX = u[0][0]-u[3][0];
-    Double_t    helpY = u[1][0]-u[4][0];
-    Double_t    helpZ = u[2][0]+GKinFitter_RadiatorDist;
-    Double_t    r     = TMath::Sqrt((helpX*helpX)+(helpY*helpY)+(helpZ*helpZ));
-
-    for(int i=0; i<4; i++)
+    if(derivate_i==0)
+        return GetReactionPx(x, u, 3);
+    return 0;
+}
+Double_t    GKinFitter::GetReactionPy_DeriPar(const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    if(derivate_i==0)
+        return GetReactionPy(x, u, 3);
+    return 0;
+}
+Double_t    GKinFitter::GetReactionPz_DeriPar(const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    if(derivate_i==0)
+        return GetReactionPz(x, u, 3);
+    return 0;
+}
+Double_t    GKinFitter::GetPhotonPx_DeriPar(const Int_t i, const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    if(derivate_i<(4*i)+1)
+        return 0;
+    if(derivate_i>(4*i)+4)
+        return 0;
+    return GetPhotonPx(i, x, u, derivate_i-((4*i)+1));
+}
+Double_t    GKinFitter::GetPhotonPy_DeriPar(const Int_t i, const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    if(derivate_i<(4*i)+1)
+        return 0;
+    if(derivate_i>(4*i)+4)
+        return 0;
+    return GetPhotonPy(i, x, u, derivate_i-((4*i)+1));
+}
+Double_t    GKinFitter::GetPhotonPz_DeriPar(const Int_t i, const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    if(derivate_i<(4*i)+1)
+        return 0;
+    if(derivate_i>(4*i)+4)
+        return 0;
+    return GetPhotonPz(i, x, u, derivate_i-((4*i)+1));
+}
+Double_t    GKinFitter::GetConstraint_DeriPar(const Int_t i, const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    switch(i)
     {
-        for(int j=1; j<(6*4)+1; j++)
-            ret[i][j]   = 0;
-    }
-    ret[0][0]   = helpX / r;
-    ret[1][0]   = helpY / r;
-    ret[2][0]   = helpZ / r;
-    ret[3][0]   = 1;
-
-    for(int i=0; i<6; i++)
-    {
-        helpX = x[(4*i)+1][0]-u[0][0];
-        helpY = x[(4*i)+2][0]-u[1][0];
-        helpZ = x[(4*i)+3][0]-u[2][0];
-        r     = TMath::Sqrt((helpX*helpX)+(helpY*helpY)+(helpZ*helpZ));
-
-        for(int j=0; j<(4*i)+1; j++)
-            ret[(4*i)+4][j]     = 0;
-        ret[(4*i)+4][(4*i)+1]   = (helpY + helpZ) * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+4][(4*i)+2]   = helpX * helpY * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+4][(4*i)+3]   = helpX * helpZ * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+4][(4*i)+4]   = helpX / r;
-        for(int j=(4*i)+5; j<(6*4)+1; j++)
-            ret[(4*i)+4][j]     = 0;
-
-        for(int j=0; j<(4*i)+1; j++)
-            ret[(4*i)+5][j]     = 0;
-        ret[(4*i)+5][(4*i)+1]   = helpY * helpX * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+5][(4*i)+2]   = (helpX + helpZ) * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+5][(4*i)+3]   = helpY * helpZ * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+5][(4*i)+4]   = helpY / r;
-        for(int j=(4*i)+5; j<(6*4)+1; j++)
-            ret[(4*i)+5][j]     = 0;
-
-        for(int j=0; j<(4*i)+1; j++)
-            ret[(4*i)+6][j]     = 0;
-        ret[(4*i)+6][(4*i)+1]   = helpZ * helpX * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+6][(4*i)+2]   = helpZ * helpY * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+6][(4*i)+3]   = (helpX + helpY) * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+6][(4*i)+4]   = helpZ / r;
-        for(int j=(4*i)+5; j<(6*4)+1; j++)
-            ret[(4*i)+6][j]     = 0;
-
-        for(int j=0; j<(4*i)+4; j++)
-            ret[(4*i)+6][j]     = 0;
-        ret[(4*i)+7][(4*i)+4]   = 1;
-        for(int j=(4*i)+5; j<(6*4)+1; j++)
-            ret[(4*i)+6][j]     = 0;
+    case 0:
+        {
+            Double_t    h[9] = {GetPhotonPx(0, x, u), GetPhotonPy(0, x, u), GetPhotonPz(0, x, u), GetPhotonE(0, x),
+                                GetPhotonPx(1, x, u), GetPhotonPy(1, x, u), GetPhotonPz(1, x, u), GetPhotonE(1, x), MASS_ETA};
+            Double_t    dh[8] = {GetPhotonPx_DeriPar(0, x, u, derivate_i), GetPhotonPy_DeriPar(0, x, u, derivate_i), GetPhotonPz_DeriPar(0, x, u, derivate_i), GetPhotonE_DeriPar(0, x, derivate_i),
+                                 GetPhotonPx_DeriPar(1, x, u, derivate_i), GetPhotonPy_DeriPar(1, x, u, derivate_i), GetPhotonPz_DeriPar(1, x, u, derivate_i), GetPhotonE_DeriPar(1, x, derivate_i)};
+            Double_t    ret = 0;
+            for(int i=0; i<8; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            return ret;
+        }
+    case 1:
+        {
+            Double_t    h[9] = {GetPhotonPx(2, x, u), GetPhotonPy(2, x, u), GetPhotonPz(2, x, u), GetPhotonE(2, x),
+                                GetPhotonPx(3, x, u), GetPhotonPy(3, x, u), GetPhotonPz(3, x, u), GetPhotonE(3, x), MASS_PI0};
+            Double_t    dh[8] = {GetPhotonPx_DeriPar(2, x, u, derivate_i), GetPhotonPy_DeriPar(2, x, u, derivate_i), GetPhotonPz_DeriPar(2, x, u, derivate_i), GetPhotonE_DeriPar(2, x, derivate_i),
+                                 GetPhotonPx_DeriPar(3, x, u, derivate_i), GetPhotonPy_DeriPar(3, x, u, derivate_i), GetPhotonPz_DeriPar(3, x, u, derivate_i), GetPhotonE_DeriPar(3, x, derivate_i)};
+            Double_t    ret = 0;
+            for(int i=0; i<8; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            return ret;
+        }
+    case 2:
+        {
+            Double_t    h[9] = {GetPhotonPx(4, x, u), GetPhotonPy(4, x, u), GetPhotonPz(4, x, u), GetPhotonE(4, x),
+                                GetPhotonPx(5, x, u), GetPhotonPy(5, x, u), GetPhotonPz(5, x, u), GetPhotonE(5, x), MASS_PI0};
+            Double_t    dh[8] = {GetPhotonPx_DeriPar(4, x, u, derivate_i), GetPhotonPy_DeriPar(4, x, u, derivate_i), GetPhotonPz_DeriPar(4, x, u, derivate_i), GetPhotonE_DeriPar(4, x, derivate_i),
+                                 GetPhotonPx_DeriPar(5, x, u, derivate_i), GetPhotonPy_DeriPar(5, x, u, derivate_i), GetPhotonPz_DeriPar(5, x, u, derivate_i), GetPhotonE_DeriPar(5, x, derivate_i)};
+            Double_t    ret = 0;
+            for(int i=0; i<8; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            return ret;
+        }
+    case 3:
+        {
+            Double_t    h[29] = {GetReactionPx(x, u),  GetReactionPy(x, u),  GetReactionPz(x, u),  GetReactionE(x),
+                                 GetPhotonPx(0, x, u), GetPhotonPy(0, x, u), GetPhotonPz(0, x, u), GetPhotonE(0, x),
+                                 GetPhotonPx(1, x, u), GetPhotonPy(1, x, u), GetPhotonPz(1, x, u), GetPhotonE(1, x),
+                                 GetPhotonPx(2, x, u), GetPhotonPy(2, x, u), GetPhotonPz(2, x, u), GetPhotonE(2, x),
+                                 GetPhotonPx(3, x, u), GetPhotonPy(3, x, u), GetPhotonPz(3, x, u), GetPhotonE(3, x),
+                                 GetPhotonPx(4, x, u), GetPhotonPy(4, x, u), GetPhotonPz(4, x, u), GetPhotonE(4, x),
+                                 GetPhotonPx(5, x, u), GetPhotonPy(5, x, u), GetPhotonPz(5, x, u), GetPhotonE(5, x), MASS_PROTON};
+            Double_t    dh[28] = {GetReactionPx_DeriPar(x, u, derivate_i), GetReactionPy_DeriPar(x, u, derivate_i), GetReactionPz_DeriPar(x, u, derivate_i), GetReactionE_DeriPar(x, derivate_i),
+                                  GetPhotonPx_DeriPar(0, x, u, derivate_i), GetPhotonPy_DeriPar(0, x, u, derivate_i), GetPhotonPz_DeriPar(0, x, u, derivate_i), GetPhotonE_DeriPar(0, x, derivate_i),
+                                  GetPhotonPx_DeriPar(1, x, u, derivate_i), GetPhotonPy_DeriPar(1, x, u, derivate_i), GetPhotonPz_DeriPar(1, x, u, derivate_i), GetPhotonE_DeriPar(1, x, derivate_i),
+                                  GetPhotonPx_DeriPar(2, x, u, derivate_i), GetPhotonPy_DeriPar(2, x, u, derivate_i), GetPhotonPz_DeriPar(2, x, u, derivate_i), GetPhotonE_DeriPar(2, x, derivate_i),
+                                  GetPhotonPx_DeriPar(3, x, u, derivate_i), GetPhotonPy_DeriPar(3, x, u, derivate_i), GetPhotonPz_DeriPar(3, x, u, derivate_i), GetPhotonE_DeriPar(3, x, derivate_i),
+                                  GetPhotonPx_DeriPar(4, x, u, derivate_i), GetPhotonPy_DeriPar(4, x, u, derivate_i), GetPhotonPz_DeriPar(4, x, u, derivate_i), GetPhotonE_DeriPar(4, x, derivate_i),
+                                  GetPhotonPx_DeriPar(5, x, u, derivate_i), GetPhotonPy_DeriPar(5, x, u, derivate_i), GetPhotonPz_DeriPar(5, x, u, derivate_i), GetPhotonE_DeriPar(5, x, derivate_i)};
+            Double_t    ret = 0;
+            for(int i=0; i<28; i++)
+                ret += GKinFitterConstrainMisMass().DoDerivative(h, i) * dh[i];
+            return ret;
+        }
+    case 4:
+        {
+            Double_t    h[9] = {GetReactionPx(x, u),  GetReactionPy(x, u),  GetReactionPz(x, u),  GetReactionE(x), MASS_PROTON};
+            Double_t    dh[8] = {GetReactionPx_DeriPar(x, u, derivate_i), GetReactionPy_DeriPar(x, u, derivate_i), GetReactionPz_DeriPar(x, u, derivate_i), GetReactionE_DeriPar(x, derivate_i)};
+            Double_t    ret = 0;
+            for(int i=0; i<8; i++)
+                ret += GKinFitterConstrainBeam().DoDerivative(h, i) * dh[i];
+            return ret;
+        }
     }
 }
 
-void        GKinFitter::Get_lv_Derivated_Unk(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret)
+Double_t    GKinFitter::GetPhotonPx_DeriUnk(const Int_t i, const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
 {
-    Double_t    helpX = u[0][0]-u[3][0];
-    Double_t    helpY = u[1][0]-u[4][0];
-    Double_t    helpZ = u[2][0]+GKinFitter_RadiatorDist;
-    Double_t    r     = TMath::Sqrt((helpX*helpX)+(helpY*helpY)+(helpZ*helpZ));
-
-    ret[0][0]   = (helpY + helpZ) * x[0][0] / (r*r*r);
-    ret[0][1]   = helpX * helpY * x[0][0] / (r*r*r);
-    ret[0][2]   = helpX * helpZ * x[0][0] / (r*r*r);
-    ret[0][3]   = -(helpY + helpZ) * x[0][0] / (r*r*r);
-    ret[0][4]   = -helpX * helpY * x[0][0] / (r*r*r);
-
-    ret[1][0]   = helpY * helpX * x[0][0] / (r*r*r);
-    ret[1][1]   = (helpX + helpZ) * x[0][0] / (r*r*r);
-    ret[1][2]   = helpY * helpZ * x[0][0] / (r*r*r);
-    ret[1][3]   = -helpY * helpX * x[0][0] / (r*r*r);
-    ret[1][4]   = -(helpX + helpZ) * x[0][0] / (r*r*r);
-
-    ret[2][0]   = helpZ * helpX * x[0][0] / (r*r*r);
-    ret[2][1]   = helpZ * helpY * x[0][0] / (r*r*r);
-    ret[2][2]   = (helpX + helpY) * x[0][0] / (r*r*r);
-    ret[2][3]   = -helpZ * helpX * x[0][0] / (r*r*r);
-    ret[2][4]   = -helpZ * helpY * x[0][0] / (r*r*r);
-
-    ret[3][0]   = 0;
-    ret[3][1]   = 0;
-    ret[3][2]   = 0;
-    ret[3][3]   = 0;
-    ret[3][4]   = 0;
-
-    for(int i=0; i<6; i++)
-    {
-        helpX = x[(4*i)+1][0]-u[0][0];
-        helpY = x[(4*i)+2][0]-u[1][0];
-        helpZ = x[(4*i)+3][0]-u[2][0];
-        r     = TMath::Sqrt((helpX*helpX)+(helpY*helpY)+(helpZ*helpZ));
-
-        ret[(4*i)+4][0]   = -(helpY + helpZ) * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+4][1]   = -helpX * helpY * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+4][2]   = -helpX * helpZ * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+4][3]   = 0;
-        ret[(4*i)+4][4]   = 0;
-
-        ret[(4*i)+5][0]   = -helpY * helpX * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+5][1]   = -(helpX + helpZ) * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+5][2]   = -helpY * helpZ * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+5][3]   = 0;
-        ret[(4*i)+5][4]   = 0;
-
-        ret[(4*i)+6][0]   = -helpZ * helpX * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+6][1]   = -helpZ * helpY * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+6][2]   = -(helpX + helpY) * x[(4*i)+4][0] / (r*r*r);
-        ret[(4*i)+6][3]   = 0;
-        ret[(4*i)+6][4]   = 0;
-
-        ret[(4*i)+7][0]   = 0;
-        ret[(4*i)+7][1]   = 0;
-        ret[(4*i)+7][2]   = 0;
-        ret[(4*i)+7][3]   = 0;
-        ret[(4*i)+7][4]   = 0;
-    }
-
+    if(derivate_i>2)
+        return 0;
+    return GetPhotonPx(i, x, u, derivate_i+4);
 }
+Double_t    GKinFitter::GetPhotonPy_DeriUnk(const Int_t i, const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    if(derivate_i>2)
+        return 0;
+    return GetPhotonPy(i, x, u, derivate_i+4);
+}
+Double_t    GKinFitter::GetPhotonPz_DeriUnk(const Int_t i, const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    if(derivate_i>2)
+        return 0;
+    return GetPhotonPz(i, x, u, derivate_i+4);
+}
+Double_t    GKinFitter::GetConstraint_DeriUnk(const Int_t i, const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+{
+    switch(i)
+    {
+    case 0:
+        {
+            Double_t    h[9] = {GetPhotonPx(0, x, u), GetPhotonPy(0, x, u), GetPhotonPz(0, x, u), GetPhotonE(0, x),
+                                GetPhotonPx(1, x, u), GetPhotonPy(1, x, u), GetPhotonPz(1, x, u), GetPhotonE(1, x), MASS_ETA};
+            Double_t    dh[8] = {GetPhotonPx_DeriUnk(0, x, u, derivate_i), GetPhotonPy_DeriUnk(0, x, u, derivate_i), GetPhotonPz_DeriUnk(0, x, u, derivate_i), 0,
+                                 GetPhotonPx_DeriUnk(1, x, u, derivate_i), GetPhotonPy_DeriUnk(1, x, u, derivate_i), GetPhotonPz_DeriUnk(1, x, u, derivate_i), 0};
+            Double_t    ret = 0;
+            for(int i=0; i<3; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            for(int i=4; i<7; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            return ret;
+        }
+    case 1:
+        {
+            Double_t    h[9] = {GetPhotonPx(2, x, u), GetPhotonPy(2, x, u), GetPhotonPz(2, x, u), GetPhotonE(2, x),
+                                GetPhotonPx(3, x, u), GetPhotonPy(3, x, u), GetPhotonPz(3, x, u), GetPhotonE(3, x), MASS_PI0};
+            Double_t    dh[8] = {GetPhotonPx_DeriUnk(2, x, u, derivate_i), GetPhotonPy_DeriUnk(2, x, u, derivate_i), GetPhotonPz_DeriUnk(2, x, u, derivate_i), 0,
+                                 GetPhotonPx_DeriUnk(3, x, u, derivate_i), GetPhotonPy_DeriUnk(3, x, u, derivate_i), GetPhotonPz_DeriUnk(3, x, u, derivate_i), 0};
+            Double_t    ret = 0;
+            for(int i=0; i<3; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            for(int i=4; i<7; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            return ret;
+        }
+    case 2:
+        {
+            Double_t    h[9] = {GetPhotonPx(4, x, u), GetPhotonPy(4, x, u), GetPhotonPz(4, x, u), GetPhotonE(4, x),
+                                GetPhotonPx(5, x, u), GetPhotonPy(5, x, u), GetPhotonPz(5, x, u), GetPhotonE(5, x), MASS_PI0};
+            Double_t    dh[8] = {GetPhotonPx_DeriUnk(4, x, u, derivate_i), GetPhotonPy_DeriUnk(4, x, u, derivate_i), GetPhotonPz_DeriUnk(4, x, u, derivate_i), 0,
+                                 GetPhotonPx_DeriUnk(5, x, u, derivate_i), GetPhotonPy_DeriUnk(5, x, u, derivate_i), GetPhotonPz_DeriUnk(5, x, u, derivate_i), 0};
+            Double_t    ret = 0;
+            for(int i=0; i<3; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            for(int i=4; i<7; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            return ret;
+        }
+    case 3:
+        {
+            Double_t    h[29] = {GetReactionPx(x, u),  GetReactionPy(x, u),  GetReactionPz(x, u),  GetReactionE(x),
+                                 GetPhotonPx(0, x, u), GetPhotonPy(0, x, u), GetPhotonPz(0, x, u), GetPhotonE(0, x),
+                                 GetPhotonPx(1, x, u), GetPhotonPy(1, x, u), GetPhotonPz(1, x, u), GetPhotonE(1, x),
+                                 GetPhotonPx(2, x, u), GetPhotonPy(2, x, u), GetPhotonPz(2, x, u), GetPhotonE(2, x),
+                                 GetPhotonPx(3, x, u), GetPhotonPy(3, x, u), GetPhotonPz(3, x, u), GetPhotonE(3, x),
+                                 GetPhotonPx(4, x, u), GetPhotonPy(4, x, u), GetPhotonPz(4, x, u), GetPhotonE(4, x),
+                                 GetPhotonPx(5, x, u), GetPhotonPy(5, x, u), GetPhotonPz(5, x, u), GetPhotonE(5, x), MASS_PROTON};
+            Double_t    dh[28] = {GetReactionPx_DeriUnk(x, u, derivate_i), GetReactionPy_DeriUnk(x, u, derivate_i), GetReactionPz_DeriUnk(x, u, derivate_i), 0,
+                                  GetPhotonPx_DeriUnk(0, x, u, derivate_i), GetPhotonPy_DeriUnk(0, x, u, derivate_i), GetPhotonPz_DeriUnk(0, x, u, derivate_i), 0,
+                                  GetPhotonPx_DeriUnk(1, x, u, derivate_i), GetPhotonPy_DeriUnk(1, x, u, derivate_i), GetPhotonPz_DeriUnk(1, x, u, derivate_i), 0,
+                                  GetPhotonPx_DeriUnk(2, x, u, derivate_i), GetPhotonPy_DeriUnk(2, x, u, derivate_i), GetPhotonPz_DeriUnk(2, x, u, derivate_i), 0,
+                                  GetPhotonPx_DeriUnk(3, x, u, derivate_i), GetPhotonPy_DeriUnk(3, x, u, derivate_i), GetPhotonPz_DeriUnk(3, x, u, derivate_i), 0,
+                                  GetPhotonPx_DeriUnk(4, x, u, derivate_i), GetPhotonPy_DeriUnk(4, x, u, derivate_i), GetPhotonPz_DeriUnk(4, x, u, derivate_i), 0,
+                                  GetPhotonPx_DeriUnk(5, x, u, derivate_i), GetPhotonPy_DeriUnk(5, x, u, derivate_i), GetPhotonPz_DeriUnk(5, x, u, derivate_i), 0};
+            Double_t    ret = 0;
+            for(int i=0; i<3; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            for(int i=4; i<7; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            for(int i=8; i<11; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            for(int i=12; i<15; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            for(int i=16; i<19; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            for(int i=20; i<23; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            for(int i=24; i<27; i++)
+                ret += GKinFitterConstrainInvMass().DoDerivative(h, i) * dh[i];
+            return ret;
+        }
+    /*case 4:
+        {
+            Double_t    h[5] = {GetReactionPx(x, u),  GetReactionPy(x, u),  GetReactionPz(x, u),  GetReactionE(x), MASS_PROTON};
+            Double_t    dh[3] = {GetReactionPx_DeriUnk(x, u, derivate_i), GetReactionPy_DeriUnk(x, u, derivate_i), GetReactionPz_DeriUnk(x, u, derivate_i)};
+            Double_t    ret = 0;
+            for(int i=0; i<3; i++)
+            {
+                ret += GKinFitterConstrainBeam().DoDerivative(h, i) * dh[i];
+                std::cout << "gfkf " << ret << std::endl;
+            }
+            return ret;
+        }*/
+    }
+}
+
+
 
 void        GKinFitter::Get_g(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret)
 {
-    TMatrixD    lv(7*4, 1);
-    Get_lv(x, u, lv);
-
-    Double_t    helpX = lv[4][0]+lv[8][0];
-    Double_t    helpY = lv[5][0]+lv[9][0];
-    Double_t    helpZ = lv[6][0]+lv[10][0];
-    Double_t    helpE = lv[7][0]+lv[11][0];
-    ret[0][0]   = (helpE * helpE) - (helpX * helpX) - (helpY * helpY) - (helpZ * helpZ) - (MASS_ETA * MASS_ETA);
-
-    helpX = lv[12][0]+lv[16][0];
-    helpY = lv[13][0]+lv[17][0];
-    helpZ = lv[14][0]+lv[18][0];
-    helpE = lv[15][0]+lv[19][0];
-    ret[1][0]   = (helpE * helpE) - (helpX * helpX) - (helpY * helpY) - (helpZ * helpZ) - (MASS_PI0 * MASS_PI0);
-
-    helpX = lv[20][0]+lv[24][0];
-    helpY = lv[21][0]+lv[25][0];
-    helpZ = lv[22][0]+lv[26][0];
-    helpE = lv[23][0]+lv[27][0];
-    ret[2][0]   = (helpE * helpE) - (helpX * helpX) - (helpY * helpY) - (helpZ * helpZ) - (MASS_PI0 * MASS_PI0);
-
-    helpX = lv[0][0] - lv[4][0] - lv[8][0]  - lv[12][0] - lv[16][0] - lv[20][0] - lv[24][0];
-    helpY = lv[1][0] - lv[5][0] - lv[9][0]  - lv[13][0] - lv[17][0] - lv[21][0] - lv[25][0];
-    helpZ = lv[2][0] - lv[6][0] - lv[10][0] - lv[14][0] - lv[18][0] - lv[22][0] - lv[26][0];
-    helpE = lv[3][0] - lv[7][0] - lv[11][0] - lv[15][0] - lv[19][0] - lv[23][0] - lv[27][0];
-    ret[3][0]   = (helpE * helpE) - (helpX * helpX) - (helpY * helpY) - (helpZ * helpZ) - (MASS_PROTON * MASS_PROTON);
+    for(int i=0; i<nCon; i++)
+        ret[i][0] = GetConstraint(i, x, u);
 }
-
-void        GKinFitter::Get_g_Derivated_Par(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret)
+void        GKinFitter::Get_g_DeriPar(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret)
 {
-    TMatrixD    lv(7*4, 1);
-    TMatrixD    dlv_par(7*4, 25);
-    Get_lv(x, u, lv);
-    Get_lv_Derivated_Par(x, u, dlv_par);
-
-    Double_t    helpX = lv[4][0]+lv[8][0];
-    Double_t    helpY = lv[5][0]+lv[9][0];
-    Double_t    helpZ = lv[6][0]+lv[10][0];
-    Double_t    helpE = lv[7][0]+lv[11][0];
-    ret[0][0]   = 0;
-    for(int i=1; i<9; i++)
+    for(int i=0; i<nCon; i++)
     {
-        Double_t    dhelpX = dlv_par[4][i]+dlv_par[8][i];
-        Double_t    dhelpY = dlv_par[5][i]+dlv_par[9][i];
-        Double_t    dhelpZ = dlv_par[6][i]+dlv_par[10][i];
-        Double_t    dhelpE = dlv_par[7][i]+dlv_par[11][i];
-        ret[0][i]   = 2 * helpE * dhelpE - 2 * helpX * dhelpX - 2 * helpY * dhelpY - 2 * helpZ * dhelpZ;
-    }
-    for(int i=9; i<25; i++)
-        ret[0][i]   = 0;
-
-
-    helpX = lv[12][0]+lv[16][0];
-    helpY = lv[13][0]+lv[17][0];
-    helpZ = lv[14][0]+lv[18][0];
-    helpE = lv[15][0]+lv[19][0];
-    for(int i=0; i<9; i++)
-        ret[1][i]   = 0;
-    for(int i=9; i<17; i++)
-    {
-        Double_t    dhelpX = dlv_par[12][i]+dlv_par[16][i];
-        Double_t    dhelpY = dlv_par[13][i]+dlv_par[17][i];
-        Double_t    dhelpZ = dlv_par[14][i]+dlv_par[18][i];
-        Double_t    dhelpE = dlv_par[15][i]+dlv_par[19][i];
-        ret[1][i]   = 2 * helpE * dhelpE - 2 * helpX * dhelpX - 2 * helpY * dhelpY - 2 * helpZ * dhelpZ;
-    }
-    for(int i=17; i<25; i++)
-        ret[1][i]   = 0;
-
-
-    helpX = lv[20][0]+lv[24][0];
-    helpY = lv[21][0]+lv[25][0];
-    helpZ = lv[22][0]+lv[26][0];
-    helpE = lv[23][0]+lv[27][0];
-    for(int i=0; i<17; i++)
-        ret[2][i]   = 0;
-    for(int i=17; i<25; i++)
-    {
-        Double_t    dhelpX = dlv_par[20][i]+dlv_par[24][i];
-        Double_t    dhelpY = dlv_par[21][i]+dlv_par[25][i];
-        Double_t    dhelpZ = dlv_par[22][i]+dlv_par[26][i];
-        Double_t    dhelpE = dlv_par[23][i]+dlv_par[27][i];
-        ret[2][i]   = 2 * helpE * dhelpE - 2 * helpX * dhelpX - 2 * helpY * dhelpY - 2 * helpZ * dhelpZ;
-    }
-
-    helpX = lv[0][0] - lv[4][0] - lv[8][0]  - lv[12][0] - lv[16][0] - lv[20][0] - lv[24][0];
-    helpY = lv[1][0] - lv[5][0] - lv[9][0]  - lv[13][0] - lv[17][0] - lv[21][0] - lv[25][0];
-    helpZ = lv[2][0] - lv[6][0] - lv[10][0] - lv[14][0] - lv[18][0] - lv[22][0] - lv[26][0];
-    helpE = lv[3][0] - lv[7][0] - lv[11][0] - lv[15][0] - lv[19][0] - lv[23][0] - lv[27][0];
-    for(int i=0; i<25; i++)
-    {
-        Double_t    dhelpX = dlv_par[0][i] - dlv_par[4][i] - dlv_par[8][i]  - dlv_par[12][i] - dlv_par[16][i] - dlv_par[20][i] - dlv_par[24][i];
-        Double_t    dhelpY = dlv_par[1][i] - dlv_par[5][i] - dlv_par[9][i]  - dlv_par[13][i] - dlv_par[17][i] - dlv_par[21][i] - dlv_par[25][i];
-        Double_t    dhelpZ = dlv_par[2][i] - dlv_par[6][i] - dlv_par[10][i] - dlv_par[14][i] - dlv_par[18][i] - dlv_par[22][i] - dlv_par[26][i];
-        Double_t    dhelpE = dlv_par[3][i] - dlv_par[7][i] - dlv_par[11][i] - dlv_par[15][i] - dlv_par[19][i] - dlv_par[23][i] - dlv_par[27][i];
-        ret[3][i]   = 2 * helpE * dhelpE - 2 * helpX * dhelpX - 2 * helpY * dhelpY - 2 * helpZ * dhelpZ;
+        for(int p=0; p<nPar; p++)
+            ret[i][p] = GetConstraint_DeriPar(i, x, u, p);
     }
 }
-
-void        GKinFitter::Get_g_Derivated_Unk(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret)
+void        GKinFitter::Get_g_DeriUnk(const TMatrixD& x, const TMatrixD& u, TMatrixD& ret)
 {
-    TMatrixD    lv(7*4, 1);
-    TMatrixD    dlv_unk(7*4, 5);
-    Get_lv(x, u, lv);
-    Get_lv_Derivated_Unk(x, u, dlv_unk);
-
-    Double_t    helpX = lv[4][0]+lv[8][0];
-    Double_t    helpY = lv[5][0]+lv[9][0];
-    Double_t    helpZ = lv[6][0]+lv[10][0];
-    Double_t    helpE = lv[7][0]+lv[11][0];
-    for(int i=0; i<3; i++)
+    for(int i=0; i<nCon; i++)
     {
-        Double_t    dhelpX = dlv_unk[4][i]+dlv_unk[8][i];
-        Double_t    dhelpY = dlv_unk[5][i]+dlv_unk[9][i];
-        Double_t    dhelpZ = dlv_unk[6][i]+dlv_unk[10][i];
-        Double_t    dhelpE = dlv_unk[7][i]+dlv_unk[11][i];
-        ret[0][i]   = 2 * helpE * dhelpE - 2 * helpX * dhelpX - 2 * helpY * dhelpY - 2 * helpZ * dhelpZ;
-    }
-    for(int i=3; i<5; i++)
-        ret[0][i]   = 0;
-
-
-    helpX = lv[12][0]+lv[16][0];
-    helpY = lv[13][0]+lv[17][0];
-    helpZ = lv[14][0]+lv[18][0];
-    helpE = lv[15][0]+lv[19][0];
-    for(int i=0; i<3; i++)
-    {
-        Double_t    dhelpX = dlv_unk[12][i]+dlv_unk[16][i];
-        Double_t    dhelpY = dlv_unk[13][i]+dlv_unk[17][i];
-        Double_t    dhelpZ = dlv_unk[14][i]+dlv_unk[18][i];
-        Double_t    dhelpE = dlv_unk[15][i]+dlv_unk[19][i];
-        ret[1][i]   = 2 * helpE * dhelpE - 2 * helpX * dhelpX - 2 * helpY * dhelpY - 2 * helpZ * dhelpZ;
-    }
-    for(int i=3; i<5; i++)
-        ret[1][i]   = 0;
-
-
-    helpX = lv[20][0]+lv[24][0];
-    helpY = lv[21][0]+lv[25][0];
-    helpZ = lv[22][0]+lv[26][0];
-    helpE = lv[23][0]+lv[27][0];
-    for(int i=0; i<3; i++)
-    {
-        Double_t    dhelpX = dlv_unk[20][i]+dlv_unk[24][i];
-        Double_t    dhelpY = dlv_unk[21][i]+dlv_unk[25][i];
-        Double_t    dhelpZ = dlv_unk[22][i]+dlv_unk[26][i];
-        Double_t    dhelpE = dlv_unk[23][i]+dlv_unk[27][i];
-        ret[2][i]   = 2 * helpE * dhelpE - 2 * helpX * dhelpX - 2 * helpY * dhelpY - 2 * helpZ * dhelpZ;
-    }
-    for(int i=3; i<5; i++)
-        ret[2][i]   = 0;
-
-    helpX = lv[0][0] - lv[4][0] - lv[8][0]  - lv[12][0] - lv[16][0] - lv[20][0] - lv[24][0];
-    helpY = lv[1][0] - lv[5][0] - lv[9][0]  - lv[13][0] - lv[17][0] - lv[21][0] - lv[25][0];
-    helpZ = lv[2][0] - lv[6][0] - lv[10][0] - lv[14][0] - lv[18][0] - lv[22][0] - lv[26][0];
-    helpE = lv[3][0] - lv[7][0] - lv[11][0] - lv[15][0] - lv[19][0] - lv[23][0] - lv[27][0];
-    for(int i=0; i<5; i++)
-    {
-        Double_t    dhelpX = dlv_unk[0][i] - dlv_unk[4][i] - dlv_unk[8][i]  - dlv_unk[12][i] - dlv_unk[16][i] - dlv_unk[20][i] - dlv_unk[24][i];
-        Double_t    dhelpY = dlv_unk[1][i] - dlv_unk[5][i] - dlv_unk[9][i]  - dlv_unk[13][i] - dlv_unk[17][i] - dlv_unk[21][i] - dlv_unk[25][i];
-        Double_t    dhelpZ = dlv_unk[2][i] - dlv_unk[6][i] - dlv_unk[10][i] - dlv_unk[14][i] - dlv_unk[18][i] - dlv_unk[22][i] - dlv_unk[26][i];
-        Double_t    dhelpE = dlv_unk[3][i] - dlv_unk[7][i] - dlv_unk[11][i] - dlv_unk[15][i] - dlv_unk[19][i] - dlv_unk[23][i] - dlv_unk[27][i];
-        ret[3][i]   = 2 * helpE * dhelpE - 2 * helpX * dhelpX - 2 * helpY * dhelpY - 2 * helpZ * dhelpZ;
+        for(int p=0; p<nUnk; p++)
+            ret[i][p] = GetConstraint_DeriUnk(i, x, u, p);
     }
 }
 
-void        GKinFitter::Get_r(const TMatrixD& x, const TMatrixD& u, const TMatrixD& g_Derivated_Par, const TMatrixD& g, TMatrixD& ret)
+void        GKinFitter::Get_r(const TMatrixD& x, const TMatrixD& u, const TMatrixD& g_DeriPar, const TMatrixD& g, TMatrixD& ret)
 {
     TMatrixD    dpar(par0);
                 dpar -= x;
-    ret = g + (g_Derivated_Par * dpar);
+    ret = g + (g_DeriPar * dpar);
 }
 
 void        GKinFitter::Get_S(const TMatrixD& g_Derivated_Par, TMatrixD& ret)
@@ -579,11 +401,6 @@ void        GKinFitter::Get_S(const TMatrixD& g_Derivated_Par, TMatrixD& ret)
     g_Derivated_Par_T.T();
 
     ret = g_Derivated_Par * V0 * g_Derivated_Par_T;
-
-    g_Derivated_Par.Print();
-    V0.Print();
-    g_Derivated_Par_T.Print();
-    ret.Print();
 }
 
 Double_t    GKinFitter::Calc_Chi2(const TMatrixD& x, const TMatrixD& g)
@@ -597,6 +414,7 @@ Double_t    GKinFitter::Calc_Chi2(const TMatrixD& x, const TMatrixD& g)
     TMatrixD    help1(lambda_T * g);
     return  help0[0][0] + (2 * help1[0][0]);
 }
+
 
 /*
 TVector3        GKinFitter::GetMainVertex_Derivated_Unk(const Int_t index_m, const TMatrixD &u)
@@ -816,8 +634,6 @@ TMatrixD        GKinFitter::Get_g_Derivated_Unk(const Int_t index_k, const TMatr
 }*/
 
 
-
-
 void GKinFitter::Constraints()
 {
     /*
@@ -923,6 +739,7 @@ TLorentzVector  GKinFitter::GetPi0b()
     return ret;
 }*/
 
+
 void    GKinFitter::Set(const GKinFitterPolarToCartesian& v)
 {
     par0    = v.GetParametersH();
@@ -934,14 +751,14 @@ void    GKinFitter::Set(const GKinFitterPolarToCartesian& v)
 
 Bool_t  GKinFitter::SolveStep(const TMatrixD& x, const TMatrixD& u, TMatrixD& new_x, TMatrixD& new_u, Double_t& chiSq)
 {
-    TMatrixD    g_Derivated_Par(4, 25);
-    Get_g_Derivated_Par(x, u, g_Derivated_Par);
-    //g_Derivated_Par.Print();
-    TMatrixD    g_Derivated_Par_T(g_Derivated_Par);
-    g_Derivated_Par_T.T();
+    TMatrixD    g_DeriPar(nCon, nPar);
+    Get_g_DeriPar(x, u, g_DeriPar);
+    //g_DeriPar.Print();
+    TMatrixD    g_DeriPar_T(g_DeriPar);
+    g_DeriPar_T.T();
     //g_Derivated_Par_T.Print();
-    TMatrixD    S_Inverted(4, 4);
-    Get_S(g_Derivated_Par, S_Inverted);
+    TMatrixD    S_Inverted(nCon, nCon);
+    Get_S(g_DeriPar, S_Inverted);
     //S_Inverted.Print();
     Double_t    determinant;
     S_Inverted.Invert(&determinant);
@@ -952,44 +769,90 @@ Bool_t  GKinFitter::SolveStep(const TMatrixD& x, const TMatrixD& u, TMatrixD& ne
     }
     //S_Inverted.Print();
 
-    TMatrixD    g_Derivated_Unk(4, 5);
-    Get_g_Derivated_Unk(x, u, g_Derivated_Unk);
-    TMatrixD    g_Derivated_Unk_T(g_Derivated_Unk);
-    g_Derivated_Unk_T.T();
+    TMatrixD    g_DeriUnk(nCon, nUnk);
+    Get_g_DeriUnk(x, u, g_DeriUnk);
+    TMatrixD    g_DeriUnk_T(g_DeriUnk);
+    g_DeriUnk_T.T();
 
-    TMatrixD    help(g_Derivated_Unk_T * S_Inverted * g_Derivated_Unk);
-    //help.Print();
+    TMatrixD    help(g_DeriUnk_T * S_Inverted * g_DeriUnk);
+    //g_DeriUnk.Print();
     help.Invert(&determinant);
+    //std::cout << determinant << std::endl;
+    //g_DeriUnk.Print();
     if(determinant==0)
     {
         std::cout << "Can not invert help in KinFitter::SolveStep" << std::endl;
         return kFALSE;
     }
 
-    TMatrixD    g(4, 1);
-    TMatrixD    r(4, 1);
+    TMatrixD    g(nCon, 1);
+    TMatrixD    r(nCon, 1);
     Get_g(x, u, g);
-    Get_r(x, u, g_Derivated_Par, g, r);
+    Get_r(x, u, g_DeriPar, g, r);
 
-    new_u   = u - (help * g_Derivated_Unk_T * S_Inverted * r);
-    lambda  = S_Inverted * (r + (g_Derivated_Unk * (new_u - u)));
-    new_x   = par0 - (V0 * g_Derivated_Par_T * lambda);
+    new_u   = u - (help * g_DeriUnk_T * S_Inverted * r);
+    lambda  = S_Inverted * (r + (g_DeriUnk * (new_u - u)));
+    new_x   = par0 - (V0 * g_DeriPar_T * lambda);
 
     chiSq   = Calc_Chi2(new_x, g);
+    std::cout << chiSq << std::endl;
+
+    std::cout << "Beam: ";
+    std::cout << GetReactionPx(new_x, new_u) << "   ";
+    std::cout << GetReactionPy(new_x, new_u) << "   ";
+    std::cout << GetReactionPz(new_x, new_u) << "   ";
+    std::cout << GetReactionE(new_x) << "   " << std::endl;
+    for(int i=0; i<6; i++)
+    {
+        std::cout << "Photon: ";
+        std::cout << GetPhotonPx(i, new_x, new_u) << "   ";
+        std::cout << GetPhotonPy(i, new_x, new_u) << "   ";
+        std::cout << GetPhotonPz(i, new_x, new_u) << "   ";
+        std::cout << GetPhotonE(i, new_x) << "   " << std::endl;
+    }
+    for(int i=0; i<nUnk; i++)
+    {
+        std::cout << "Vertex " << i << ": ";
+        std::cout << new_u[i][0] << std::endl;
+    }
+    for(int i=0; i<nCon; i++)
+    {
+        std::cout << "Constraints " << i << ": ";
+        std::cout << GetConstraint(i, new_x, new_u) << std::endl;
+    }
 
     return kTRUE;
 }
 
 Bool_t  GKinFitter::Solve()
 {
+    std::cout << "Beam: ";
+    std::cout << GetInitialReactionPx() << "   ";
+    std::cout << GetInitialReactionPy() << "   ";
+    std::cout << GetInitialReactionPz() << "   ";
+    std::cout << GetInitialReactionE() << "   " << std::endl;
+    for(int i=0; i<6; i++)
+    {
+        std::cout << "Photon: ";
+        std::cout << GetInitialPhotonPx(i) << "   ";
+        std::cout << GetInitialPhotonPy(i) << "   ";
+        std::cout << GetInitialPhotonPz(i) << "   ";
+        std::cout << GetInitialPhotonE(i) << "   " << std::endl;
+    }
+    for(int i=0; i<nCon; i++)
+    {
+        std::cout << "Constraints " << i << ": ";
+        std::cout << GetConstraint(i, par0, unk0) << std::endl;
+    }
     if(SolveStep(par0, unk0, par, unk, chi2)==kFALSE)
     {
         std::cout << "first SolveStep not working in KinFitter::Solve" << std::endl;
         return kFALSE;
     }
+    std::cout << "ChiSq: "<< chi2 << std::endl;
 
-    TMatrixD    new_x((6*4)+1, 1);
-    TMatrixD    new_u(5, 1);
+    TMatrixD    new_x(nPar, 1);
+    TMatrixD    new_u(nUnk, 1);
     Double_t    newChi2;
 
     for(int i=0; i<20; i++)
@@ -999,6 +862,7 @@ Bool_t  GKinFitter::Solve()
             std::cout << i << " SolveStep not working in KinFitter::Solve" << std::endl;
             return kFALSE;
         }
+        std::cout << "ChiSq: "<< newChi2 << std::endl;
         if(newChi2<chi2)
         {
             chi2    = newChi2;

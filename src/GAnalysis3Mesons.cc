@@ -11,8 +11,8 @@ GAnalysis3Mesons::GAnalysis3Mesons(const char* name, const char* title, const Bo
     hist_SubImCut(TString(name).Append("SubImCut"), TString(title).Append("SubImCut"), kFALSE),
     hist_MMCut(TString(name).Append("MMCut"), TString(title).Append("MMCut"), kFALSE),
     fit(),
-    hist_fit(TString(name).Append("_SubImCut_fit"), TString(title).Append(" SubImCut fit"), 40, kFALSE),
-    hist_SubImCut_fit(TString(name).Append("fit"), TString(title).Append("fit"), 40, kFALSE)
+    hist_fit(TString(name).Append("_SubImCut_fit"), TString(title).Append(" SubImCut fit"), 25, kFALSE),
+    hist_SubImCut_fit(TString(name).Append("fit"), TString(title).Append("fit"), 25, kFALSE)
 {
     if(_IsEtap==kTRUE)
         SetCutSubIM(0, 497, 697);
