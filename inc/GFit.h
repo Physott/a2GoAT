@@ -42,8 +42,6 @@ public:
     virtual Int_t       Fill(Double_t x)                {}
     virtual Int_t       Fill(GKinFitter& fitter, const Double_t taggerTime);
     virtual Int_t       Fill(GKinFitter& fitter, const Double_t taggerTime, const Int_t taggerChannel);
-    virtual Int_t       Fill(GKinFitterWithProton& fitter, const Double_t taggerTime);
-    virtual Int_t       Fill(GKinFitterWithProton& fitter, const Double_t taggerTime, const Int_t taggerChannel);
     virtual void        PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void        Reset(Option_t* option = "");
     virtual void        ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads = kFALSE);
@@ -89,8 +87,6 @@ public:
     virtual Int_t       Fill(Double_t x)                {}
     virtual Int_t       Fill(GKinFitter& fitter, const Double_t taggerTime);
     virtual Int_t       Fill(GKinFitter& fitter, const Double_t taggerTime, const Int_t taggerChannel);
-    virtual Int_t       Fill(GKinFitterWithProton& fitter, const Double_t taggerTime);
-    virtual Int_t       Fill(GKinFitterWithProton& fitter, const Double_t taggerTime, const Int_t taggerChannel);
     virtual void        PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void        Reset(Option_t* option = "");
             void        ResetCount()                    {count = 0;}

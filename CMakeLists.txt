@@ -196,7 +196,7 @@ add_executable(MyPhysics
    #inc/GKinFitterParticle.h
    inc/GKinFitterConverter.h
    inc/GKinFitter.h
-   inc/GKinFitterWithProton.h
+   #inc/GKinFitterWithProton.h
    inc/GFit.h
    #inc/GHistFit.h
    inc/GHistEvent.h
@@ -227,7 +227,7 @@ add_executable(MyPhysics
    #src/GKinFitterParticle.cc
    src/GKinFitterConverter.cc
    src/GKinFitter.cc
-   src/GKinFitterWithProton.cc
+   #src/GKinFitterWithProton.cc
    src/GFit.cc
    #src/GHistFit.cc
    src/GHistEvent.cc

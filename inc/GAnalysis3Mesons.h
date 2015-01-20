@@ -64,7 +64,7 @@ private:
     GHistEvent3Mesons   hist_MMCut;
     GHistFit            hist_fit;
 
-    GKinFitterWithProton        fit;
+    GKinFitter          fit;
 
 protected:
 

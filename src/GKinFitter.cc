@@ -18,23 +18,27 @@
 
 
 
-GKinFitter::GKinFitter()    :
-    nPar((6*4)+1),
-    nUnk(3),
-    nCon(1+3),
-    fNiter(0),
+GKinFitter::GKinFitter(const Int_t nParticles, const Int_t nConstraints, const GKinFitterFitType type)    :
+    nPart(nParticles),
+    nUnk(Int_t(type)),
+    nCon(nConstraints),
+    fitType(type),
+    nPar(GetNParameters()),
+    countPart(nParticles),
+    countCon(nConstraints),
+    countIter(0),
     par0(nPar,1),
     par(nPar,1),
     unk0(nUnk,1),
     unk(nUnk,1),
     lambda(nCon,1),
-    V0(nPar,nPar),
-    V(nPar,nPar),
+    V0(nPar, nPar),
+    V(nPar, nPar),
     //fmD(nCon,nPar),
     //fmd(nCon,1),
     //fmlamda(nCon,1),
     //fmV_D(nCon,nCon),
-    chi2(0)//,
+    chiSq(0)//,
     //fPtot(0, 0, 0, 0),
     //solved(kFALSE)
 {
@@ -45,7 +49,190 @@ GKinFitter::~GKinFitter()
 
 }
 
-Double_t    GKinFitter::GetReactionPx(const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
+Int_t   GKinFitter::GetNParameters()
+{
+    switch(fitType)
+    {
+    case flagNoRecoil:
+    case flagUnknownRecoil:
+        return ((nPart+1)*GKinFitter_ParametersPerParticle);    //+1 for the beam
+        return ((nPart+1)*GKinFitter_ParametersPerParticle);    //+1 for the beam
+    case flagRecoilAngles:
+        return ((nPart+1)*GKinFitter_ParametersPerParticle) + 2;    //+1 for the beam +2 for the recoil angles
+    }
+}
+
+
+//public members
+
+
+void            GKinFitter::AddBeam(const Double_t beamEnergy, const Double_t _targetMass, const Double_t beamEnergyError, const Double_t beamSpotRadius)
+{
+    targetMass  = _targetMass;
+    par0[0][0]  = beamEnergy;
+    par0[1][0]  = 0;
+    par0[2][0]  = 0;
+    V0[0][0]    = beamEnergyError*beamEnergyError;
+    V0[1][1]    = beamSpotRadius*beamSpotRadius/100;
+    V0[2][2]    = 2*TMath::Pi();
+}
+void            GKinFitter::AddGamma(const Double_t energy, const Double_t theta, const Double_t phi, const Double_t energyError, const Double_t thetaError, const Double_t phiError)
+{
+    if(countPart==nPart)
+    {
+        std::cout << "Can not add Particle. Already " << countPart << " there." << std::endl;
+        return;
+    }
+    par0[ (countPart+1)*GKinFitter_ParametersPerParticle   ][0]  = energy;
+    par0[((countPart+1)*GKinFitter_ParametersPerParticle)+1][0]  = theta;
+    par0[((countPart+1)*GKinFitter_ParametersPerParticle)+2][0]  = phi;
+    V0[ (countPart+1)*GKinFitter_ParametersPerParticle   ][ (countPart+1)*GKinFitter_ParametersPerParticle   ]    = energyError*energyError;
+    V0[((countPart+1)*GKinFitter_ParametersPerParticle)+1][((countPart+1)*GKinFitter_ParametersPerParticle)+1]    = thetaError*thetaError;
+    V0[((countPart+1)*GKinFitter_ParametersPerParticle)+2][((countPart+1)*GKinFitter_ParametersPerParticle)+2]    = phiError*phiError;
+    countPart++;
+}
+void            GKinFitter::AddRecoilAngles(const Double_t theta, const Double_t phi, const Double_t thetaError, const Double_t phiError)
+{
+    par0[ (nPart+1)*GKinFitter_ParametersPerParticle   ][0]  = theta;
+    par0[((nPart+1)*GKinFitter_ParametersPerParticle)+1][0]  = phi;
+    V0[ (nPart+1)*GKinFitter_ParametersPerParticle   ][ (nPart+1)*GKinFitter_ParametersPerParticle   ]    = thetaError*thetaError;
+    V0[((nPart+1)*GKinFitter_ParametersPerParticle)+1][((nPart+1)*GKinFitter_ParametersPerParticle)+1]    = phiError*phiError;
+}
+
+void            GKinFitter::Print(const char* option)
+{
+    std::cout << "GKinFitter: nPart=" << nPart << ", nUnk=" << nUnk << ", nCon=" << nCon;
+    if(fitType==flagNoRecoil)
+        std::cout << "   FitType: NoRecoil" << std::endl;
+    else if(fitType==flagUnknownRecoil)
+        std::cout << "   FitType: UnknownRecoil" << std::endl;
+    else if(fitType==flagRecoilAngles)
+        std::cout << "   FitType: RecoilAngles" << std::endl;
+
+    TString str(option);
+    str.ToLower();
+    if(strcmp(str.Data(), "input")==0)
+    {
+        if(countPart<nPart)
+            std::cout << "Input not completed. Only " << countPart << " Particles added yet." << std::endl;
+        std::cout << "Input Parameters GKinFitter::par0     beam, particles, recoil angles(optional)" << std::endl;
+        par0.Print();
+        std::cout << "Input Covariance Matrix GKinFitter::V0     beam, particles, recoil angles(optional)" << std::endl;
+        V0.Print();
+    }
+}
+
+Bool_t          GKinFitter::SolveStep(TMatrixD& par, TMatrixD& unk, const TMatrixD& oldPar, const TMatrixD& oldUnk)
+{
+    TMatrixD    gPar(nCon, nPar);
+    gDerivatePar(gPar, oldPar, oldUnk);
+    TMatrixD    gParT(gPar);
+    gParT.T();
+
+    TMatrixD    S(gPar*V0*gParT);
+    Double_t    determinant    = S.Determinant();
+    if(determinant==0)
+        return kFALSE;
+    TMatrixD    SInv(S);
+    SInv.Invert();
+
+
+    TMatrixD    gUnk(nCon, nPar);
+    gDerivateUnk(gUnk, oldPar, oldUnk);
+    TMatrixD    gUnkT(gUnk);
+    gUnkT.T();
+    TMatrixD    T(gUnkT*SInv*gUnk);
+    determinant    = T.Determinant();
+    if(determinant==0)
+        return kFALSE;
+    TMatrixD    TInv(T);
+    TInv.Invert();
+
+    TMatrixD    G(nCon, 1);
+    TMatrixD    R(nCon, 1);
+    g(G, oldPar, oldUnk);
+    r(R, oldPar, oldUnk, G);
+    unk  = oldUnk;
+    unk -= TInv*gUnkT*SInv*R;
+
+    TMatrixD    diff(unk);
+    diff    -= oldUnk;
+    TMatrixD    help(R);
+    help    += gUnk*diff;
+    lambda   = SInv*help;
+
+    par  = oldPar;
+    par -= V0*gParT*lambda;
+
+    if(CalcChiSq(par, unk, G)==kFALSE)
+        return kFALSE;
+    return kTRUE;
+}
+
+Bool_t          GKinFitter::Solve()
+{
+    //Calc Unk0
+    TLorentzVector    tot(-GKinFitterGamma().Beam(par, unk));
+    unk0[0][0]   = 0;
+    switch(fitType)
+    {
+    case flagNoRecoil:
+        break;
+    case flagUnknownRecoil:
+        for(int i=0; i<nPart; i++)
+            tot += GKinFitterGamma().Particle(i, par, unk);
+        unk0[0][1]   = tot.E();
+        unk0[0][2]   = tot.Theta();
+        unk0[0][3]   = tot.Phi();
+        break;
+    case flagRecoilAngles:
+        for(int i=0; i<nPart; i++)
+            tot += GKinFitterGamma().Particle(i, par, unk);
+        unk[0][1]   = tot.E();
+        break;
+    }
+
+    SolveStep(par, unk, par0, unk0);
+    Double_t    oldChiSq    = chiSq;
+    TMatrixD    newPar(par);
+    TMatrixD    newUnk(unk);
+    SolveStep(newPar, newUnk, par, unk);
+    countIter   = 1;
+    while(chiSq<oldChiSq)
+    {
+        oldChiSq    = chiSq;
+        par         = newPar;
+        unk         = newUnk;
+        countIter++;
+        SolveStep(newPar, newUnk, par, unk);
+    }
+}
+
+Bool_t    GKinFitter::CalcChiSq(const TMatrixD& par, const TMatrixD& unk, const TMatrixD& g)
+{
+    TMatrixD    lambdaT(lambda);
+    lambdaT.T();
+    TMatrixD    res(lambdaT*g);
+    res *= 2;
+
+    TMatrixD    diff(par0);
+    diff    -=  par;
+    TMatrixD    diffT(diff);
+    diffT.T();
+
+    TMatrixD    V0Inv(V0);
+    Double_t    determinant    = V0Inv.Determinant();
+    if(determinant==0)
+        return kFALSE;
+    V0Inv.Invert();
+    TMatrixD    help(diffT*V0Inv*diff);
+    res += help;
+
+    chiSq   = res[0][0];
+    return kTRUE;
+}
+
+/*Double_t    GKinFitter::GetReactionPx(const TMatrixD& x, const TMatrixD& u, const Int_t derivate_i)
 {
     Double_t h[7] = {u[0][0],u[1][0],u[2][0], x[0][0],0,0,-10500};
     if(derivate_i<0)
@@ -360,9 +547,8 @@ Double_t    GKinFitter::GetConstraint_DeriUnk(const Int_t i, const TMatrixD& x, 
                 std::cout << "gfkf " << ret << std::endl;
             }
             return ret;
-        }*/
-    }
-}
+        }    //}
+//}
 
 
 
@@ -634,7 +820,7 @@ TMatrixD        GKinFitter::Get_g_Derivated_Unk(const Int_t index_k, const TMatr
 }*/
 
 
-void GKinFitter::Constraints()
+/*void GKinFitter::Constraints()
 {
     /*
   //Add up the particle 4 vectors
@@ -699,7 +885,7 @@ void GKinFitter::Constraints()
         fmD[3][4*i+18] =-2*all.Z();
         fmD[3][4*i+19] = 2*all.T();
     }*/
-}
+//}
 
 /*TLorentzVector  GKinFitter::GetEta()
 {
@@ -740,7 +926,7 @@ TLorentzVector  GKinFitter::GetPi0b()
 }*/
 
 
-void    GKinFitter::Set(const GKinFitterPolarToCartesian& v)
+/*void    GKinFitter::Set(const GKinFitterPolarToCartesian& v)
 {
     par0    = v.GetParametersH();
     V0      = v.GetCovarianceH();
@@ -875,4 +1061,4 @@ Bool_t  GKinFitter::Solve()
 
     std::cout << "No solution after 20 steps in KinFitter::Solve" << std::endl;
     return kFALSE;
-}
+}*/
