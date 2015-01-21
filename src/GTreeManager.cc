@@ -120,6 +120,7 @@ Bool_t  GTreeManager::StartFile(const char* input_filename, const char* output_f
     }
     cout << "Opened input file " << file_in->GetName() << "!" << file_in->GetTitle() << endl;
 
+    std::cout << treeList.GetEntries() << std::endl;
     for(int l=0; l<treeList.GetEntries(); l++)
     {
         if(file_in->Get(((GTree*)treeList[l])->GetName()))
@@ -127,6 +128,7 @@ Bool_t  GTreeManager::StartFile(const char* input_filename, const char* output_f
     }
     for(int l=0; l<treeCorreleatedToScalerReadList.GetEntries(); l++)
     {
+        std::cout << treeCorreleatedToScalerReadList[l]->GetName() << std::endl;
         if(file_in->Get(((GTree*)treeCorreleatedToScalerReadList[l])->GetName()))
             ((GTree*)treeCorreleatedToScalerReadList[l])->OpenForInput();
     }

@@ -19,6 +19,73 @@ MyPhysics::~MyPhysics()
 
 Bool_t	MyPhysics::Start()
 {
+    TLorentzVector  g0(0.0, 134.98/2, 0.0, 134.98/2);
+    TLorentzVector  g1(0.0, -134.98/2, 0.0, 134.98/2);
+    TLorentzVector  pi(g0+g1);
+    //pi.Print();
+
+    g0.Boost(0.0, 0.3, 0.9);
+    g1.Boost(0.0, 0.3, 0.9);
+    pi.Boost(0.0, 0.3, 0.9);
+    //g0.Print();
+    //g1.Print();
+    //pi.Print();
+
+    TLorentzVector  p(-pi.Px(), -pi.Py(), -pi.Pz(), sqrt((pi.P()*pi.P())+(938.27*938.27)));
+    //p.Print();
+
+    TLorentzVector  b(pi+p);
+    //b.Print();
+    g0.Boost(0.40902, 0.0, 0.0);
+    g1.Boost(0.40902, 0.0, 0.0);
+    pi.Boost(0.40902, 0.0, 0.0);
+    b.Boost(0.40902, 0.0, 0.0);
+    p.Boost(0.40902, 0.0, 0.0);
+    /*b.Print();
+    g0.Print();
+    g1.Print();
+    pi.Print();
+    p.Print();*/
+    std::cout << b.E()-b.P() << std::endl;
+
+    GKinFitterBase  fitter(2,2);
+    GHistFit2       hfit("test", "tset", kTRUE);
+
+    Double_t        bsmear      = b.Px()+(0.05*b.Px());
+    TLorentzVector  g0smear(g0.E()-(0.05*g0.E()), 0.0, 0.0, g0.E()-(0.05*g0.E()));
+                    g0smear.SetTheta(g0.Theta()+(0.05*g0.Theta()));
+                    g0smear.SetPhi(g0.Phi()-(0.05*g0.Phi()));
+    TLorentzVector  g1smear(g1.E()+(0.05*g1.E()), 0.0, 0.0, g1.E()+(0.05*g1.E()));
+                    g1smear.SetTheta(g1.Theta()-(0.05*g1.Theta()));
+                    g1smear.SetPhi(g1.Phi()+(0.05*g1.Phi()));
+    std::cout << bsmear << std::endl;
+    g0smear.Print();
+    g1smear.Print();
+
+    fitter.AddBeam(b.Px()+(0.05*b.Px()), 938.27, 0.05*b.Px(), 0.005);
+    fitter.AddGamma(g0.E()-(0.05*g0.E()), g0.Theta()+(0.05*g0.Theta()), g0.Phi()-(0.05*g0.Phi()), 0.05*g0.E(), 0.05*g0.Theta(), 0.05*g0.Phi());
+    fitter.AddGamma(g1.E()+(0.05*g1.E()), g1.Theta()-(0.05*g1.Theta()), g1.Phi()+(0.05*g1.Phi()), 0.05*g1.E(), 0.05*g1.Theta(), 0.05*g1.Phi());
+    int indices[2];
+    indices[0]  = 0;
+    indices[1]  = 1;
+    fitter.AddInvMassConstraint(indices, 2, 134.98);
+    fitter.AddMisMassConstraint(938.27);
+
+    fitter.GetInitialBeam().Print();
+    fitter.GetBeam().Print();
+    fitter.GetInitialPhoton(0).Print();
+    fitter.GetPhoton(0).Print();
+    fitter.GetInitialPhoton(1).Print();
+    fitter.GetPhoton(1).Print();
+    std::cout << fitter.GetInitialIMConstraint(0) << std::endl;
+    std::cout << fitter.GetInitialMMConstraint() << std::endl;
+
+    TMatrixD    gDerPar(2, 9);
+    fitter.GetInitialGDerPar(gDerPar);
+    gDerPar.Print();
+
+    fitter.Solve(hfit);
+
     if(!IsGoATFile())
     {
         cout << "ERROR: Input File is not a GoAT file." << endl;

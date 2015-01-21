@@ -106,30 +106,33 @@ void        GHistFit::ScalerReadCorrection(const Double_t CorrectionFactor, cons
 
 GHistFit2::GHistFit2(const char* name, const char* title, Bool_t linkHistogram)   :
     GHistLinked(linkHistogram),
-    invMass(TString(name).Append("_im"), TString(title).Append(" inv. Mass"), 2000, 0, 2000, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE),
-    invMassSub0(TString(name).Append("_invMassSub0"), TString(title).Append(" inv. Mass SubPart0"), 2000, 0, 2000, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE),
-    invMassSub1(TString(name).Append("_invMassSub1"), TString(title).Append(" inv. Mass SubPart1"), 2000, 0, 2000, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE),
-    invMassSub2(TString(name).Append("_invMassSub2"), TString(title).Append(" inv. Mass SubPart2"), 2000, 0, 2000, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE),
-    chiSq(TString(name).Append("_ChiSq"), TString(title).Append(" ChiSq"), 1000, 0, 100, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE),
-    confidenceLevel(TString(name).Append("_ConfLev"), TString(title).Append(" ConfLev"), 1000, 0, 1, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE),
-    zVertex(TString(name).Append("_Vertex_X"), TString(title).Append(" Vertex_X"), 1000, -1, 1, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE),
-    protonEnergy(TString(name).Append("protonEnergy"), TString(title).Append(" protonEnergy"), 1000, -1, 1, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE),
-    protonTheta(TString(name).Append("protonTheta"), TString(title).Append(" protonTheta"), 1000, -1, 1, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE),
-    protonPhi(TString(name).Append("protonPhi"), TString(title).Append(" protonPhi"), 1000, -1, 1, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE),
-    beamEnergy(TString(name).Append("protonEnergy"), TString(title).Append(" protonEnergy"), 1000, -1, 1, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE),
-    beamTheta(TString(name).Append("protonTheta"), TString(title).Append(" protonTheta"), 1000, -1, 1, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE),
-    beamPhi(TString(name).Append("protonPhi"), TString(title).Append(" protonPhi"), 1000, -1, 1, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE)
+    invMass(TString(name).Append("_im"), TString(title).Append(" inv. Mass"), 1500, 0, 1500, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
+    invMassSub0(TString(name).Append("_invMassSub0"), TString(title).Append(" inv. Mass SubPart0"), 750, 0, 750, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
+    invMassSub1(TString(name).Append("_invMassSub1"), TString(title).Append(" inv. Mass SubPart1"), 300, 0, 300, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
+    invMassSub2(TString(name).Append("_invMassSub2"), TString(title).Append(" inv. Mass SubPart2"), 300, 0, 300, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
+    chiSq(TString(name).Append("_ChiSq"), TString(title).Append(" ChiSq"), 1000, 0, 100000, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
+    confidenceLevel(TString(name).Append("_ConfLev"), TString(title).Append(" ConfLev"), 1000, 0, 1000, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
+    zVertex(TString(name).Append("_Vertex_X"), TString(title).Append(" Vertex_X"), 1000, -1, 1, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
+    protonEnergy(TString(name).Append("protonEnergy"), TString(title).Append(" protonEnergy"), 1000, 0, 1000, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
+    protonTheta(TString(name).Append("protonTheta"), TString(title).Append(" protonTheta"), 180, 0, 180, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
+    protonPhi(TString(name).Append("protonPhi"), TString(title).Append(" protonPhi"), 360, -180, 180, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
+    beamEnergy(TString(name).Append("protonEnergy"), TString(title).Append(" protonEnergy"), 2000, 0, 2000, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
+    beamTheta(TString(name).Append("protonTheta"), TString(title).Append(" protonTheta"), 180, 0, 180, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
+    beamPhi(TString(name).Append("protonPhi"), TString(title).Append(" protonPhi"), 360, -180, 180, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE)
 {
     for(int i=0; i<6; i++)
     {
-        photonsEnergy[i]    = new GHistBGSub2(TString(name).Append("_PhotonE").Append(TString().Itoa(i,10)), TString(title).Append(" PhotonE").Append(TString().Itoa(i,10)), 1000, -1, 1, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE);
-        photonsTheta[i]     = new GHistBGSub2(TString(name).Append("_PhotonTheta").Append(TString().Itoa(i,10)), TString(title).Append(" PhotonTheta").Append(TString().Itoa(i,10)), 360, 0, 180, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE);
-        photonsPhi[i]       = new GHistBGSub2(TString(name).Append("_PhotonPhi").Append(TString().Itoa(i,10)), TString(title).Append(" PhotonPhi").Append(TString().Itoa(i,10)), 540, -180, 360, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE);
+        photonsEnergy[i]    = new GHistBGSub2(TString(name).Append("_PhotonE").Append(TString().Itoa(i,10)), TString(title).Append(" PhotonE").Append(TString().Itoa(i,10)), 1000, 0, 1000, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE);
+        photonsTheta[i]     = new GHistBGSub2(TString(name).Append("_PhotonTheta").Append(TString().Itoa(i,10)), TString(title).Append(" PhotonTheta").Append(TString().Itoa(i,10)), 180, 0, 180, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE);
+        photonsPhi[i]       = new GHistBGSub2(TString(name).Append("_PhotonPhi").Append(TString().Itoa(i,10)), TString(title).Append(" PhotonPhi").Append(TString().Itoa(i,10)), 360, -180, 180, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE);
     }
-    for(int i=0; i<7; i++)
-        con[i]    = new GHistBGSub2(TString(name).Append("_Con").Append(TString().Itoa(i,10)), TString(title).Append(" Constraint ").Append(TString().Itoa(i,10)), 1000, -100000, 100000, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE);
+    con[0]    = new GHistBGSub2(TString(name).Append("_Con0"), TString(title).Append(" Constraint 0"), 1000, -350000, 350000, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE);
+    con[1]    = new GHistBGSub2(TString(name).Append("_Con1"), TString(title).Append(" Constraint 1"), 1000, -40000, 40000, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE);
+    con[2]    = new GHistBGSub2(TString(name).Append("_Con2"), TString(title).Append(" Constraint 2"), 1000, -40000, 40000, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE);
+    for(int i=3; i<7; i++)
+        con[i]    = new GHistBGSub2(TString(name).Append("_Con").Append(TString().Itoa(i,10)), TString(title).Append(" Constraint ").Append(TString().Itoa(i,10)), 1000, -100000, 100000, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE);
     for(int i=0; i<23; i++)
-        pulls[i]    = new GHistBGSub2(TString(name).Append("_Pull").Append(TString().Itoa(i,10)), TString(title).Append(" Pull ").Append(TString().Itoa(i,10)), 1000, -10, 10, GKinFitter_MaxSteps, 0, GKinFitter_MaxSteps, kFALSE);
+        pulls[i]    = new GHistBGSub2(TString(name).Append("_Pull").Append(TString().Itoa(i,10)), TString(title).Append(" Pull ").Append(TString().Itoa(i,10)), 1000, -10, 10, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE);
 }
 
 GHistFit2::~GHistFit2()

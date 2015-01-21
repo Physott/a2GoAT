@@ -195,6 +195,7 @@ add_executable(MyPhysics
    inc/GH1.h
    inc/GHistFit.h
    inc/GKinFitterConverter.h
+   inc/GKinFitterBase.h
    inc/GKinFitter.h
    inc/GHistEvent.h
    inc/GCheckProton.h
@@ -223,6 +224,7 @@ add_executable(MyPhysics
    src/GHistTaggerBinning2.cc
    src/GHistFit.cc
    src/GKinFitterConverter.cc
+   src/GKinFitterBase.cc
    src/GKinFitter.cc
    src/GHistEvent.cc
    src/GCheckProton.cc

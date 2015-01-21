@@ -10,7 +10,7 @@ GAnalysis3Mesons::GAnalysis3Mesons(const char* name, const char* title, const Bo
     hist_raw(TString(name).Append("raw"), TString(title).Append("raw"), kFALSE),
     hist_SubImCut(TString(name).Append("SubImCut"), TString(title).Append("SubImCut"), kFALSE),
     hist_MMCut(TString(name).Append("MMCut"), TString(title).Append("MMCut"), kFALSE),
-    fit(6, 4, GKinFitter::flagNoRecoil),
+    fit(6, 4),
     hist_fit(TString(name).Append("_SubImCut_fit"), TString(title).Append(" SubImCut fit"), 25, kFALSE),
     hist_SubImCut_fit(TString(name).Append("fit"), TString(title).Append("fit"), 25, kFALSE)
 {
@@ -177,7 +177,7 @@ GAnalysis3MesonsProton::GAnalysis3MesonsProton(const char* name, const char* tit
     hist_raw(TString(name).Append("raw"), TString(title).Append("raw"), kFALSE),
     hist_SubImCut(TString(name).Append("SubImCut"), TString(title).Append("SubImCut"), kFALSE),
     hist_MMCut(TString(name).Append("MMCut"), TString(title).Append("MMCut"), kFALSE),
-    fit(6, 7, GKinFitter::flagRecoilAngles),
+    fit(6, 7),
     hist_SubImCut_fit(TString(name).Append("_SubImCut_fit"), TString(title).Append(" SubImCut fit"), 24, kFALSE),
     hist_fit(TString(name).Append("fit"), TString(title).Append("fit"), kFALSE)
 {

@@ -4,7 +4,7 @@
 
 #include "GHistEvent.h"
 #include "GCheckProton.h"
-#include "GKinFitter.h"
+#include "GKinFitterBase.h"
 
 
 class GTreeTagger;
@@ -24,7 +24,7 @@ private:
     GHistEvent3Mesons   hist_MMCut;
     GHistFit            hist_fit;
 
-    GKinFitter          fit;
+    GKinFitterBase          fit;
 
 protected:
 
@@ -63,7 +63,7 @@ private:
     GHistEvent3Mesons   hist_MMCut;
     GHistFit2           hist_fit;
 
-    GKinFitter          fit;
+    GKinFitterBase          fit;
 
 protected:
 

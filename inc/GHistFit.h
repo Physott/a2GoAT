@@ -7,9 +7,9 @@
 #include "GHistManager.h"
 #include "GH1.h"
 
-#define GKinFitter_MaxSteps 10
+#define GKinFitterBase_MaxSteps 10
 
-class   GKinFitter;
+class   GKinFitterBase;
 
 class   GHistFit    : public    GHistLinked
 {
@@ -47,7 +47,7 @@ public:
     virtual void        ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads = kFALSE);
     virtual Int_t       WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)   {}
 
-    friend class GKinFitter;
+    friend class GKinFitterBase;
 };
 
 
@@ -88,7 +88,7 @@ public:
     virtual void        ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads = kFALSE);
     virtual Int_t       WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)   {}
 
-    friend class GKinFitter;
+    friend class GKinFitterBase;
 };
 
 
