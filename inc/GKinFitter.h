@@ -4,253 +4,12 @@
 #include "TMatrixD.h"
 #include "TMath.h"
 #include "TLorentzVector.h"
-#include "GKinFitterConverter.h"
+#include "GHistFit.h"
 
 
 #define     GKinFitter_ParametersPerParticle    3
 
 
-/*
-class GKinFitter4VectorX: public ROOT::Math::IGradientFunctionMultiDim
-{
-public:
-    double DoEval(const double* x) const
-    {
-        Double_t    helpX = x[0] - x[4];
-        Double_t    helpY = x[1] - x[5];
-        Double_t    helpZ = x[2] - x[6];
-        Double_t    r     = TMath::Sqrt((helpX*helpX)+(helpY*helpY)+(helpZ*helpZ));
-
-        return x[3]*helpX/r;
-    }
-    unsigned int NDim() const                               {return 7;}
-    ROOT::Math::IGradientFunctionMultiDim* Clone() const    {return new GKinFitter4VectorX();}
-    double DoDerivative(const double* x, unsigned int ipar) const
-    {
-        Double_t    helpX = x[0] - x[4];
-        Double_t    helpY = x[1] - x[5];
-        Double_t    helpZ = x[2] - x[6];
-        Double_t    r     = TMath::Sqrt((helpX*helpX)+(helpY*helpY)+(helpZ*helpZ));
-        switch(ipar)
-        {
-        case 0:
-            return x[3]*(helpY + helpZ)/(r*r*r);
-        case 1:
-            return -x[3]*helpX*helpY/(r*r*r);
-        case 2:
-            return -x[3]*helpX*helpZ/(r*r*r);
-        case 3:
-            return helpX/r;
-        case 4:
-            return x[3]*(helpY + helpZ)/(r*r*r);
-        case 5:
-            return x[3]*helpX*helpY/(r*r*r);
-        case 6:
-            return x[3]*helpX*helpZ/(r*r*r);
-        default:
-            return DoEval(x);
-        }
-    }
-};
-class GKinFitter4VectorY: public ROOT::Math::IGradientFunctionMultiDim
-{
-public:
-    double DoEval(const double* x) const
-    {
-        Double_t    helpX = x[0] - x[4];
-        Double_t    helpY = x[1] - x[5];
-        Double_t    helpZ = x[2] - x[6];
-        Double_t    r     = TMath::Sqrt((helpX*helpX)+(helpY*helpY)+(helpZ*helpZ));
-
-        return x[3]*helpY/r;
-    }
-    unsigned int NDim() const                               {return 7;}
-    ROOT::Math::IGradientFunctionMultiDim* Clone() const    {return new GKinFitter4VectorY();}
-    double DoDerivative(const double* x, unsigned int ipar) const
-    {
-        Double_t    helpX = x[0] - x[4];
-        Double_t    helpY = x[1] - x[5];
-        Double_t    helpZ = x[2] - x[6];
-        Double_t    r     = TMath::Sqrt((helpX*helpX)+(helpY*helpY)+(helpZ*helpZ));
-        switch(ipar)
-        {
-        case 0:
-            return -x[3]*helpY*helpX/(r*r*r);
-        case 1:
-            return x[3]*(helpX + helpZ)/(r*r*r);
-        case 2:
-            return -x[3]*helpY*helpZ/(r*r*r);
-        case 3:
-            return helpY/r;
-        case 4:
-            return x[3]*helpY*helpX/(r*r*r);
-        case 5:
-            return x[3]*(helpX + helpZ)/(r*r*r);
-        case 6:
-            return x[3]*helpY*helpZ/(r*r*r);
-        default:
-            return DoEval(x);
-        }
-    }
-};
-class GKinFitter4VectorZ: public ROOT::Math::IGradientFunctionMultiDim
-{
-public:
-    double DoEval(const double* x) const
-    {
-        Double_t    helpX = x[0] - x[4];
-        Double_t    helpY = x[1] - x[5];
-        Double_t    helpZ = x[2] - x[6];
-        Double_t    r     = TMath::Sqrt((helpX*helpX)+(helpY*helpY)+(helpZ*helpZ));
-
-        return x[3]*helpZ/r;
-    }
-    unsigned int NDim() const                               {return 7;}
-    ROOT::Math::IGradientFunctionMultiDim* Clone() const    {return new GKinFitter4VectorZ();}
-    double DoDerivative(const double* x, unsigned int ipar) const
-    {
-        Double_t    helpX = x[0] - x[4];
-        Double_t    helpY = x[1] - x[5];
-        Double_t    helpZ = x[2] - x[6];
-        Double_t    r     = TMath::Sqrt((helpX*helpX)+(helpY*helpY)+(helpZ*helpZ));
-        switch(ipar)
-        {
-        case 0:
-            return -x[3]*helpZ*helpX/(r*r*r);
-        case 1:
-            return -x[3]*helpZ*helpY/(r*r*r);
-        case 2:
-            return x[3]*(helpX + helpY)/(r*r*r);
-        case 3:
-            return helpZ/r;
-        case 4:
-            return x[3]*helpZ*helpX/(r*r*r);
-        case 5:
-            return x[3]*helpZ*helpY/(r*r*r);
-        case 6:
-            return x[3]*(helpX*helpY)/(r*r*r);
-        default:
-            return DoEval(x);
-        }
-    }
-};*/
-/*
-class GKinFitterConstrainInvMass: public ROOT::Math::IGradientFunctionMultiDim
-{
-public:
-    double DoEval(const double* x) const
-    {
-        Double_t    helpX = x[0] + x[4];
-        Double_t    helpY = x[1] + x[5];
-        Double_t    helpZ = x[2] + x[6];
-        Double_t    helpE = x[3] + x[7];
-
-        return (helpE*helpE)-(helpX*helpX)-(helpY*helpY)-(helpZ*helpZ)-(x[8]*x[8]);
-    }
-    unsigned int NDim() const                               {return 9;}
-    ROOT::Math::IGradientFunctionMultiDim* Clone() const    {return new GKinFitterConstrainInvMass();}
-    double DoDerivative(const double* x, unsigned int ipar) const
-    {
-        if(ipar==8)
-            return -2*x[8];
-        switch(ipar)
-        {
-        case 0:
-        case 4:
-            return -2*(x[0] + x[4]);
-        case 1:
-        case 5:
-            return -2*(x[1] + x[5]);
-        case 2:
-        case 6:
-            return -2*(x[2] + x[6]);
-        case 3:
-        case 7:
-            return 2*(x[3] + x[7]);
-        }
-    }
-};
-class GKinFitterConstrainMisMass: public ROOT::Math::IGradientFunctionMultiDim
-{
-public:
-    double DoEval(const double* x) const
-    {
-        Double_t    helpX = x[0] - x[4] - x[8]  - x[12] - x[16] - x[20] - x[24];
-        Double_t    helpY = x[1] - x[5] - x[9]  - x[13] - x[17] - x[21] - x[25];
-        Double_t    helpZ = x[2] - x[6] - x[10] - x[14] - x[18] - x[22] - x[26];
-        Double_t    helpE = x[3] - x[7] - x[11] - x[15] - x[19] - x[23] - x[27];
-
-        return (helpE*helpE)-(helpX*helpX)-(helpY*helpY)-(helpZ*helpZ)-(x[28]*x[28]);
-    }
-    unsigned int NDim() const                               {return 29;}
-    ROOT::Math::IGradientFunctionMultiDim* Clone() const    {return new GKinFitterConstrainMisMass();}
-    double DoDerivative(const double* x, unsigned int ipar) const
-    {
-        if(ipar==28)
-            return 2*x[28];
-        switch(ipar)
-        {
-        case 0:
-        case 4:
-        case 8:
-        case 12:
-        case 16:
-        case 20:
-        case 24:
-            return -2*(x[0] - x[4] - x[8]  - x[12] - x[16] - x[20] - x[24]);
-        case 1:
-        case 5:
-        case 9:
-        case 13:
-        case 17:
-        case 21:
-        case 25:
-            return -2*(x[1] - x[5] - x[9]  - x[13] - x[17] - x[21] - x[25]);
-        case 2:
-        case 6:
-        case 10:
-        case 14:
-        case 18:
-        case 22:
-        case 26:
-            return -2*(x[2] - x[6] - x[10] - x[14] - x[18] - x[22] - x[26]);
-        case 3:
-        case 7:
-        case 11:
-        case 15:
-        case 19:
-        case 23:
-        case 27:
-            return 2*(x[3] - x[7] - x[11] - x[15] - x[19] - x[23] - x[27]);
-        }
-    }
-};
-class GKinFitterConstrainBeam: public ROOT::Math::IGradientFunctionMultiDim
-{
-public:
-    double DoEval(const double* x) const
-    {
-        return ((x[3]-938.272046)*(x[3]-938.272046))-(x[0]*x[0])-(x[1]*x[1])-(x[2]*x[2]);
-    }
-    unsigned int NDim() const                               {return 4;}
-    ROOT::Math::IGradientFunctionMultiDim* Clone() const    {return new GKinFitterConstrainBeam();}
-    double DoDerivative(const double* x, unsigned int ipar) const
-    {
-        switch(ipar)
-        {
-        case 0:
-            return -2*x[0];
-        case 1:
-            return -2*x[1];
-        case 2:
-            return -2*x[2];
-        case 3:
-            return 2*(x[3]-938.272046);
-        default:
-            DoEval(x);
-        }
-    }
-};*/
 
 class   GKinFitterNewTheta
 {
@@ -286,6 +45,11 @@ private:
     inline TLorentzVector  RawDerivateEnergy(const Double_t energy, const Double_t theta, const Double_t phi);
     inline TLorentzVector  RawDerivateTheta(const Double_t energy, const Double_t theta, const Double_t phi);
     inline TLorentzVector  RawDerivatePhi(const Double_t energy, const Double_t theta, const Double_t phi);
+    inline TLorentzVector  Beam(const TMatrixD& par, const TMatrixD& unk);
+    inline TLorentzVector  BeamDerivateEnergy(const TMatrixD& par, const TMatrixD& unk);
+    inline TLorentzVector  BeamDerivateTheta(const TMatrixD& par, const TMatrixD& unk);
+    inline TLorentzVector  BeamDerivatePhi(const TMatrixD& par, const TMatrixD& unk);
+    inline TLorentzVector  BeamDerivateZVertex(const TMatrixD& par, const TMatrixD& unk);
 
 public:
     GKinFitterGamma()    {}
@@ -296,11 +60,11 @@ public:
     inline TLorentzVector  WithUnknownDerivateTheta(const Double_t energy, const Double_t theta, const Double_t zVertex, const Double_t phi);
     inline TLorentzVector  WithUnknownDerivateZVertex(const Double_t energy, const Double_t theta, const Double_t zVertex, const Double_t phi);
     inline TLorentzVector  WithUnknownDerivatePhi(const Double_t energy, const Double_t theta, const Double_t zVertex, const Double_t phi);
-    inline TLorentzVector  Beam(const TMatrixD& par, const TMatrixD& unk);
-    inline TLorentzVector  BeamDerivateEnergy(const TMatrixD& par, const TMatrixD& unk);
-    inline TLorentzVector  BeamDerivateTheta(const TMatrixD& par, const TMatrixD& unk);
-    inline TLorentzVector  BeamDerivatePhi(const TMatrixD& par, const TMatrixD& unk);
-    inline TLorentzVector  BeamDerivateZVertex(const TMatrixD& par, const TMatrixD& unk);
+           TLorentzVector  BeamAndTarget(const TMatrixD& par, const TMatrixD& unk, const Double_t targetMass)  {return Beam(par, unk)+TLorentzVector(0.0, 0.0, 0.0, targetMass);}
+           TLorentzVector  BeamAndTargetDerivateEnergy(const TMatrixD& par, const TMatrixD& unk)               {return BeamDerivateEnergy(par, unk);}
+           TLorentzVector  BeamAndTargetDerivateTheta(const TMatrixD& par, const TMatrixD& unk)                {return BeamDerivateTheta(par, unk);}
+           TLorentzVector  BeamAndTargetDerivatePhi(const TMatrixD& par, const TMatrixD& unk)                  {return BeamDerivatePhi(par, unk);}
+           TLorentzVector  BeamAndTargetDerivateZVertex(const TMatrixD& par, const TMatrixD& unk)              {return BeamDerivateZVertex(par, unk);}
     inline TLorentzVector  Particle(const int particleIndex, const TMatrixD& par, const TMatrixD& unk);
     inline TLorentzVector  ParticleDerivateEnergy(const int particleIndex, const TMatrixD& par, const TMatrixD& unk);
     inline TLorentzVector  ParticleDerivateTheta(const int particleIndex, const TMatrixD& par, const TMatrixD& unk);
@@ -489,13 +253,22 @@ private:
     Int_t               countCon; //Number of constraints
     Int_t               countIter; // Number of times Solve has been called
     TMatrixD            par0;      //vector of measured parameters
-    TMatrixD            par;       //vector of fitted parameters
+    TMatrixD            para;       //vector of fitted parameters
     TMatrixD            unk0;      //vector of unknowns calculated from constrain and par0
-    TMatrixD            unk;       //vector of fitted unknowns
+    TMatrixD            unkn;       //vector of fitted unknowns
     TMatrixD            lambda;  	//Vector of lagrangian multipliers
     TMatrixD            V0;        //Covariance matrix of measured parameters
     TMatrixD            V;         //Covariance matrix of fitted parameters
     Double_t            chiSq;
+
+    //Matrices for Calculation
+    TMatrixD            G;
+    TMatrixD            GPar;
+    TMatrixD            GParT;
+    TMatrixD            GUnk;
+    TMatrixD            GUnkT;
+    TMatrixD            SInv;
+    TMatrixD            U;
 
     Int_t   GetNParameters();
 
@@ -513,10 +286,13 @@ private:
     inline void             g(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk);
     inline void             gDerivatePar(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk);
     inline void             gDerivateUnk(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk);
-    inline void             r(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk, const TMatrixD& G);
+    inline void             r(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk);
 
-    Bool_t  SolveStep(TMatrixD &par, TMatrixD &unk, const TMatrixD& oldPar, const TMatrixD& oldUnk);
-    Bool_t  CalcChiSq(const TMatrixD& par, const TMatrixD& unk, const TMatrixD &g);
+    Bool_t  CalcChiSq(const TMatrixD& par, const TMatrixD& unk);
+    Bool_t  CalcV(const TMatrixD& par, const TMatrixD& unk);
+    void    FillHists(GHistFit2& hists);
+    Bool_t  SolveStep(TMatrixD &par, TMatrixD &unk, const TMatrixD& oldPar, const TMatrixD& oldUnk, GHistFit2& hists);
+    Bool_t  SolveStart(GHistFit2& hists);
 
 protected:
 
@@ -527,9 +303,11 @@ public:
     void            AddBeam(const Double_t beamEnergy, const Double_t _targetMass, const Double_t beamEnergyError, const Double_t beamSpotRadius);
     void            AddGamma(const Double_t energy, const Double_t theta, const Double_t phi, const Double_t energyError, const Double_t thetaError, const Double_t phiError);
     void            AddRecoilAngles(const Double_t theta, const Double_t phi, const Double_t thetaError, const Double_t phiError);
+    Double_t        ConfidenceLevel()           {return TMath::Prob(chiSq, nCon-nUnk);}
+    Double_t        Pull(const Int_t i)         {return (par0[i][0] - para[i][0])/TMath::Sqrt(V0[i][i] - V[i][i]);}
     void            Print(const char* option = "");
     void            Reset()     {countPart=0; countCon=0; countIter=0;}
-    Bool_t          Solve();
+    Bool_t          Solve(GHistFit2& hists);
     //Bool_t          ReSolve();*/
 };
 TLorentzVector  GKinFitter::Recoil(const TMatrixD& par, const TMatrixD& unk)
@@ -594,37 +372,37 @@ TLorentzVector  GKinFitter::RecoilDerivateZVertex(const TMatrixD& par, const TMa
 }
 Double_t        GKinFitter::MM(const TMatrixD& par, const TMatrixD& unk, const Double_t mass)
 {
-    TLorentzVector    tot(GKinFitterGamma().Beam(par, unk));
+    TLorentzVector    tot(GKinFitterGamma().BeamAndTarget(par, unk, targetMass));
     for(int i=0; i<nPart; i++)
         tot -= GKinFitterGamma().Particle(i, par, unk);
     return tot.M2()-(mass*mass);
 }
 void            GKinFitter::MMDerivatePar(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk)
 {
-    TLorentzVector    tot(GKinFitterGamma().Beam(par, unk));
+    TLorentzVector    tot(GKinFitterGamma().BeamAndTarget(par, unk, targetMass));
     for(int i=0; i<nPart; i++)
         tot -= GKinFitterGamma().Particle(i, par, unk);
 
 
-    ret[0][0]    = 2*tot*GKinFitterGamma().BeamDerivateEnergy(par, unk);
-    ret[0][1]    = 2*tot*GKinFitterGamma().BeamDerivateTheta(par, unk);
-    ret[0][2]    = 2*tot*GKinFitterGamma().BeamDerivatePhi(par, unk);
+    ret[3][0]    = 2*tot*GKinFitterGamma().BeamAndTargetDerivateEnergy(par, unk);
+    ret[3][1]    = 2*tot*GKinFitterGamma().BeamAndTargetDerivateTheta(par, unk);
+    ret[3][2]    = 2*tot*GKinFitterGamma().BeamAndTargetDerivatePhi(par, unk);
 
     for(int i=0; i<nPart; i++)
     {
-        ret[0][ (i+1)*GKinFitter_ParametersPerParticle   ]    = 2*tot*GKinFitterGamma().ParticleDerivateEnergy(i, par, unk);
-        ret[0][((i+1)*GKinFitter_ParametersPerParticle)+1]    = 2*tot*GKinFitterGamma().ParticleDerivateTheta(i, par, unk);
-        ret[0][((i+1)*GKinFitter_ParametersPerParticle)+2]    = 2*tot*GKinFitterGamma().ParticleDerivatePhi(i, par, unk);
+        ret[3][ (i+1)*GKinFitter_ParametersPerParticle   ]    = 2*tot*GKinFitterGamma().ParticleDerivateEnergy(i, par, unk);
+        ret[3][((i+1)*GKinFitter_ParametersPerParticle)+1]    = 2*tot*GKinFitterGamma().ParticleDerivateTheta(i, par, unk);
+        ret[3][((i+1)*GKinFitter_ParametersPerParticle)+2]    = 2*tot*GKinFitterGamma().ParticleDerivatePhi(i, par, unk);
     }
 }
 Double_t        GKinFitter::MMDerivateUnk(const TMatrixD& par, const TMatrixD& unk)
 {
-    TLorentzVector    tot(GKinFitterGamma().Beam(par, unk));
+    TLorentzVector    tot(GKinFitterGamma().BeamAndTarget(par, unk, targetMass));
     for(int i=0; i<nPart; i++)
         tot -= GKinFitterGamma().Particle(i, par, unk);
 
 
-    Double_t    ret    = 2*tot*GKinFitterGamma().BeamDerivateZVertex(par, unk);
+    Double_t    ret    = 2*tot*GKinFitterGamma().BeamAndTargetDerivateZVertex(par, unk);
 
     for(int i=0; i<nPart; i++)
         ret   += 2*tot*GKinFitterGamma().ParticleDerivateZVertex(i, par, unk);
@@ -633,7 +411,7 @@ Double_t        GKinFitter::MMDerivateUnk(const TMatrixD& par, const TMatrixD& u
 }
 TLorentzVector  GKinFitter::I4Vec(const TMatrixD& par, const TMatrixD& unk, const TLorentzVector &vec)
 {
-    TLorentzVector    tot(GKinFitterGamma().Beam(par, unk));
+    TLorentzVector    tot(GKinFitterGamma().BeamAndTarget(par, unk, targetMass));
     for(int i=0; i<nPart; i++)
         tot -= GKinFitterGamma().Particle(i, par, unk);
     tot -= Recoil(par, unk);
@@ -642,19 +420,19 @@ TLorentzVector  GKinFitter::I4Vec(const TMatrixD& par, const TMatrixD& unk, cons
 }
 void            GKinFitter::I4VecDerivatePar(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk)
 {
-    TLorentzVector  help(GKinFitterGamma().BeamDerivateEnergy(par, unk));
+    TLorentzVector  help(GKinFitterGamma().BeamAndTargetDerivateEnergy(par, unk));
     ret[0][0]   = help.Px();
     ret[1][0]   = help.Py();
     ret[2][0]   = help.Pz();
     ret[3][0]   = help.E();
 
-    help    = GKinFitterGamma().BeamDerivateTheta(par, unk);
+    help    = GKinFitterGamma().BeamAndTargetDerivateTheta(par, unk);
     ret[0][1]   = help.Px();
     ret[1][1]   = help.Py();
     ret[2][1]   = help.Pz();
     ret[3][1]   = help.E();
 
-    help    = GKinFitterGamma().BeamDerivatePhi(par, unk);
+    help    = GKinFitterGamma().BeamAndTargetDerivatePhi(par, unk);
     ret[0][2]   = help.Px();
     ret[1][2]   = help.Py();
     ret[2][2]   = help.Pz();
@@ -698,7 +476,7 @@ void            GKinFitter::I4VecDerivatePar(TMatrixD& ret, const TMatrixD& par,
 }
 void            GKinFitter::I4VecDerivateUnk(TMatrixD &ret, const TMatrixD& par, const TMatrixD& unk)
 {
-    TLorentzVector  help(GKinFitterGamma().BeamDerivateZVertex(par, unk));
+    TLorentzVector  help(GKinFitterGamma().BeamAndTargetDerivateZVertex(par, unk));
     ret[0][0]   = help.Px();
     ret[1][0]   = help.Py();
     ret[2][0]   = help.Pz();
@@ -787,7 +565,7 @@ void            GKinFitter::g(TMatrixD& ret, const TMatrixD& par, const TMatrixD
 void            GKinFitter::gDerivatePar(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk)
 {
     int    indices[2];
-    TMatrixD    help(4, nPart);
+    TMatrixD    help(4, nPar);
     indices[0]  = 0;
     indices[1]  = 1;
     GKinFitterInvMass().DerivatePar(help, par, unk, indices, 2);
@@ -807,13 +585,11 @@ void            GKinFitter::gDerivatePar(TMatrixD& ret, const TMatrixD& par, con
     switch(fitType)
     {
     case flagNoRecoil:
-        MMDerivatePar(*((TMatrixD*)&ret.GetSub(3, 3, 0, nPart-1, help)), par, unk);
-        for(int i=0; i<nPar; i++)
-            ret[3][i]   = help[0][i];
+        MMDerivatePar(ret, par, unk);
         break;
     case flagUnknownRecoil:
     case flagRecoilAngles:
-        MMDerivatePar(*((TMatrixD*)&ret.GetSub(3, 6, 0, nPart-1, help)), par, unk);
+        I4VecDerivatePar(help, par, unk);
         for(int i=0; i<nPart; i++)
         {
             ret[3][i]   = help[0][i];
@@ -827,7 +603,7 @@ void            GKinFitter::gDerivatePar(TMatrixD& ret, const TMatrixD& par, con
 void            GKinFitter::gDerivateUnk(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk)
 {
     int    indices[2];
-    TMatrixD    help;
+    TMatrixD    help(4, nUnk);
     indices[0]  = 0;
     indices[1]  = 1;
     ret[0][0]   = GKinFitterInvMass().DerivateUnk(par, unk, indices, 2);
@@ -877,7 +653,7 @@ void            GKinFitter::gDerivateUnk(TMatrixD& ret, const TMatrixD& par, con
         break;
     }
 }
-void            GKinFitter::r(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk, const TMatrixD& G)
+void            GKinFitter::r(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk)
 {
     ret = G;
     TMatrixD    gPar(nCon, nPar);

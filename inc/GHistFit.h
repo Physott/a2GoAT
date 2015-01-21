@@ -2,116 +2,93 @@
 #define __GHistFit_h__
 
 
-#include "GFit.h"
+#include <TH2.h>
+
+#include "GHistManager.h"
 #include "GH1.h"
 
+#define GKinFitter_MaxSteps 10
 
-class   GTreeMeson;
+class   GKinFitter;
 
-
-class  GHistFitPullParticle    : GHistLinked
+class   GHistFit    : public    GHistLinked
 {
 private:
-    GH1    Pull_Px;
-    GH1    Pull_Py;
-    GH1    Pull_Pz;
-    GH1    Pull_E;
+    Int_t       nPar;
+    Int_t       nUnk;
+    Int_t       nCon;
+    GH1         invMass;
+    GH1         invMassSub0;
+    GH1         invMassSub1;
+    GH1         invMassSub2;
+    GH1         chiSq;
+    GH1         confidenceLevel;
+    GH1         zVertex;
+    GHistBGSub2 photonsE;
+    GHistBGSub2 photonsTheta;
+    GHistBGSub2 photonsPhi;
+    GH1         protonEnergy;
+    GH1         protonTheta;
+    GH1         protonPhi;
+    GH1         beamEnergy;
+    GH1         beamTheta;
+    GH1         beamPhi;
+    GHistBGSub2 con;
+    GHistBGSub2 pulls;
 
 public:
-    GHistFitPullParticle(const char *name, const char *title, const Bool_t linkHistogram = kTRUE);
-    ~GHistFitPullParticle()  {}
+    GHistFit(const char* name, const char* title, const Int_t nPulls, Bool_t linkHistogram= kTRUE);
+    ~GHistFit();
 
-    virtual void    CalcResult()        {Pull_Px.CalcResult(); Pull_Py.CalcResult(); Pull_Pz.CalcResult(); Pull_E.CalcResult();}
-    virtual Int_t   Fill(Double_t x)    {}
-    virtual void    Fill(const Double_t* pulls);
-    virtual void    Fill(const Double_t* pulls, const Double_t taggerTime);
-    virtual void    Fill(const Double_t* pulls, const Double_t taggerTime, const Int_t taggerChannel);
-    virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
-    virtual void    Reset(Option_t* option = "")        {Pull_Px.Reset(option); Pull_Py.Reset(option); Pull_Pz.Reset(option); Pull_E.Reset(option);}
-    virtual void    ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads = kFALSE);
-    virtual Int_t   WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)   {}
-};
-
-
-class  GHistFitPull6Photons    : GHistLinked
-{
-private:
-    GHistFitPullParticle    p0;
-    GHistFitPullParticle    p1;
-    GHistFitPullParticle    p2;
-    GHistFitPullParticle    p3;
-    GHistFitPullParticle    p4;
-    GHistFitPullParticle    p5;
-
-public:
-    GHistFitPull6Photons(const char *name, const char *title, const Bool_t linkHistogram = kTRUE);
-    ~GHistFitPull6Photons()  {}
-
-    virtual void    CalcResult()        {p0.CalcResult(); p1.CalcResult(); p2.CalcResult(); p3.CalcResult(); p4.CalcResult(); p5.CalcResult();}
-    virtual Int_t   Fill(Double_t x)    {}
-    virtual void    Fill(const GFitStruct& fit);
-    virtual void    Fill(const GFitStruct& fit, const Double_t taggerTime);
-    virtual void    Fill(const GFitStruct& fit, const Double_t taggerTime, const Int_t taggerChannel);
-    virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
-    virtual void    Reset(Option_t* option = "")        {p0.Reset(option); p1.Reset(option); p2.Reset(option); p3.Reset(option); p4.Reset(option); p5.Reset(option);}
-    virtual void    ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads = kFALSE);
-    virtual Int_t   WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)   {}
-};
-
-
-class  GHistFitStruct    : GHistLinked
-{
-private:
-    GH1                     im;
-    GH1                     ChiSq;
-    GH1                     ConfidenceLevel;
-
-public:
-    GHistFitStruct(const char *name, const char *title, const Bool_t linkHistogram = kTRUE);
-    ~GHistFitStruct()  {}
-
-    virtual void    CalcResult()        {im.CalcResult(); ChiSq.CalcResult(); ConfidenceLevel.CalcResult();}
-    virtual Int_t   Fill(Double_t x)    {}
-    virtual void    Fill(const GFitStruct& fit);
-    virtual void    Fill(const GFitStruct& fit, const Double_t taggerTime);
-    virtual void    Fill(const GFitStruct& fit, const Double_t taggerTime, const Int_t taggerChannel);
-    virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
-    virtual void    Reset(Option_t* option = "")        {im.Reset(option); ChiSq.Reset(option); ConfidenceLevel.Reset(option);}
-    virtual void    ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads = kFALSE);
-    virtual Int_t   WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)   {}
-};
-
-
-
-class	GHistFit    : GHistLinked
-{
-private:
-    Bool_t      isEtap;
-
-    GHistFitStruct    raw;
-    GHistFitStruct    CutChiSq;
-    GHistFitStruct    CutConfidenceLevel;
-    GHistFitStruct    CutBoth;
-
-    Double_t    ConfidenceLevelCut;
-    Double_t    ChiSqCut;
-
-protected:
-
-public:
-    GHistFit(const char *name, const char *title, const Bool_t IsEtap, const Bool_t linkHistogram = kTRUE);
-    virtual ~GHistFit();
-
-    virtual void        CalcResult()        {raw.CalcResult(); CutChiSq.CalcResult(); CutConfidenceLevel.CalcResult(); CutBoth.CalcResult();}
-    virtual Int_t       Fill(Double_t x)    {}
-    virtual void        Fill(const GFit3Constraints& fit);
-    virtual void        Fill(const GFit3Constraints& fit, const Double_t taggerTime);
-    virtual void        Fill(const GFit3Constraints& fit, const Double_t taggerTime, const Int_t taggerChannel);
-            Bool_t      IsEtap()    const   {return isEtap;}
+    virtual void        CalcResult();
+    virtual Int_t       Fill(Double_t x)                {}
     virtual void        PrepareWriteList(GHistWriteList* arr, const char* name = 0);
-    virtual void        Reset(Option_t* option = "")        {raw.Reset(option); CutChiSq.Reset(option); CutConfidenceLevel.Reset(option); CutBoth.Reset(option);}
+    virtual void        Reset(Option_t* option = "");
     virtual void        ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads = kFALSE);
     virtual Int_t       WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)   {}
+
+    friend class GKinFitter;
+};
+
+
+class   GHistFit2    : public    GHistLinked
+{
+private:
+    Int_t           nPar;
+    Int_t           nUnk;
+    Int_t           nCon;
+    Int_t           nIter;
+    GHistBGSub2     invMass;
+    GHistBGSub2     invMassSub0;
+    GHistBGSub2     invMassSub1;
+    GHistBGSub2     invMassSub2;
+    GHistBGSub2     chiSq;
+    GHistBGSub2     confidenceLevel;
+    GHistBGSub2     zVertex;
+    GHistBGSub2*    photonsEnergy[6];
+    GHistBGSub2*    photonsTheta[6];
+    GHistBGSub2*    photonsPhi[6];
+    GHistBGSub2     protonEnergy;
+    GHistBGSub2     protonTheta;
+    GHistBGSub2     protonPhi;
+    GHistBGSub2     beamEnergy;
+    GHistBGSub2     beamTheta;
+    GHistBGSub2     beamPhi;
+    GHistBGSub2*    con[7];
+    GHistBGSub2*    pulls[23];
+
+public:
+    GHistFit2(const char* name, const char* title, Bool_t linkHistogram= kTRUE);
+    ~GHistFit2();
+
+    virtual void        CalcResult();
+    virtual Int_t       Fill(Double_t x)                {}
+    virtual void        PrepareWriteList(GHistWriteList* arr, const char* name = 0);
+    virtual void        Reset(Option_t* option = "");
+    virtual void        ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads = kFALSE);
+    virtual Int_t       WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)   {}
+
+    friend class GKinFitter;
 };
 
 

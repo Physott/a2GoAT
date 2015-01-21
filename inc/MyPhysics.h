@@ -14,7 +14,7 @@ class	MyPhysics  : public GTreeManager
 private:
     //GAnalysis3Mesons        hist_eta;
     //GAnalysis3MesonsProton  hist_eta_proton;
-    GAnalysis3Mesons        hist_etap;
+    //GAnalysis3Mesons        hist_etap;
     GAnalysis3MesonsProton  hist_etap_proton;
 
 protected:

@@ -179,7 +179,7 @@ GAnalysis3MesonsProton::GAnalysis3MesonsProton(const char* name, const char* tit
     hist_MMCut(TString(name).Append("MMCut"), TString(title).Append("MMCut"), kFALSE),
     fit(6, 7, GKinFitter::flagRecoilAngles),
     hist_SubImCut_fit(TString(name).Append("_SubImCut_fit"), TString(title).Append(" SubImCut fit"), 24, kFALSE),
-    hist_fit(TString(name).Append("fit"), TString(title).Append("fit"), 24, kFALSE)
+    hist_fit(TString(name).Append("fit"), TString(title).Append("fit"), kFALSE)
 {
 
 }
@@ -231,26 +231,6 @@ void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, const GTreeParticl
             else
                 hist_SubImCut.Fill(im, mm, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
 
-            fit.Reset();
-            fit.AddBeam(tagger.GetPhotonBeam_E(i), MASS_PROTON, 0.5, 0.01);
-            for(int p=0; p<6; p++)
-                fit.AddGamma(meson.SubPhotons(0, p).E(), meson.SubPhotons(0, p).Theta(), meson.SubPhotons(0, p).Phi(), 0.05*meson.SubPhotons(0, p).E(), 3*TMath::DegToRad(), 3*TMath::DegToRad());
-            fit.AddRecoilAngles(proton.Particle(0).Theta(), proton.Particle(0).Phi(), 2*TMath::DegToRad(), 2*TMath::DegToRad());
-
-            fit.Print();
-            //fit.Print("input");
-
-            /*if(fit.Solve()>0)
-            {
-                if(fit.ConfidenceLevel()>0.1)
-                {
-                    if(CreateHistogramsForTaggerBinning==kTRUE)
-                        hist_SubImCut_fit.Fill(fit, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                    else
-                        hist_SubImCut_fit.Fill(fit, tagger.GetTagged_t(i));
-                }
-            }*/
-
             if(mm>850 && mm<1025)
             {
                 if(CreateHistogramsForTaggerBinning==kTRUE)
@@ -258,16 +238,16 @@ void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, const GTreeParticl
                 else
                     hist_MMCut.Fill(im, mm, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
 
-                /*if(fit.IsSolved()==kTRUE)
-                {
-                    if(fit.ConfidenceLevel()>0.1)
-                    {
-                        if(CreateHistogramsForTaggerBinning==kTRUE)
-                            hist_fit.Fill(fit, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
-                        else
-                            hist_fit.Fill(fit, tagger.GetTagged_t(i));
-                    }
-                }*/
+                fit.Reset();
+                fit.AddBeam(tagger.GetPhotonBeam_E(i), MASS_PROTON, 0.5, 0.01);
+                for(int p=0; p<6; p++)
+                    fit.AddGamma(meson.SubPhotons(0, p).E(), meson.SubPhotons(0, p).Theta(), meson.SubPhotons(0, p).Phi(), 0.05*meson.SubPhotons(0, p).E(), 3*TMath::DegToRad(), 3*TMath::DegToRad());
+                fit.AddRecoilAngles(proton.Particle(0).Theta(), proton.Particle(0).Phi(), 2*TMath::DegToRad(), 2*TMath::DegToRad());
+
+                //fit.Print();
+                //fit.Print("input");
+
+                fit.Solve(hist_fit);
             }
         }
     }
