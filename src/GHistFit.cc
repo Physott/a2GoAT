@@ -111,7 +111,7 @@ GHistFit2::GHistFit2(const char* name, const char* title, Bool_t linkHistogram) 
     invMassSub1(TString(name).Append("_invMassSub1"), TString(title).Append(" inv. Mass SubPart1"), 300, 0, 300, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
     invMassSub2(TString(name).Append("_invMassSub2"), TString(title).Append(" inv. Mass SubPart2"), 300, 0, 300, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
     chiSq(TString(name).Append("_ChiSq"), TString(title).Append(" ChiSq"), 1000, 0, 100000, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
-    confidenceLevel(TString(name).Append("_ConfLev"), TString(title).Append(" ConfLev"), 1000, 0, 1000, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
+    confidenceLevel(TString(name).Append("_ConfLev"), TString(title).Append(" ConfLev"), 1000, 0, 1.2, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
     zVertex(TString(name).Append("_Vertex_X"), TString(title).Append(" Vertex_X"), 1000, -1, 1, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
     protonEnergy(TString(name).Append("protonEnergy"), TString(title).Append(" protonEnergy"), 1000, 0, 1000, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),
     protonTheta(TString(name).Append("protonTheta"), TString(title).Append(" protonTheta"), 180, 0, 180, GKinFitterBase_MaxSteps, 0, GKinFitterBase_MaxSteps, kFALSE),

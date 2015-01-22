@@ -244,9 +244,10 @@ private:
     Int_t               countCon; //Number of constraints
     Int_t               countIter; // Number of times Solve has been called
     TMatrixD            par0;      //vector of measured parameters
-    TMatrixD            para;       //vector of fitted parameters
-    Double_t            unk0;      //vector of unknowns calculated from constrain and par0
-    Double_t            unkn;       //vector of fitted unknowns
+    TMatrixD            par1;       //vector of fitted parameters
+    TMatrixD            par2;       //vector of fitted parameters
+    Double_t            unk1;      //vector of unknowns calculated from constrain and par0
+    Double_t            unk2;       //vector of fitted unknowns
     TMatrixD            lambda;  	//Vector of lagrangian multipliers
     TMatrixD            V0;        //Covariance matrix of measured parameters
     TMatrixD            V;         //Covariance matrix of fitted parameters
@@ -265,26 +266,38 @@ private:
     TMatrixD            SInv;
     Double_t            U;
 
-    /*inline TLorentzVector   Recoil(const TMatrixD& par, const TMatrixD& unk);
-    inline TLorentzVector   RecoilDerivateEnergy(const TMatrixD& par, const TMatrixD& unk);
-    inline TLorentzVector   RecoilDerivateTheta(const TMatrixD& par, const TMatrixD& unk);
-    inline TLorentzVector   RecoilDerivatePhi(const TMatrixD& par, const TMatrixD& unk);
-    inline TLorentzVector   RecoilDerivateZVertex(const TMatrixD& par, const TMatrixD& unk);
-    inline Double_t         MM(const TMatrixD& par, const TMatrixD& unk, const Double_t mass);
-    inline void             MMDerivatePar(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk);
-    inline Double_t         MMDerivateUnk(const TMatrixD& par, const TMatrixD& unk);
-    inline TLorentzVector   I4Vec(const TMatrixD& par, const TMatrixD& unk, const TLorentzVector& vec);
-    inline void             I4VecDerivatePar(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk);
-    inline void             I4VecDerivateUnk(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk);
-    inline void             g(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk);
-    inline void             gDerivatePar(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk);
-    inline void             gDerivateUnk(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk);
-    inline void             r(TMatrixD& ret, const TMatrixD& par, const TMatrixD& unk);*/
+    TLorentzVector  GetBeam(const TMatrixD& par, const Double_t unk)                const   {return GKinFitterBaseGamma().GammaEval(par[0][0], par[1][0], unk, par[2][0]);}
+    TLorentzVector  GetBeamDerivateEnergy(const TMatrixD& par, const Double_t unk)  const   {return GKinFitterBaseGamma().GammaDerivateEnergy(par[0][0], par[1][0], unk, par[2][0]);}
+    TLorentzVector  GetBeamDerivateTheta(const TMatrixD& par, const Double_t unk)   const   {return GKinFitterBaseGamma().GammaDerivateTheta(par[0][0], par[1][0], unk, par[2][0]);}
+    TLorentzVector  GetBeamDerivatePhi(const TMatrixD& par, const Double_t unk)     const   {return GKinFitterBaseGamma().GammaDerivatePhi(par[0][0], par[1][0], unk, par[2][0]);}
+    TLorentzVector  GetBeamDerivateZVertex(const TMatrixD& par, const Double_t unk) const   {return GKinFitterBaseGamma().GammaDerivateZVertex(par[0][0], par[1][0], unk, par[2][0]);}
+    TLorentzVector  GetPhoton(const TMatrixD& par, const Double_t unk, const int i)                 const   {return GKinFitterBaseGamma().GammaEval(par[(i+1)*GKinFitterBase_ParametersPerParticle][0], par[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unk, par[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
+    TLorentzVector  GetPhotonDerivateEnergy(const TMatrixD& par, const Double_t unk, const int i)   const   {return GKinFitterBaseGamma().GammaDerivateEnergy(par[(i+1)*GKinFitterBase_ParametersPerParticle][0], par[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unk, par[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
+    TLorentzVector  GetPhotonDerivateTheta(const TMatrixD& par, const Double_t unk, const int i)    const   {return GKinFitterBaseGamma().GammaDerivateTheta(par[(i+1)*GKinFitterBase_ParametersPerParticle][0], par[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unk, par[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
+    TLorentzVector  GetPhotonDerivatePhi(const TMatrixD& par, const Double_t unk, const int i)      const   {return GKinFitterBaseGamma().GammaDerivatePhi(par[(i+1)*GKinFitterBase_ParametersPerParticle][0], par[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unk, par[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
+    TLorentzVector  GetPhotonDerivateZVertex(const TMatrixD& par, const Double_t unk, const int i)  const   {return GKinFitterBaseGamma().GammaDerivateZVertex(par[(i+1)*GKinFitterBase_ParametersPerParticle][0], par[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unk, par[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
+
+    Double_t        GetIMConstraint(const TMatrixD& par, const Double_t unk,const int i)                        const;
+    void            GetIMConstraintDerPar(TMatrixD& ret, const TMatrixD& par, const Double_t unk,const int i);
+    Double_t        GetIMConstraintDerUnk(const TMatrixD& par, const Double_t unk,const int i)                  const;
+    Double_t        GetMMConstraint(const TMatrixD& par, const Double_t unk)                                    const;
+    void            GetMMConstraintDerPar(TMatrixD& ret, const TMatrixD& par, const Double_t unk);
+    Double_t        GetMMConstraintDerUnk(const TMatrixD& par, const Double_t unk)                              const;
+
+    void    GetInitialG(TMatrixD& ret);
+    void    GetInitialGDerPar(TMatrixD& ret);
+    void    GetInitialGDerUnk(TMatrixD& ret);
+    void    GetG(TMatrixD& ret, const TMatrixD &par, const Double_t unk);
+    void    GetGDerPar(TMatrixD& ret, const TMatrixD& par, const Double_t unk);
+    void    GetGDerUnk(TMatrixD& ret, const TMatrixD& par, const Double_t unk);
+
+    void    GetR(TMatrixD& ret, const TMatrixD &par, const Double_t unk);
+
 
     Bool_t  CalcChiSq(const TMatrixD& par, const TMatrixD& unk);
     Bool_t  CalcV(const TMatrixD& par, const TMatrixD& unk);
     void    FillHists(GHistFit2& hists);
-    Bool_t  SolveStep(TMatrixD &newPar, Double_t &newUnk, GHistFit2 &hists);
+    Bool_t  SolveStep(GHistFit2& hists);
     Bool_t  SolveStart(GHistFit2& hists);
 
 protected:
@@ -293,57 +306,15 @@ public:
     GKinFitterBase(const Int_t nParticles, const Int_t nConstraints);
     ~GKinFitterBase();
 
-    TLorentzVector  GetInitialBeam()                const   {return GKinFitterBaseGamma().GammaEval(par0[0][0], par0[1][0], unk0, par0[2][0]);}
-    TLorentzVector  GetInitialBeamDerivateEnergy()  const   {return GKinFitterBaseGamma().GammaDerivateEnergy(par0[0][0], par0[1][0], unk0, par0[2][0]);}
-    TLorentzVector  GetInitialBeamDerivateTheta()   const   {return GKinFitterBaseGamma().GammaDerivateTheta(par0[0][0], par0[1][0], unk0, par0[2][0]);}
-    TLorentzVector  GetInitialBeamDerivatePhi()     const   {return GKinFitterBaseGamma().GammaDerivatePhi(par0[0][0], par0[1][0], unk0, par0[2][0]);}
-    TLorentzVector  GetInitialBeamDerivateZVertex() const   {return GKinFitterBaseGamma().GammaDerivateZVertex(par0[0][0], par0[1][0], unk0, par0[2][0]);}
-    TLorentzVector  GetBeam()                       const   {return GKinFitterBaseGamma().GammaEval(para[0][0], para[1][0], unkn, para[2][0]);}
-    TLorentzVector  GetBeamDerivateEnergy()         const   {return GKinFitterBaseGamma().GammaDerivateEnergy(para[0][0], para[1][0], unkn, para[2][0]);}
-    TLorentzVector  GetBeamDerivateTheta()          const   {return GKinFitterBaseGamma().GammaDerivateTheta(para[0][0], para[1][0], unkn, para[2][0]);}
-    TLorentzVector  GetBeamDerivatePhi()            const   {return GKinFitterBaseGamma().GammaDerivatePhi(para[0][0], para[1][0], unkn, para[2][0]);}
-    TLorentzVector  GetBeamDerivateZVertex()        const   {return GKinFitterBaseGamma().GammaDerivateZVertex(para[0][0], para[1][0], unkn, para[2][0]);}
-    TLorentzVector  GetInitialPhoton(const int i)                   const   {return GKinFitterBaseGamma().GammaEval(par0[(i+1)*GKinFitterBase_ParametersPerParticle][0], par0[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unk0, par0[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
-    TLorentzVector  GetInitialPhotonDerivateEnergy(const int i)     const   {return GKinFitterBaseGamma().GammaDerivateEnergy(par0[(i+1)*GKinFitterBase_ParametersPerParticle][0], par0[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unk0, par0[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
-    TLorentzVector  GetInitialPhotonDerivateTheta(const int i)      const   {return GKinFitterBaseGamma().GammaDerivateTheta(par0[(i+1)*GKinFitterBase_ParametersPerParticle][0], par0[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unk0, par0[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
-    TLorentzVector  GetInitialPhotonDerivatePhi(const int i)        const   {return GKinFitterBaseGamma().GammaDerivatePhi(par0[(i+1)*GKinFitterBase_ParametersPerParticle][0], par0[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unk0, par0[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
-    TLorentzVector  GetInitialPhotonDerivateZVertex(const int i)    const   {return GKinFitterBaseGamma().GammaDerivateZVertex(par0[(i+1)*GKinFitterBase_ParametersPerParticle][0], par0[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unk0, par0[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
-    TLorentzVector  GetPhoton(const int i)                          const   {return GKinFitterBaseGamma().GammaEval(para[(i+1)*GKinFitterBase_ParametersPerParticle][0], para[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unkn, para[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
-    TLorentzVector  GetPhotonDerivateEnergy(const int i)            const   {return GKinFitterBaseGamma().GammaDerivateEnergy(para[(i+1)*GKinFitterBase_ParametersPerParticle][0], para[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unkn, para[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
-    TLorentzVector  GetPhotonDerivateTheta(const int i)             const   {return GKinFitterBaseGamma().GammaDerivateTheta(para[(i+1)*GKinFitterBase_ParametersPerParticle][0], para[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unkn, para[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
-    TLorentzVector  GetPhotonDerivatePhi(const int i)               const   {return GKinFitterBaseGamma().GammaDerivatePhi(para[(i+1)*GKinFitterBase_ParametersPerParticle][0], para[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unkn, para[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
-    TLorentzVector  GetPhotonDerivateZVertex(const int i)           const   {return GKinFitterBaseGamma().GammaDerivateZVertex(para[(i+1)*GKinFitterBase_ParametersPerParticle][0], para[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0], unkn, para[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0]);}
-
-    Double_t        GetInitialIMConstraint(const int i)         const;
-    void            GetInitialIMConstraintDerPar(TMatrixD& ret, const int i);
-    Double_t        GetInitialIMConstraintDerUnk(const int i)   const;
-    Double_t        GetIMConstraint(const int i)                const;
-    void            GetIMConstraintDerPar(TMatrixD& ret, const int i);
-    Double_t        GetIMConstraintDerUnk(const int i)          const;
-    Double_t        GetInitialMMConstraint()                    const;
-    void            GetInitialMMConstraintDerPar(TMatrixD& ret);
-    Double_t        GetInitialMMConstraintDerUnk()              const;
-    Double_t        GetMMConstraint()                           const;
-    void            GetMMConstraintDerPar(TMatrixD& ret);
-    Double_t        GetMMConstraintDerUnk()                     const;
-
-    void    GetInitialG(TMatrixD& ret);
-    void    GetInitialGDerPar(TMatrixD& ret);
-    void    GetInitialGDerUnk(TMatrixD& ret);
-    void    GetG(TMatrixD& ret);
-    void    GetGDerPar(TMatrixD& ret);
-    void    GetGDerUnk(TMatrixD& ret);
-
-    void    GetInitialR(TMatrixD& ret);
-    void    GetR(TMatrixD& ret);
+    TLorentzVector  GetBeam()               const   {return GetBeam(par2, unk2);}
+    TLorentzVector  GetPhoton(const int i)  const   {return GetPhoton(par2, unk2, i);}
 
     void            AddInvMassConstraint(const int* partList, const int nPartList, const Double_t mass);
     void            AddMisMassConstraint(const Double_t mass);
     void            AddBeam(const Double_t beamEnergy, const Double_t _targetMass, const Double_t beamEnergyError, const Double_t beamSpotRadius);
     void            AddGamma(const Double_t energy, const Double_t theta, const Double_t phi, const Double_t energyError, const Double_t thetaError, const Double_t phiError);
-    void            AddRecoilAngles(const Double_t theta, const Double_t phi, const Double_t thetaError, const Double_t phiError);
     Double_t        ConfidenceLevel()           {return TMath::Prob(chiSq, nCon-1);}
-    Double_t        Pull(const Int_t i)         {return (par0[i][0] - para[i][0])/TMath::Sqrt(V0[i][i] - V[i][i]);}
+    Double_t        Pull(const Int_t i)         {return (par0[i][0] - par2[i][0])/TMath::Sqrt(V0[i][i] - V[i][i]);}
     void            Print(const char* option = "");
     void            Reset()     {countPart=0; countCon=0; countIter=0; nImConstraint=0; isMmConstraint=kFALSE;}
     Bool_t          Solve(GHistFit2& hists);

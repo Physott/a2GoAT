@@ -177,7 +177,7 @@ GAnalysis3MesonsProton::GAnalysis3MesonsProton(const char* name, const char* tit
     hist_raw(TString(name).Append("raw"), TString(title).Append("raw"), kFALSE),
     hist_SubImCut(TString(name).Append("SubImCut"), TString(title).Append("SubImCut"), kFALSE),
     hist_MMCut(TString(name).Append("MMCut"), TString(title).Append("MMCut"), kFALSE),
-    fit(6, 7),
+    fit(6, 4),
     hist_SubImCut_fit(TString(name).Append("_SubImCut_fit"), TString(title).Append(" SubImCut fit"), 24, kFALSE),
     hist_fit(TString(name).Append("fit"), TString(title).Append("fit"), kFALSE)
 {
@@ -242,8 +242,18 @@ void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, const GTreeParticl
                 fit.AddBeam(tagger.GetPhotonBeam_E(i), MASS_PROTON, 0.5, 0.01);
                 for(int p=0; p<6; p++)
                     fit.AddGamma(meson.SubPhotons(0, p).E(), meson.SubPhotons(0, p).Theta(), meson.SubPhotons(0, p).Phi(), 0.05*meson.SubPhotons(0, p).E(), 3*TMath::DegToRad(), 3*TMath::DegToRad());
-                fit.AddRecoilAngles(proton.Particle(0).Theta(), proton.Particle(0).Phi(), 2*TMath::DegToRad(), 2*TMath::DegToRad());
 
+                int indices[2];
+                indices[0]  = 0;
+                indices[1]  = 1;
+                fit.AddInvMassConstraint(indices, 2, MASS_ETA);
+                indices[0]  = 2;
+                indices[1]  = 3;
+                fit.AddInvMassConstraint(indices, 2, MASS_PI0);
+                indices[0]  = 4;
+                indices[1]  = 5;
+                fit.AddInvMassConstraint(indices, 2, MASS_PI0);
+                fit.AddMisMassConstraint(MASS_PROTON);
                 //fit.Print();
                 //fit.Print("input");
 

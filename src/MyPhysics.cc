@@ -19,7 +19,7 @@ MyPhysics::~MyPhysics()
 
 Bool_t	MyPhysics::Start()
 {
-    TLorentzVector  g0(0.0, 134.98/2, 0.0, 134.98/2);
+    /*TLorentzVector  g0(0.0, 134.98/2, 0.0, 134.98/2);
     TLorentzVector  g1(0.0, -134.98/2, 0.0, 134.98/2);
     TLorentzVector  pi(g0+g1);
     //pi.Print();
@@ -46,7 +46,7 @@ Bool_t	MyPhysics::Start()
     g1.Print();
     pi.Print();
     p.Print();*/
-    std::cout << b.E()-b.P() << std::endl;
+    /*std::cout << b.E()-b.P() << std::endl;
 
     GKinFitterBase  fitter(2,2);
     GHistFit2       hfit("test", "tset", kTRUE);
@@ -58,6 +58,10 @@ Bool_t	MyPhysics::Start()
     TLorentzVector  g1smear(g1.E()+(0.05*g1.E()), 0.0, 0.0, g1.E()+(0.05*g1.E()));
                     g1smear.SetTheta(g1.Theta()-(0.05*g1.Theta()));
                     g1smear.SetPhi(g1.Phi()+(0.05*g1.Phi()));
+
+    b.Print();
+    g0.Print();
+    g1.Print();
     std::cout << bsmear << std::endl;
     g0smear.Print();
     g1smear.Print();
@@ -71,20 +75,10 @@ Bool_t	MyPhysics::Start()
     fitter.AddInvMassConstraint(indices, 2, 134.98);
     fitter.AddMisMassConstraint(938.27);
 
-    fitter.GetInitialBeam().Print();
-    fitter.GetBeam().Print();
-    fitter.GetInitialPhoton(0).Print();
-    fitter.GetPhoton(0).Print();
-    fitter.GetInitialPhoton(1).Print();
-    fitter.GetPhoton(1).Print();
-    std::cout << fitter.GetInitialIMConstraint(0) << std::endl;
-    std::cout << fitter.GetInitialMMConstraint() << std::endl;
-
-    TMatrixD    gDerPar(2, 9);
-    fitter.GetInitialGDerPar(gDerPar);
-    gDerPar.Print();
-
     fitter.Solve(hfit);
+    fitter.GetBeam().Print();
+    fitter.GetPhoton(0).Print();
+    fitter.GetPhoton(1).Print();*/
 
     if(!IsGoATFile())
     {

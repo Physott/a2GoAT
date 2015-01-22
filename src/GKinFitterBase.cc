@@ -26,9 +26,10 @@ GKinFitterBase::GKinFitterBase(const Int_t nParticles, const Int_t nConstraints)
     countCon(0),
     countIter(0),
     par0(nPar,1),
-    para(nPar,1),
-    unk0(0),
-    unkn(0),
+    par1(nPar,1),
+    par2(nPar,1),
+    unk1(0),
+    unk2(0),
     lambda(nCon,1),
     V0(nPar, nPar),
     V(nPar, nPar),
@@ -50,12 +51,12 @@ GKinFitterBase::~GKinFitterBase()
 
 void    GKinFitterBase::FillHists(GHistFit2& hists)
 {
-    /*TLorentzVector  eta(GKinFitterBaseGamma().Particle(0, para, unkn));
-                    eta     += GKinFitterBaseGamma().Particle(1, para, unkn);
-    TLorentzVector  pi0a(GKinFitterBaseGamma().Particle(2, para, unkn));
-                    pi0a    += GKinFitterBaseGamma().Particle(3, para, unkn);
-    TLorentzVector  pi0b(GKinFitterBaseGamma().Particle(4, para, unkn));
-                    pi0b    += GKinFitterBaseGamma().Particle(5, para, unkn);
+    TLorentzVector  eta(GetPhoton(par2, unk2, 0));
+                    eta     += GetPhoton(par2, unk2, 1);
+    TLorentzVector  pi0a(GetPhoton(par2, unk2, 2));
+                    pi0a    += GetPhoton(par2, unk2, 3);
+    TLorentzVector  pi0b(GetPhoton(par2, unk2, 4));
+                    pi0b    += GetPhoton(par2, unk2, 5);
     TLorentzVector  etap(eta);
                     etap    += pi0a;
                     etap    += pi0b;
@@ -67,38 +68,34 @@ void    GKinFitterBase::FillHists(GHistFit2& hists)
 
     hists.chiSq.Fill(chiSq, countIter);
     hists.confidenceLevel.Fill(ConfidenceLevel(), countIter);
-    hists.zVertex.Fill(unkn[0][0], countIter);
+    hists.zVertex.Fill(unk2, countIter);
     for(int i=0; i<nPart; i++)
     {
-        hists.photonsEnergy[i]->Fill(para[(i+1)*GKinFitterBase_ParametersPerParticle][0], countIter);
-        hists.photonsTheta[i]->Fill(para[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0] * TMath::RadToDeg(), countIter);
-        hists.photonsPhi[i]->Fill(para[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0] * TMath::RadToDeg(), countIter);
+        hists.photonsEnergy[i]->Fill(par2[(i+1)*GKinFitterBase_ParametersPerParticle][0], countIter);
+        hists.photonsTheta[i]->Fill(par2[((i+1)*GKinFitterBase_ParametersPerParticle)+1][0] * TMath::RadToDeg(), countIter);
+        hists.photonsPhi[i]->Fill(par2[((i+1)*GKinFitterBase_ParametersPerParticle)+2][0] * TMath::RadToDeg(), countIter);
     }
-    hists.beamEnergy.Fill(para[0][0], countIter);
-    hists.beamTheta.Fill(para[1][0] * TMath::RadToDeg(), countIter);
-    hists.beamPhi.Fill(para[2][0] * TMath::RadToDeg(), countIter);
+    hists.beamEnergy.Fill(par2[0][0], countIter);
+    hists.beamTheta.Fill(par2[1][0] * TMath::RadToDeg(), countIter);
+    hists.beamPhi.Fill(par2[2][0] * TMath::RadToDeg(), countIter);
     int indices[2];
     indices[0]  = 0;
     indices[1]  = 1;
-    hists.con[0]->Fill(GKinFitterBaseInvMass().Eval(para, unkn, indices, 2, MASS_ETA), countIter);
+    hists.con[0]->Fill(GetIMConstraint(par2, unk2, 0), countIter);
     indices[0]  = 2;
     indices[1]  = 3;
-    hists.con[1]->Fill(GKinFitterBaseInvMass().Eval(para, unkn, indices, 2, MASS_PI0), countIter);
+    hists.con[1]->Fill(GetIMConstraint(par2, unk2, 1), countIter);
     indices[0]  = 4;
     indices[1]  = 5;
-    hists.con[2]->Fill(GKinFitterBaseInvMass().Eval(para, unkn, indices, 2, MASS_PI0), countIter);
+    hists.con[2]->Fill(GetIMConstraint(par2, unk2, 2), countIter);
     for(int i=0; i<nPar; i++)
         hists.pulls[i]->Fill(Pull(i), countIter);
 
-   hists.protonEnergy.Fill(unkn[1][0], countIter);
-   hists.protonTheta.Fill(para[(nPart+1)*GKinFitterBase_ParametersPerParticle][0] * TMath::RadToDeg(), countIter);
-   hists.protonPhi.Fill(para[((nPart+1)*GKinFitterBase_ParametersPerParticle)+1][0] * TMath::RadToDeg(), countIter);
-
-   TLorentzVector  help(I4Vec(para, unkn, TLorentzVector(0.0, 0.0, 0.0, 0.0)));
+   TLorentzVector  help(GetMMConstraint(par2, unk2));
    hists.con[3]->Fill(help.Px(), countIter);
    hists.con[4]->Fill(help.Py(), countIter);
    hists.con[5]->Fill(help.Pz(), countIter);
-   hists.con[6]->Fill(help.E(), countIter);*/
+   hists.con[6]->Fill(help.E(), countIter);
 }
 
 
@@ -147,30 +144,20 @@ void            GKinFitterBase::AddGamma(const Double_t energy, const Double_t t
     V0[((countPart+1)*GKinFitterBase_ParametersPerParticle)+2][((countPart+1)*GKinFitterBase_ParametersPerParticle)+2]    = phiError*phiError;
     countPart++;
 }
-void            GKinFitterBase::AddRecoilAngles(const Double_t theta, const Double_t phi, const Double_t thetaError, const Double_t phiError)
-{
-    par0[ (nPart+1)*GKinFitterBase_ParametersPerParticle   ][0]  = theta;
-    par0[((nPart+1)*GKinFitterBase_ParametersPerParticle)+1][0]  = phi;
-    V0[ (nPart+1)*GKinFitterBase_ParametersPerParticle   ][ (nPart+1)*GKinFitterBase_ParametersPerParticle   ]    = thetaError*thetaError;
-    V0[((nPart+1)*GKinFitterBase_ParametersPerParticle)+1][((nPart+1)*GKinFitterBase_ParametersPerParticle)+1]    = phiError*phiError;
-}
 
-Double_t        GKinFitterBase::GetInitialIMConstraint(const int i)    const
+
+Double_t        GKinFitterBase::GetIMConstraint(const TMatrixD& par, const Double_t unk, const int i)    const
 {
     if(i>=nImConstraint || i<0)
         return 0.0;
 
-    TLorentzVector  tot(GetInitialPhoton(imConstraint[i].PartList[0]));
+    TLorentzVector  tot(GetPhoton(par, unk, imConstraint[i].PartList[0]));
     for(int c=1; c<imConstraint[i].nPartList; c++)
-        tot +=  GetInitialPhoton(imConstraint[i].PartList[c]);
+        tot +=  GetPhoton(par, unk, imConstraint[i].PartList[c]);
 
-    //std::cout << tot.M2() - (imConstraint[i].mass*imConstraint[i].mass) << std::endl;
-    //std::cout << tot.M() - imConstraint[i].mass << std::endl;
-    //std::cout << tot.M() << std::endl;
-    //std::cout << imConstraint[i].mass << std::endl;
     return tot.M2() - (imConstraint[i].mass*imConstraint[i].mass);
 }
-void       GKinFitterBase::GetInitialIMConstraintDerPar(TMatrixD& ret, const int i)
+void       GKinFitterBase::GetIMConstraintDerPar(TMatrixD& ret, const TMatrixD& par, const Double_t unk, const int i)
 {
     for(int c=0; c<nPar; c++)
         ret[c][0]   = 0;
@@ -178,257 +165,126 @@ void       GKinFitterBase::GetInitialIMConstraintDerPar(TMatrixD& ret, const int
     if(i>=nImConstraint || i<0)
         return;
 
-    TLorentzVector  tot(GetInitialPhoton(imConstraint[i].PartList[0]));
+    TLorentzVector  tot(GetPhoton(par, unk, imConstraint[i].PartList[0]));
     for(int c=1; c<imConstraint[i].nPartList; c++)
-        tot +=  GetInitialPhoton(imConstraint[i].PartList[c]);
+        tot +=  GetPhoton(par, unk, imConstraint[i].PartList[c]);
 
     for(int c=0; c<imConstraint[i].nPartList; c++)
     {
-        ret[ (imConstraint[i].PartList[c]+1)*GKinFitterBase_ParametersPerParticle   ][0]   = 2 * tot * GetInitialPhotonDerivateEnergy(imConstraint[i].PartList[c]);
-        ret[((imConstraint[i].PartList[c]+1)*GKinFitterBase_ParametersPerParticle)+1][0]   = 2 * tot * GetInitialPhotonDerivateTheta(imConstraint[i].PartList[c]);
-        ret[((imConstraint[i].PartList[c]+1)*GKinFitterBase_ParametersPerParticle)+2][0]   = 2 * tot * GetInitialPhotonDerivatePhi(imConstraint[i].PartList[c]);
+        ret[ (imConstraint[i].PartList[c]+1)*GKinFitterBase_ParametersPerParticle   ][0]   = 2 * tot * GetPhotonDerivateEnergy(par, unk, imConstraint[i].PartList[c]);
+        ret[((imConstraint[i].PartList[c]+1)*GKinFitterBase_ParametersPerParticle)+1][0]   = 2 * tot * GetPhotonDerivateTheta(par, unk, imConstraint[i].PartList[c]);
+        ret[((imConstraint[i].PartList[c]+1)*GKinFitterBase_ParametersPerParticle)+2][0]   = 2 * tot * GetPhotonDerivatePhi(par, unk, imConstraint[i].PartList[c]);
     }
 }
-Double_t   GKinFitterBase::GetInitialIMConstraintDerUnk(const int i)   const
+Double_t   GKinFitterBase::GetIMConstraintDerUnk(const TMatrixD& par, const Double_t unk, const int i)          const
 {
     if(i>=nImConstraint || i<0)
         return 0.0;
 
-    TLorentzVector  tot(GetInitialPhoton(imConstraint[i].PartList[0]));
+    TLorentzVector  tot(GetPhoton(par, unk, imConstraint[i].PartList[0]));
     for(int c=1; c<imConstraint[i].nPartList; c++)
-        tot +=  GetInitialPhoton(imConstraint[i].PartList[c]);
+        tot +=  GetPhoton(par, unk, imConstraint[i].PartList[c]);
 
     Double_t    ret = 0;
     for(int c=0; c<imConstraint[i].nPartList; c++)
-        ret += 2* tot * GetInitialPhotonDerivateZVertex(imConstraint[i].PartList[c]);
-
-    return ret;
-}
-Double_t        GKinFitterBase::GetIMConstraint(const int i)    const
-{
-    if(i>=nImConstraint || i<0)
-        return 0.0;
-
-    TLorentzVector  tot(GetPhoton(imConstraint[i].PartList[0]));
-    for(int c=1; c<imConstraint[i].nPartList; c++)
-        tot +=  GetPhoton(imConstraint[i].PartList[c]);
-
-    return tot.M2() - (imConstraint[i].mass*imConstraint[i].mass);
-}
-void       GKinFitterBase::GetIMConstraintDerPar(TMatrixD& ret, const int i)
-{
-    for(int c=0; c<nPar; c++)
-        ret[c][0]   = 0;
-
-    if(i>=nImConstraint || i<0)
-        return;
-
-    TLorentzVector  tot(GetPhoton(imConstraint[i].PartList[0]));
-    for(int c=1; c<imConstraint[i].nPartList; c++)
-        tot +=  GetPhoton(imConstraint[i].PartList[c]);
-
-    for(int c=0; c<imConstraint[i].nPartList; c++)
-    {
-        ret[ (imConstraint[i].PartList[c]+1)*GKinFitterBase_ParametersPerParticle   ][0]   = 2 * tot * GetPhotonDerivateEnergy(imConstraint[i].PartList[c]);
-        ret[((imConstraint[i].PartList[c]+1)*GKinFitterBase_ParametersPerParticle)+1][0]   = 2 * tot * GetPhotonDerivateTheta(imConstraint[i].PartList[c]);
-        ret[((imConstraint[i].PartList[c]+1)*GKinFitterBase_ParametersPerParticle)+2][0]   = 2 * tot * GetPhotonDerivatePhi(imConstraint[i].PartList[c]);
-    }
-}
-Double_t   GKinFitterBase::GetIMConstraintDerUnk(const int i)          const
-{
-    if(i>=nImConstraint || i<0)
-        return 0.0;
-
-    TLorentzVector  tot(GetPhoton(imConstraint[i].PartList[0]));
-    for(int c=1; c<imConstraint[i].nPartList; c++)
-        tot +=  GetPhoton(imConstraint[i].PartList[c]);
-
-    Double_t    ret = 0;
-    for(int c=0; c<imConstraint[i].nPartList; c++)
-        ret += 2* tot * GetPhotonDerivateZVertex(imConstraint[i].PartList[c]);
+        ret += 2* tot * GetPhotonDerivateZVertex(par, unk, imConstraint[i].PartList[c]);
 
     return ret;
 }
 
-Double_t        GKinFitterBase::GetInitialMMConstraint()    const
+Double_t        GKinFitterBase::GetMMConstraint(const TMatrixD& par, const Double_t unk)    const
 {
     TLorentzVector  tot(0.0, 0.0, 0.0, targetMass);
-    tot += GetInitialBeam();
+    tot += GetBeam(par, unk);
 
     for(int i=0; i<nPart; i++)
-        tot -=  GetInitialPhoton(i);
-
-    //std::cout << tot.M2() - (mmConstraint*mmConstraint) << std::endl;
-    //std::cout << tot.M() - mmConstraint << std::endl;
-    //std::cout << tot.M() << std::endl;
-    //std::cout << mmConstraint << std::endl;
-    return tot.M2() - (mmConstraint*mmConstraint);
-}
-void            GKinFitterBase::GetInitialMMConstraintDerPar(TMatrixD& ret)
-{
-    TLorentzVector  tot(0.0, 0.0, 0.0, targetMass);
-    tot += GetInitialBeam();
-
-    for(int i=0; i<nPart; i++)
-        tot -=  GetInitialPhoton(i);
-
-    ret[0][0]   = 2 * tot * GetInitialBeamDerivateEnergy();
-    ret[1][0]   = 2 * tot * GetInitialBeamDerivateTheta();
-    ret[2][0]   = 2 * tot * GetInitialBeamDerivatePhi();
-    for(int c=0; c<nPart; c++)
-    {
-        ret[ (c+1)*GKinFitterBase_ParametersPerParticle   ][0]   = 2 * tot * GetInitialPhotonDerivateEnergy(c);
-        ret[((c+1)*GKinFitterBase_ParametersPerParticle)+1][0]   = 2 * tot * GetInitialPhotonDerivateTheta(c);
-        ret[((c+1)*GKinFitterBase_ParametersPerParticle)+2][0]   = 2 * tot * GetInitialPhotonDerivatePhi(c);
-    }
-}
-Double_t        GKinFitterBase::GetInitialMMConstraintDerUnk()   const
-{
-    TLorentzVector  tot(0.0, 0.0, 0.0, targetMass);
-    tot += GetInitialBeam();
-
-    for(int i=0; i<nPart; i++)
-        tot -=  GetInitialPhoton(i);
-
-    Double_t    ret = 0;
-    ret += 2 * tot * GetInitialBeamDerivateZVertex();
-    for(int c=0; c<nPart; c++)
-        ret += 2 * tot * GetInitialPhotonDerivateZVertex(c);
-
-    return ret;
-}
-Double_t        GKinFitterBase::GetMMConstraint()    const
-{
-    TLorentzVector  tot(0.0, 0.0, 0.0, targetMass);
-    tot += GetBeam();
-
-    for(int i=0; i<nPart; i++)
-        tot -=  GetPhoton(i);
+        tot -=  GetPhoton(par, unk, i);
 
     return tot.M2() - (mmConstraint*mmConstraint);
 }
-void            GKinFitterBase::GetMMConstraintDerPar(TMatrixD& ret)
+void            GKinFitterBase::GetMMConstraintDerPar(TMatrixD& ret, const TMatrixD& par, const Double_t unk)
 {
     TLorentzVector  tot(0.0, 0.0, 0.0, targetMass);
-    tot += GetBeam();
+    tot += GetBeam(par, unk);
 
     for(int i=0; i<nPart; i++)
-        tot -=  GetPhoton(i);
+        tot -=  GetPhoton(par, unk, i);
 
-    ret[0][0]   = 2 * tot * GetBeamDerivateEnergy();
-    ret[1][0]   = 2 * tot * GetBeamDerivateTheta();
-    ret[2][0]   = 2 * tot * GetBeamDerivatePhi();
+    ret[0][0]   = 2 * tot * GetBeamDerivateEnergy(par, unk);
+    ret[1][0]   = 2 * tot * GetBeamDerivateTheta(par, unk);
+    ret[2][0]   = 2 * tot * GetBeamDerivatePhi(par, unk);
     for(int c=0; c<nPart; c++)
     {
-        ret[ (c+1)*GKinFitterBase_ParametersPerParticle   ][0]   = 2 * tot * GetPhotonDerivateEnergy(c);
-        ret[((c+1)*GKinFitterBase_ParametersPerParticle)+1][0]   = 2 * tot * GetPhotonDerivateTheta(c);
-        ret[((c+1)*GKinFitterBase_ParametersPerParticle)+2][0]   = 2 * tot * GetPhotonDerivatePhi(c);
+        ret[ (c+1)*GKinFitterBase_ParametersPerParticle   ][0]   = 2 * tot * GetPhotonDerivateEnergy(par, unk, c);
+        ret[((c+1)*GKinFitterBase_ParametersPerParticle)+1][0]   = 2 * tot * GetPhotonDerivateTheta(par, unk, c);
+        ret[((c+1)*GKinFitterBase_ParametersPerParticle)+2][0]   = 2 * tot * GetPhotonDerivatePhi(par, unk, c);
     }
 }
-Double_t        GKinFitterBase::GetMMConstraintDerUnk()   const
+Double_t        GKinFitterBase::GetMMConstraintDerUnk(const TMatrixD& par, const Double_t unk)   const
 {
     TLorentzVector  tot(0.0, 0.0, 0.0, targetMass);
-    tot += GetBeam();
+    tot += GetBeam(par, unk);
 
     for(int i=0; i<nPart; i++)
-        tot -=  GetPhoton(i);
+        tot -=  GetPhoton(par, unk, i);
 
     Double_t    ret = 0;
-    ret += 2 * tot * GetBeamDerivateZVertex();
+    ret += 2 * tot * GetBeamDerivateZVertex(par, unk);
     for(int c=0; c<nPart; c++)
-        ret += 2 * tot * GetPhotonDerivateZVertex(c);
+        ret += 2 * tot * GetPhotonDerivateZVertex(par, unk, c);
 
     return ret;
 }
 
-void    GKinFitterBase::GetInitialG(TMatrixD& ret)
+void    GKinFitterBase::GetG(TMatrixD& ret, const TMatrixD& par, const Double_t unk)
 {
     int count   = 0;
     for(int i=0; i<nImConstraint; i++)
     {
-        ret[count][0]   = GetInitialIMConstraint(i);
+        ret[count][0]   = GetIMConstraint(par, unk, i);
         count++;
     }
     if(isMmConstraint==kTRUE)
-        ret[count][0]   = GetInitialMMConstraint();
+        ret[count][0]   = GetMMConstraint(par, unk);
 }
-void    GKinFitterBase::GetInitialGDerPar(TMatrixD& ret)
+void    GKinFitterBase::GetGDerPar(TMatrixD& ret, const TMatrixD& par, const Double_t unk)
 {
     TMatrixD    help(nPar, 1);
     int count   = 0;
     for(int i=0; i<nImConstraint; i++)
     {
-        GetInitialIMConstraintDerPar(help, i);
+        GetIMConstraintDerPar(help, par, unk, i);
         for(int m=0; m<nPar; m++)
             ret[count][m]   = help[m][0];
         count++;
     }
     if(isMmConstraint==kTRUE)
     {
-        GetInitialMMConstraintDerPar(help);
+        GetMMConstraintDerPar(help, par, unk);
         for(int m=0; m<nPar; m++)
             ret[count][m]   = help[m][0];
     }
 }
-void    GKinFitterBase::GetInitialGDerUnk(TMatrixD& ret)
+void    GKinFitterBase::GetGDerUnk(TMatrixD& ret, const TMatrixD &par, const Double_t unk)
 {
     int count   = 0;
     for(int i=0; i<nImConstraint; i++)
     {
-        ret[count][0]   = GetInitialIMConstraintDerUnk(i);
+        ret[count][0]   = GetIMConstraintDerUnk(par, unk, i);
         count++;
     }
     if(isMmConstraint==kTRUE)
-        ret[count][0]   = GetInitialMMConstraintDerUnk();
-}
-void    GKinFitterBase::GetG(TMatrixD& ret)
-{
-    int count   = 0;
-    for(int i=0; i<nImConstraint; i++)
-    {
-        ret[count][0]   = GetIMConstraint(i);
-        count++;
-    }
-    if(isMmConstraint==kTRUE)
-        ret[count][0]   = GetMMConstraint();
-}
-void    GKinFitterBase::GetGDerPar(TMatrixD& ret)
-{
-    TMatrixD    help(nPar, 1);
-    int count   = 0;
-    for(int i=0; i<nImConstraint; i++)
-    {
-        GetIMConstraintDerPar(help, i);
-        for(int m=0; m<nPar; m++)
-            ret[count][m]   = help[m][0];
-        count++;
-    }
-    if(isMmConstraint==kTRUE)
-    {
-        GetMMConstraintDerPar(help);
-        for(int m=0; m<nPar; m++)
-            ret[count][m]   = help[m][0];
-    }
-}
-void    GKinFitterBase::GetGDerUnk(TMatrixD& ret)
-{
-    int count   = 0;
-    for(int i=0; i<nImConstraint; i++)
-    {
-        ret[count][0]   = GetIMConstraintDerUnk(i);
-        count++;
-    }
-    if(isMmConstraint==kTRUE)
-        ret[count][0]   = GetMMConstraintDerUnk();
+        ret[count][0]   = GetMMConstraintDerUnk(par, unk);
 }
 
-void    GKinFitterBase::GetInitialR(TMatrixD& ret)
+void    GKinFitterBase::GetR(TMatrixD& ret, const TMatrixD &par, const Double_t unk)
 {
-    //TMatrixD    diff(par0)
-}
-void    GKinFitterBase::GetR(TMatrixD& ret)
-{
+    TMatrixD    diff(par0);
+    diff    -=  par;
 
+    ret.Mult(GPar, diff);
+    GetG(G, par, unk);
+    ret += G;
 }
 
 
@@ -457,27 +313,104 @@ void            GKinFitterBase::Print(const char* option)
     }
 }
 
-Bool_t          GKinFitterBase::SolveStep(TMatrixD& newPar, Double_t& newUnk,GHistFit2& hists)
+Bool_t          GKinFitterBase::SolveStep(GHistFit2& hists)
 {
-    GetGDerPar(GPar);
-    TMatrixD    help1(nCon, nPar);
-    help1.MultT(V0, GPar);
-    SInv.Mult(GPar, help1);
+    par1    = par2;
+    unk1    = unk2;
+
+    GetGDerPar(GPar, par1, unk1);
+    {
+        TMatrixD    help(nPar, nCon);
+        help.MultT(V0, GPar);
+        SInv.Mult(GPar, help);
+    }
     Double_t    det = SInv.Determinant();
     if(det==0)
     {
-        std::cout << "Can not invert S." << std::endl;
+        //std::cout << "Can not invert S." << std::endl;
         return kFALSE;
     }
     SInv.InvertFast();
 
-    GetGDerUnk(GUnk);
-    TMatrixD    help2(nCon, 1);
-    help2.Mult(SInv, GUnk);
-    TMatrixD    help3(1, 1);
-    help3.TMult(GUnk, help2);
-    U   = 1/help3[0][0];
+    GetGDerUnk(GUnk, par1, unk1);
+    {
+        TMatrixD    help1(nCon, 1);
+        help1.Mult(SInv, GUnk);
+        TMatrixD    help2(1, 1);
+        help2.TMult(GUnk, help1);
+        U   = 1/help2[0][0];
+    }
 
+    TMatrixD    R(nCon, 1);
+    GetR(R, par1, unk1);
+    //std::cout << G[0][0] << std::endl;
+    //std::cout << G[1][0] << std::endl;
+
+    {
+        TMatrixD    help1(nCon, 1);
+        help1.Mult(SInv, R);
+        TMatrixD    help2(1, 1);
+        help2.TMult(GUnk, help1);
+        unk2    = unk1 -(U * help2[0][0]);
+    }
+
+    {
+        TMatrixD    help(GUnk);
+        help   *= unk2 - unk1;
+        help   += R;
+        lambda.Mult(SInv, help);
+    }
+
+    {
+        TMatrixD    help1(nPar, 1);
+        help1.TMult(GPar, lambda);
+        TMatrixD    help2(nPar, 1);
+        help2.Mult(V0, help1);
+        par2     = par1;
+        par2    -= help2;
+    }
+    //std::cout << unk2 << std::endl;
+
+    //chiSq
+    {
+        TMatrixD    help1(1, 1);
+        help1.TMult(lambda, G);
+        chiSq    = help1[0][0];
+        chiSq   *= 2;
+        TMatrixD    diff(par0);
+        diff    -= par2;
+        TMatrixD    help2(nPar, 1);
+        help2.Mult(V0, diff);
+        help1.TMult(diff, help2);
+        chiSq   += help1[0][0];
+    }
+
+    //V
+    TMatrixD    A(nPar, nPar);
+    {
+        TMatrixD    help(nCon, nPar);
+        help.Mult(SInv, GPar);
+        A.TMult(GPar, help);
+    }
+
+    TMatrixD    B(nPar, 1);
+    {
+        TMatrixD    help(nCon, 1);
+        help.Mult(SInv, GUnk);
+        B.TMult(GPar, help);
+    }
+    {
+        TMatrixD    help1(nPar, nPar);
+        help1.MultT(B, B);
+        help1   *= U;
+        TMatrixD    help2(A);
+        help2   -= help1;
+        A.Mult(help2, V0);
+        TMatrixD    help3(nPar, nPar);
+        help3.UnitMatrix();
+        help3   -= A;
+        V.Mult(V0, help3);
+    }
 
 
     return kTRUE;
@@ -497,36 +430,61 @@ Bool_t          GKinFitterBase::Solve(GHistFit2& hists)
         return kFALSE;
     }
 
-    //Calc Unk0
-    unk0    = 0;
-    unkn    = 0;
+    //Calc Par2 and Unk2
+    unk2    = 0;
+    Double_t    fValOld;
+    Double_t    fVal;
+    if(nImConstraint>0)
+    {
+        fValOld = GetIMConstraint(par0, unk2, 0);
+        unk2    = unk2 - fValOld/GetIMConstraintDerUnk(par0, unk2, 0);
+        fVal    = GetIMConstraint(par0, unk2, 0);
+        //std::cout << "Only " << unk2 << " Constraints filled. " << fVal << " needed." << fValOld << " needed." << std::endl;
+        while(fVal<fValOld)
+        {
+            fValOld = fVal;
+            unk2    = unk2 - fValOld/GetIMConstraintDerUnk(par0, unk2, 0);
+            fVal    = GetIMConstraint(par0, unk2, 0);
+            //std::cout << "Only " << unk2 << " Constraints filled. " << fVal << " needed." << fValOld << " needed." << std::endl;
+        }
+    }
+    par2    = par0;
 
-    TMatrixD    newPar(nPar, 1);
-    Double_t    newUnk;
-
-    if(SolveStep(newPar, newUnk, hists)==kFALSE)
+    //Start solving
+    if(SolveStep(hists)==kFALSE)
         return kFALSE;
-    /*Double_t    oldChiSq    = chiSq;
-    TMatrixD    newPar(para);
-    TMatrixD    newUnk(unkn);
+    FillHists(hists);
+    Double_t    oldChiSq    = chiSq;
     countIter   = 1;
     //std::cout << "ChiSq: " << chiSq << std::endl;
-    if(SolveStep(newPar, newUnk, para, unkn, hists)==kFALSE)
-        return CalcV(para, unkn);
+    if(SolveStep(hists)==kFALSE)
+    {
+        std::cout << "countIter: " << countIter << std::endl;
+        par2    = par1;
+        unk2    = unk1;
+        return kTRUE;
+    }
     //std::cout << "ChiSq: " << chiSq << std::endl;
-    while(countIter<=5)// && chiSq<oldChiSq)
+    while(countIter<=10 && chiSq<oldChiSq)
     {
         //std::cout << "ChiSq: " << chiSq << std::endl;
+        FillHists(hists);
         oldChiSq    = chiSq;
-        para        = newPar;
-        unkn        = newUnk;
         countIter++;
-        if(SolveStep(newPar, newUnk, para, unkn, hists)==kFALSE)
-            return CalcV(para, unkn);
+        if(SolveStep(hists)==kFALSE)
+        {
+            //std::cout << "countIter: " << countIter << std::endl;
+            par2    = par1;
+            unk2    = unk1;
+            return kTRUE;
+        }
     }
     if(countIter==GKinFitterBase_MaxSteps)
         std::cout << "Fitter not finished. " << GKinFitterBase_MaxSteps << " steps are not enough." << std::endl;
-    return CalcV(para, unkn);*/
+    //std::cout << "countIter: " << countIter << std::endl;
+    par2    = par1;
+    unk2    = unk1;
+    return kTRUE;
 }
 
 Bool_t    GKinFitterBase::CalcChiSq(const TMatrixD& par, const TMatrixD& unk)
