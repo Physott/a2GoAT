@@ -13,13 +13,15 @@
 
 class	GFit
 {
-private:
+protected:
+    GKinFitter fitter;
 
 public:
-    GFit()  {}
-    ~GFit() {}
+    GFit(const Int_t npart, const Int_t ncon): fitter(npart, ncon, 0)   {}
+    ~GFit()                                                             {}
 
     virtual Double_t        ConfidenceLevel()           = 0;
+            //Int_t           GetNIter()                  {return fitter.GetNIter();}
     virtual TLorentzVector  GetTotalFitParticle()       = 0;
     virtual TLorentzVector  GetSub(const int i)         = 0;
     virtual TLorentzVector  GetRecoil()                 = 0;
@@ -34,7 +36,6 @@ class	GFit3Constraints    : public GFit
 private:
     Bool_t              solved;
     Bool_t              isEtap;
-    GKinFitter          fitter;
 
 public:
     GFit3Constraints(const Bool_t _IsEtap);
@@ -64,7 +65,6 @@ class	GFit4Constraints    : public GFit
 private:
     Bool_t              solved;
     Bool_t              isEtap;
-    GKinFitter          fitter;
 
 public:
     GFit4Constraints(const Bool_t _IsEtap);
@@ -100,7 +100,6 @@ class	GFit4ConstraintsBeam    : public GFit
 private:
     Bool_t              solved;
     Bool_t              isEtap;
-    GKinFitter          fitter;
 
 public:
     GFit4ConstraintsBeam(const Bool_t _IsEtap);
@@ -140,7 +139,6 @@ class	GFit7ConstraintsProton    : public GFit
 private:
     Bool_t              solved;
     Bool_t              isEtap;
-    GKinFitter          fitter;
 
 public:
     GFit7ConstraintsProton(const Bool_t _IsEtap);
@@ -174,7 +172,6 @@ class	GFit7ConstraintsBeamProton    : public GFit
 private:
     Bool_t              solved;
     Bool_t              isEtap;
-    GKinFitter          fitter;
 
 public:
     GFit7ConstraintsBeamProton(const Bool_t _IsEtap);
@@ -211,6 +208,7 @@ class   GHistFit    : public    GHistLinked
 {
 private:
     Int_t       nPulls;
+    GH1         nIter;
     GH1         im;
     GH1         sub0im;
     GH1         sub1im;

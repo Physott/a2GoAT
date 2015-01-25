@@ -5,7 +5,7 @@
 GFit3Constraints::GFit3Constraints(const Bool_t _IsEtap)    :
     solved(kFALSE),
     isEtap(_IsEtap),
-    fitter(6, 3, 0)
+    GFit(6, 3)
 {
 
 }
@@ -64,7 +64,7 @@ void    GFit3Constraints::Set(const TLorentzVector& p0,
 GFit4Constraints::GFit4Constraints(const Bool_t _IsEtap)    :
     solved(kFALSE),
     isEtap(_IsEtap),
-    fitter(6, 4, 0)
+    GFit(6, 4)
 {
 
 }
@@ -106,6 +106,7 @@ void    GFit4Constraints::Set(const TLorentzVector& p0,
         fitter.AddSubInvMassConstraint(2, &index[0], MASS_PI0);
     fitter.AddSubInvMassConstraint(2, &index[2], MASS_PI0);
     fitter.AddSubInvMassConstraint(2, &index[4], MASS_PI0);
+    //fitter.AddSubMissMassConstraint(beamAndTarget, MASS_PROTON);
     fitter.AddSubMissMassConstraint(beamAndTarget, 6, &index[0], MASS_PROTON);
 }
 
@@ -130,7 +131,7 @@ void    GFit4Constraints::Set(const TLorentzVector& p0,
 GFit4ConstraintsBeam::GFit4ConstraintsBeam(const Bool_t _IsEtap)    :
     solved(kFALSE),
     isEtap(_IsEtap),
-    fitter(7, 4, 0)
+    GFit(7, 4)
 {
 
 }
@@ -177,7 +178,7 @@ void    GFit4ConstraintsBeam::Set(const TLorentzVector& p0,
     beam.SetResolutions(1, 1, 2);
     fitter.AddNegKFParticle(beam);
 
-    Int_t   index[6]    = {0, 1, 2, 3, 4, 5};
+    Int_t   index[7]    = {0, 1, 2, 3, 4, 5, 6};
     if(isEtap==kTRUE)
         fitter.AddSubInvMassConstraint(2, &index[0], MASS_ETA);
     else
@@ -203,7 +204,7 @@ void    GFit4ConstraintsBeam::Set(const TLorentzVector& p0,
 GFit7ConstraintsProton::GFit7ConstraintsProton(const Bool_t _IsEtap)    :
     solved(kFALSE),
     isEtap(_IsEtap),
-    fitter(7, 7, 0)
+    GFit(7, 7)
 {
 
 }
@@ -291,7 +292,7 @@ void    GFit7ConstraintsProton::Set(const TLorentzVector& p0,
 GFit7ConstraintsBeamProton::GFit7ConstraintsBeamProton(const Bool_t _IsEtap)    :
     solved(kFALSE),
     isEtap(_IsEtap),
-    fitter(8, 7, 0)
+    GFit(8, 7)
 {
 
 }
@@ -373,6 +374,7 @@ void    GFit7ConstraintsBeamProton::Set(const TLorentzVector& p0,
 GHistFit::GHistFit(const char* name, const char* title, const Int_t _NPulls, Bool_t linkHistogram)   :
     GHistLinked(linkHistogram),
     nPulls(_NPulls),
+    nIter(TString(name).Append("_nIter"), TString(title).Append(" nIter"), 10, 0, 10, 48, kFALSE),
     im(TString(name).Append("_im"), TString(title).Append(" inv. Mass"), 2000, 0, 2000, 48, kFALSE),
     sub0im(TString(name).Append("_sub0im"), TString(title).Append(" sub0 inv. Mass"), 800, 0, 800, 48, kFALSE),
     sub1im(TString(name).Append("_sub1im"), TString(title).Append(" sub1 inv. Mass"), 400, 0, 400, 48, kFALSE),
@@ -396,6 +398,7 @@ GHistFit::~GHistFit()
 
 void        GHistFit::CalcResult()
 {
+    nIter.CalcResult();
     im.CalcResult();
     sub0im.CalcResult();
     sub1im.CalcResult();
@@ -412,6 +415,8 @@ void        GHistFit::CalcResult()
 
 Int_t       GHistFit::Fill(GFit& fitter, const Double_t taggerTime)
 {
+    //nIter.Fill(fitter.GetNIter(), taggerTime);
+    nIter.Fill(0, taggerTime);
     TLorentzVector  etap(fitter.GetTotalFitParticle());
     im.Fill(etap.M(), taggerTime);
     sub0im.Fill(fitter.GetSub(0).M(), taggerTime);
@@ -430,7 +435,8 @@ Int_t       GHistFit::Fill(GFit& fitter, const Double_t taggerTime)
 
 Int_t       GHistFit::Fill(GFit& fitter, const Double_t taggerTime, const Int_t taggerChannel)
 {
-
+    //nIter.Fill(fitter.GetNIter(), taggerTime, taggerChannel);
+    nIter.Fill(0, taggerTime);
     TLorentzVector  etap(fitter.GetTotalFitParticle());
     im.Fill(etap.M(), taggerTime, taggerChannel);
     sub0im.Fill(fitter.GetSub(0).M(), taggerTime, taggerChannel);
@@ -454,6 +460,7 @@ void    GHistFit::PrepareWriteList(GHistWriteList* arr, const char* name)
 
     if(name)
     {
+        nIter.PrepareWriteList(arr, TString(name).Append("_nIter").Data());
         im.PrepareWriteList(arr, TString(name).Append("_IM").Data());
         sub0im.PrepareWriteList(arr, TString(name).Append("_Sub0IM").Data());
         sub1im.PrepareWriteList(arr, TString(name).Append("_Sub1IM").Data());
@@ -469,6 +476,7 @@ void    GHistFit::PrepareWriteList(GHistWriteList* arr, const char* name)
     }
     else
     {
+        nIter.PrepareWriteList(arr);
         im.PrepareWriteList(arr);
         sub0im.PrepareWriteList(arr);
         sub1im.PrepareWriteList(arr);
@@ -486,6 +494,7 @@ void    GHistFit::PrepareWriteList(GHistWriteList* arr, const char* name)
 
 void        GHistFit::Reset(Option_t* option)
 {
+    nIter.Reset(option);
     im.Reset(option);
     sub0im.Reset(option);
     sub1im.Reset(option);
@@ -502,6 +511,7 @@ void        GHistFit::Reset(Option_t* option)
 
 void        GHistFit::ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads)
 {
+    nIter.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     im.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     sub0im.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     sub1im.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);

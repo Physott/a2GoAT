@@ -50,24 +50,13 @@ void GKinFitter::ResetMatrices(){
 }
 
 //-----------------------------------------------------------------------------
-Int_t GKinFitter::Solve(){
-
-  //Solve according to algorithm of Paul Avery:
-  //Applied Fitting Theory VI, Formulas for Kinematic Fitting
-  //see www.phys.ufl.edu/~avery/fitting.html
-
-  if(fNpart!=fNparti){
-    std::cout<<"GKinFitter::Solve() Added wrong number of particles. KinFit not completed"<<std::endl;
-    return -1;
-  }
-
-  TMatrixD mDT=fmD;
-  mDT.T();
+Int_t GKinFitter::SolveStep(const TMatrixD mDT)
+{
   TMatrixD mV_Dinv=fmD*fmV_Alpha0*mDT;
   fmV_D=mV_Dinv;
   TDecompLU lu(fmV_D);
   if(!lu.Decompose()){
-    std::cout<<"GKinFitter::Solve() Cannot invert. KinFit not completed"<<std::endl;
+    //std::cout<<"GKinFitter::SolveStep() Cannot invert. KinFit not completed"<<std::endl;
     return -1;
   }
   fmV_D.Invert();
@@ -91,6 +80,37 @@ Int_t GKinFitter::Solve(){
 
   return 1;
 
+}
+
+Int_t GKinFitter::Solve()
+{
+    //Solve according to algorithm of Paul Avery:
+    //Applied Fitting Theory VI, Formulas for Kinematic Fitting
+    //see www.phys.ufl.edu/~avery/fitting.html
+
+    if(fNpart!=fNparti){
+      std::cout<<"GKinFitter::Solve() Added wrong number of particles. KinFit not completed"<<std::endl;
+      return -1;
+    }
+
+    TMatrixD mDT=fmD;
+    mDT.T();
+
+    if(SolveStep(mDT)<0)
+        return -1;
+
+    //New parameters
+    fmAlpha=fmAlpha0-fmV_Alpha0*mDT*fmlamda;
+    //New Covariant matrix
+    fmV_Alpha=fmV_Alpha0-fmV_Alpha0*mDT*fmV_D*fmD*fmV_Alpha0;
+    //chi2
+    TMatrixD mlamdaT=fmlamda;
+    mlamdaT.T();
+    TMatrixD mchi2=mlamdaT*fmd;
+    fchi2=mchi2[0][0];
+    fNiter++;
+
+    return 1;
 }
 
 //-----------------------------------------------------------------------------
@@ -371,4 +391,173 @@ void GKinFitter::Debug(){
   std::cout<<"Check1 "<<std::endl;
   mCheck1.Print();
 
+}
+
+
+
+
+
+
+
+
+
+
+GKinIterativeFitter::GKinIterativeFitter(const Int_t npart, const Int_t ncon, const Int_t unk)  :
+    fitter(npart, ncon, unk)
+{
+    fmAlpha0.ResizeTo(fitter.fmAlpha0);
+    fmV_Alpha0.ResizeTo(fitter.fmV_Alpha0);
+    result.ResizeTo(fitter.fmAlpha0);
+    dresult.ResizeTo(fitter.fmV_Alpha0);
+
+    for(int i=0; i<20; i++)
+        IM_pid[i]   = 0;
+
+    Reset();
+}
+
+
+GKinIterativeFitter::~GKinIterativeFitter()
+{
+    for(int i=0; i<20; i++)
+        if(IM_pid[i])   delete IM_pid[i];
+}
+
+void GKinIterativeFitter::AddSubInvMassConstraint(const Int_t Np, const Int_t pid[], const Double_t Minv)
+{
+    if(IM_pid[nIM])   delete IM_pid[nIM];
+    IM_pid[nIM] = new Int_t[Np];
+    for(int i=0; i<Np; i++)
+        IM_pid[nIM][i]   = pid[i];
+    IM_Np[nIM]  = Np;
+    IM[nIM]     = Minv;
+    nIM++;
+}
+
+Int_t GKinIterativeFitter::SolveStep()
+{
+    //Iterative Solve according to algorithm of Paul Avery:
+    //Applied Fitting Theory VI, Formulas for Kinematic Fitting
+    //see www.phys.ufl.edu/~avery/fitting.html
+
+    if(fitter.fNpart!=fitter.fNparti){
+      std::cout<<"GKinFitter::Solve() Added wrong number of particles. KinFit not completed"<<std::endl;
+      return -1;
+    }
+
+    TMatrixD mDT=fitter.fmD;
+    mDT.T();
+
+    if(fitter.SolveStep(mDT)<0)
+        return -1;
+
+    //New parameters
+    fitter.fmAlpha=fmAlpha0-fitter.fmV_Alpha0*mDT*fitter.fmlamda;
+    //New Covariant matrix
+    fitter.fmV_Alpha=fmV_Alpha0-fmV_Alpha0*mDT*fitter.fmV_D*fitter.fmD*fmV_Alpha0;
+
+    //chi2
+    TMatrixD mlamdaT=fitter.fmlamda;
+    mlamdaT.T();
+    TMatrixD mchi2=mlamdaT*fitter.fmd;
+    fitter.fchi2=mchi2[0][0];
+    TMatrixD diff(fmAlpha0);
+    diff    -= fitter.fmAlpha;
+    TMatrixD diffT(diff);
+    diffT.T();
+    mchi2=diffT * fmV_Alpha0 * diff;
+    fitter.fchi2+=mchi2[0][0];
+    nIter++;
+
+    return 1;
+}
+
+Int_t GKinIterativeFitter::Solve()
+{
+    Init(par);
+
+    nIter   = 0;
+    if(SolveStep()<0)
+        return -1;
+
+    Double_t    oldChi2 = fitter.fchi2*1.1;
+
+    while(nIter<10 && fitter.fchi2<oldChi2)
+    {
+        result  = fitter.fmAlpha;
+        dresult = fitter.fmV_Alpha;
+        oldChi2 = fitter.fchi2;
+        Init();
+        if(SolveStep()<0)
+        {
+            fitter.fmAlpha          = result;
+            fitter.fmV_Alpha        = dresult;
+            fitter.fmAlpha0         = fmAlpha0;
+            fitter.fmV_Alpha0       = fmV_Alpha0;
+            fitter.fchi2            = oldChi2;
+            return  1;
+        }
+    }
+    fitter.fmAlpha          = result;
+    fitter.fmV_Alpha        = dresult;
+    fitter.fmAlpha0         = fmAlpha0;
+    fitter.fmV_Alpha0       = fmV_Alpha0;
+    fitter.fchi2            = oldChi2;
+    return 1;
+}
+
+
+Int_t GKinIterativeFitter::Init(const GKinFitterParticle* p)
+{
+    fitter.Reset();
+
+    for(int i=0; i<nPar; i++)
+    {
+        if(parSign[i]==kTRUE)
+            fitter.AddPosKFParticle(p[i]);
+        else
+            fitter.AddNegKFParticle(p[i]);
+    }
+    for(int i=0; i<nIM; i++)
+        fitter.AddSubInvMassConstraint(IM_Np[i], IM_pid[i], IM[i]);
+    for(int i=0; i<nMM; i++)
+    {
+        Int_t*  indices = new Int_t[nPar];
+        for(int j=0; j<nPar; j++)
+            indices[j]  = j;
+        fitter.AddSubMissMassConstraint(MM_mom[i], nPar, indices, MM[i]);
+    }
+    for(int i=0; i<nTE; i++)
+        fitter.AddTotEnergyConstraint(TE[i]);
+    for(int i=0; i<nTM; i++)
+        fitter.AddTotMomentumConstraint(TM[i]);
+}
+
+Int_t GKinIterativeFitter::Init()
+{
+    fitter.Reset();
+
+    GKinFitterParticle  kfp;
+    for(int i=0; i<nPar; i++)
+    {
+        kfp.Set4Vector(fitter.GetParticle(i).Get4Vector());
+        if(parSign[i]==kTRUE)
+            fitter.AddPosKFParticle(kfp);
+        else
+            fitter.AddNegKFParticle(kfp);
+        fitter.fmV_Alpha0 = fmV_Alpha0;
+    }
+    for(int i=0; i<nIM; i++)
+        fitter.AddSubInvMassConstraint(IM_Np[i], IM_pid[i], IM[i]);
+    for(int i=0; i<nMM; i++)
+    {
+        Int_t*  indices = new Int_t[nPar];
+        for(int j=0; j<nPar; j++)
+            indices[j]  = j;
+        fitter.AddSubMissMassConstraint(MM_mom[i], nPar, indices, MM[i]);
+    }
+    for(int i=0; i<nTE; i++)
+        fitter.AddTotEnergyConstraint(TE[i]);
+    for(int i=0; i<nTM; i++)
+        fitter.AddTotMomentumConstraint(TM[i]);
 }

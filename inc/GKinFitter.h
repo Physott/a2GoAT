@@ -7,6 +7,8 @@
 
 #include "GKinFitterParticle.h"
 
+class GKinIterativeFitter;
+
 class GKinFitter 
 {
 	private:
@@ -31,11 +33,13 @@ class GKinFitter
 	TMatrixD fT;     	//Overall transforamtin matrix from Spherical->Cart
 	TLorentzVector fPtot;
 
+    Int_t SolveStep(const TMatrixD mDT); //do the least squares fit
+
 public:
     GKinFitter(const Int_t npart, const Int_t ncon, const Int_t unk);
     virtual ~GKinFitter()							{}
 
-	Int_t Solve(); //do the least squares fit
+    Int_t Solve(); //do the least squares fit
 
 	//Form the D and d matrixes for the fit
     void AddInvMassConstraint(const Double_t Minv);   //based on Invariant mass of added particles
@@ -61,7 +65,68 @@ public:
 	void ResetMatrices();
     void Reset()            {ResetConstraints();ResetParticles();ResetMatrices();}
 	void Debug();
+
+    friend class GKinIterativeFitter;
 };
+
+
+
+class GKinIterativeFitter
+{
+private:
+    GKinFitter          fitter;
+    Int_t               nIter; // Number of times Solve has been called
+    Int_t               nPar;
+    GKinFitterParticle  par[20];
+    Bool_t              parSign[20];
+    TMatrixD            fmAlpha0;	//original parameters
+    TMatrixD            fmV_Alpha0;//Covariance matrix for original parameters
+    TMatrixD            result;	//fitted parameters
+    TMatrixD            dresult;//Covariance matrix for fitted parameters
+    Int_t               nIM;
+    Double_t            IM[10];
+    Int_t               IM_Np[10];
+    Int_t*              IM_pid[10];
+    Int_t               nMM;
+    Double_t            MM[10];
+    TLorentzVector      MM_mom[10];
+    Int_t               nTE;
+    Double_t            TE[10];
+    Int_t               nTM;
+    TVector3            TM[10];
+
+    Int_t Init();
+    Int_t Init(const GKinFitterParticle *p);
+    Int_t SolveStep();
+
+public:
+    GKinIterativeFitter(const Int_t npart, const Int_t ncon, const Int_t unk);
+    ~GKinIterativeFitter();
+
+    Int_t Solve(); //do the least squares fit
+
+    //Form the D and d matrixes for the fit
+    void AddSubInvMassConstraint(const Int_t Np, const Int_t pid[], const Double_t Minv);
+    void AddTotEnergyConstraint(const Double_t Etot)                                        {TE[nTE] = Etot; nTE++;}
+    void AddTotMomentumConstraint(const TVector3 mom)                                       {TM[nTM] = mom; nTM++;}
+    void AddSubMissMassConstraint(const TLorentzVector Mom, const Double_t MissMass)        {MM[nMM] = MissMass; MM_mom[nMM] = Mom; nMM++;}
+
+    void AddPosKFParticle(const GKinFitterParticle kfp)                                     {fmAlpha0.SetSub(nPar,0,kfp.GetAlpha()); fmV_Alpha0.SetSub(nPar,nPar,kfp.GetVAlpha()); par[nPar].Set4Vector(kfp.Get4Vector()); par[nPar].SetVAlpha(kfp.GetVAlpha()); parSign[nPar]=kTRUE; nPar++;}
+    void AddNegKFParticle(const GKinFitterParticle kfp)                                     {fmAlpha0.SetSub(nPar,0,kfp.GetAlpha()); fmV_Alpha0.SetSub(nPar,nPar,kfp.GetVAlpha());par[nPar].Set4Vector(kfp.Get4Vector()); par[nPar].SetVAlpha(kfp.GetVAlpha()); parSign[nPar]=kFALSE; nPar++;}
+
+    Int_t               GetNIter()                          {return nIter;}
+    GKinFitterParticle GetTotalFitParticle()                {return fitter.GetTotalFitParticle();}
+    TLorentzVector Get4Vector()                             {return fitter.Get4Vector();}
+    GKinFitterParticle GetParticle(const Int_t ip)          {return fitter.GetParticle(ip);}
+    GKinFitterParticle GetInitialParticle(const Int_t ip)   {return fitter.GetInitialParticle(ip);}
+    Double_t GetChi2()                                      {return fitter.GetChi2();}
+
+    Double_t ConfidenceLevel()      {return fitter.ConfidenceLevel();}//Note should be Ncon-Nunknowns
+    Double_t Pull(const Int_t i)    {return (fmAlpha0[i][0]-fitter.fmAlpha[i][0])/sqrt(fmV_Alpha0[i][i]-fitter.fmV_Alpha[i][i]);}
+
+    void Reset()            {nPar=0; nIM=0; nMM=0; nTE=0; nTM=0; fitter.Reset();}
+};
+
 
 #endif
 

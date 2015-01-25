@@ -44,15 +44,17 @@ void	MyPhysics::ProcessEvent()
 {
     if(eta->GetNParticles()>0)
     {
-        hist_eta.Fill(*eta, *tagger, kTRUE);
         if(protons->GetNParticles()>0)
             hist_eta_proton.Fill(*eta, *protons, *tagger, kTRUE);
+        else
+            hist_eta.Fill(*eta, *tagger, kTRUE);
     }
     if(etap->GetNParticles()>0)
     {
-        hist_etap.Fill(*etap, *tagger, kTRUE);
         if(protons->GetNParticles()>0)
             hist_etap_proton.Fill(*etap, *protons, *tagger, kTRUE);
+        else
+            hist_etap.Fill(*etap, *tagger, kTRUE);
     }
 }
 
