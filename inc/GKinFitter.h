@@ -23,12 +23,21 @@ protected:
     TMatrixD fmAlpha2;	//fitted parameters
 	TMatrixD fmV_Alpha0;//Covariance matrix for original parameters
 	TMatrixD fmV_Alpha; //Covariance matrix for fitted parameters
+    Double_t fmUnk0; 	//initial parameters
+    Double_t fmUnk; 	//fitted parameters
 	TMatrixD fmD;      	//Matrix of constraint derivitives
+    TMatrixD fmDUnk;  	//Matrix of constraint derivitives
 	TMatrixD fmd;      	//Vector of evaluated constraints
 	TMatrixD fmlamda;  	//Vector of lagrangian multipliers
 	TMatrixD fmV_D;    	//Covariance matrix of constraints (TO BE INVERTED)
     Double_t Cchi2;
     Double_t Vchi2;
+
+    Double_t       GetParticleFactor(const Int_t ip);
+    Double_t       GetInitialParticleFactor(const Int_t ip);
+    Double_t       GetInitialParticleDerivateEnergyFactor(const Int_t ip);
+    Double_t       GetInitialParticleDerivatePzFactor(const Int_t ip);
+    Double_t       GetInitialParticleDerivateUnkFactor(const Int_t ip);
 
 public:
     GKinFitter(const Int_t npart, const Int_t ncon);
@@ -48,7 +57,9 @@ public:
 
     TLorentzVector GetTotalFitParticle();//returns alpha=fPtot and sum of error matrices  from each particle
     TLorentzVector GetParticle(const Int_t ip);
+    Double_t       GetUnknown()                             {return fmUnk;}
     TLorentzVector GetInitialParticle(const Int_t ip);
+    Double_t       GetInitialUnknown()                      {return fmUnk0;}
     TLorentzVector GetOriginalParticle(const Int_t ip);
     Double_t GetConstraintsChi2()                           {return Cchi2;}
     Double_t GetVariablesChi2()                             {return Vchi2;}

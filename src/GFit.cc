@@ -381,6 +381,7 @@ GHistFit::GHistFit(const char* name, const char* title, const Int_t _NPulls, Boo
     Pim(TString(name).Append("Pim"), TString(title).Append(" Proton Mass"), 2000, 0, 2000, 48, kFALSE),
     Ptheta(TString(name).Append("Ptheta"), TString(title).Append(" Proton theta"), 180, 0, 180, 48, kFALSE),
     Pphi(TString(name).Append("Pphi"), TString(title).Append(" Proton phi"), 360, -180, 180, 48, kFALSE),
+    zVertex(TString(name).Append("ZVertex"), TString(title).Append(" zVertex"), 1000, -0.2, 0.2, 48, kFALSE),
     chiSq(TString(name).Append("ChiSq"), TString(title).Append(" ChiSq"), 1000, 0, 100000, 48, kFALSE),
     VchiSq(TString(name).Append("VChiSq"), TString(title).Append(" VChiSq"), 1000, 0, 100000, 48, kFALSE),
     CchiSq(TString(name).Append("CChiSq"), TString(title).Append(" CChiSq"), 1000, 0, 100, 48, kFALSE),
@@ -408,6 +409,7 @@ void        GHistFit::CalcResult()
     Pim.CalcResult();
     Ptheta.CalcResult();
     Pphi.CalcResult();
+    zVertex.CalcResult();
     chiSq.CalcResult();
     VchiSq.CalcResult();
     CchiSq.CalcResult();
@@ -429,6 +431,7 @@ Int_t       GHistFit::Fill(GFit& fitter, const Double_t taggerTime)
     Pim.Fill(fitter.GetRecoil().M(), taggerTime);
     Ptheta.Fill(fitter.GetRecoil().Theta()*TMath::RadToDeg(), taggerTime);
     Pphi.Fill(fitter.GetRecoil().Phi()*TMath::RadToDeg(), taggerTime);
+    zVertex.Fill(fitter.GetUnknown(), taggerTime);
     chiSq.Fill(fitter.GetChi2(), taggerTime);
     VchiSq.Fill(fitter.GetVariablesChi2(), taggerTime);
     CchiSq.Fill(fitter.GetConstraintsChi2(), taggerTime);
@@ -452,6 +455,7 @@ Int_t       GHistFit::Fill(GFit& fitter, const Double_t taggerTime, const Int_t 
     Pim.Fill(fitter.GetRecoil().M(), taggerTime, taggerChannel);
     Ptheta.Fill(fitter.GetRecoil().Theta()*TMath::RadToDeg(), taggerTime, taggerChannel);
     Pphi.Fill(fitter.GetRecoil().Phi()*TMath::RadToDeg(), taggerTime, taggerChannel);
+    zVertex.Fill(fitter.GetUnknown(), taggerTime, taggerChannel);
     chiSq.Fill(fitter.GetChi2(), taggerTime, taggerChannel);
     VchiSq.Fill(fitter.GetVariablesChi2(), taggerTime, taggerChannel);
     CchiSq.Fill(fitter.GetConstraintsChi2(), taggerTime, taggerChannel);
@@ -478,6 +482,7 @@ void    GHistFit::PrepareWriteList(GHistWriteList* arr, const char* name)
         Pim.PrepareWriteList(arr, TString(name).Append("_PrIM").Data());
         Ptheta.PrepareWriteList(arr, TString(name).Append("_PrTheta").Data());
         Pphi.PrepareWriteList(arr, TString(name).Append("_PrPhi").Data());
+        zVertex.PrepareWriteList(arr, TString(name).Append("_zVertex").Data());
         chiSq.PrepareWriteList(arr, TString(name).Append("_ChiSq").Data());
         VchiSq.PrepareWriteList(arr, TString(name).Append("_VChiSq").Data());
         CchiSq.PrepareWriteList(arr, TString(name).Append("_CChiSq").Data());
@@ -497,6 +502,7 @@ void    GHistFit::PrepareWriteList(GHistWriteList* arr, const char* name)
         Pim.PrepareWriteList(arr);
         Ptheta.PrepareWriteList(arr);
         Pphi.PrepareWriteList(arr);
+        zVertex.PrepareWriteList(arr);
         chiSq.PrepareWriteList(arr);
         VchiSq.PrepareWriteList(arr);
         CchiSq.PrepareWriteList(arr);
@@ -518,6 +524,7 @@ void        GHistFit::Reset(Option_t* option)
     Pim.Reset(option);
     Ptheta.Reset(option);
     Pphi.Reset(option);
+    zVertex.Reset(option);
     chiSq.Reset(option);
     VchiSq.Reset(option);
     CchiSq.Reset(option);
@@ -538,6 +545,7 @@ void        GHistFit::ScalerReadCorrection(const Double_t CorrectionFactor, cons
     Pim.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     Ptheta.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     Pphi.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+    zVertex.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     chiSq.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     VchiSq.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     CchiSq.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);

@@ -32,6 +32,7 @@ public:
     virtual Double_t        GetChi2()                       {return fitter.GetChi2();}
     virtual Double_t        GetVariablesChi2()              {return fitter.GetVariablesChi2();}
     virtual Double_t        GetConstraintsChi2()            {return fitter.GetConstraintsChi2();}
+            Double_t        GetUnknown()                    {return fitter.GetUnknown();}
     virtual Double_t        GetPull(const Int_t index)  = 0;
             Bool_t          IsSolved()                      {return solved;}
             Bool_t          Solve()                         {if(fitter.Solve()>0) solved = kTRUE; else solved = kFALSE; return solved;}
@@ -202,6 +203,7 @@ private:
     GH1         Pim;
     GH1         Ptheta;
     GH1         Pphi;
+    GH1         zVertex;
     GH1         chiSq;
     GH1         VchiSq;
     GH1         CchiSq;
