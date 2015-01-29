@@ -574,6 +574,7 @@ GHistIterativeFit::GHistIterativeFit(const char* name, const char* title, const 
     totPx(TString(name).Append("totPx"), TString(title).Append(" totPx"), 1000, -100, 100, _NSteps, 0, _NSteps, kFALSE),
     totPy(TString(name).Append("totPy"), TString(title).Append(" totPy"), 1000, -100, 100, _NSteps, 0, _NSteps, kFALSE),
     totPz(TString(name).Append("totPz"), TString(title).Append(" totPz"), 1000, -100, 100, _NSteps, 0, _NSteps, kFALSE),
+    zVertex(TString(name).Append("zVertex"), TString(title).Append(" zVertex"), 1000, -1, 1, _NSteps, 0, _NSteps, kFALSE),
     VchiSq(TString(name).Append("VChiSq"), TString(title).Append(" VChiSq"), 1000, 0, 1000000, _NSteps, 0, _NSteps, kFALSE),
     VconfidenceLevel(TString(name).Append("VConfLev"), TString(title).Append(" VConfLev"), 1000, 0, 1, _NSteps, 0, _NSteps, kFALSE),
     CchiSq(TString(name).Append("CChiSq"), TString(title).Append(" CChiSq"), 1000, 0, 100, _NSteps, 0, _NSteps, kFALSE),
@@ -603,6 +604,7 @@ void        GHistIterativeFit::CalcResult()
     totPx.CalcResult();
     totPy.CalcResult();
     totPz.CalcResult();
+    zVertex.CalcResult();
     VchiSq.CalcResult();
     VconfidenceLevel.CalcResult();
     CchiSq.CalcResult();
@@ -617,6 +619,7 @@ Int_t       GHistIterativeFit::Fill(GFit& fitter)
 {
     TLorentzVector  etap(fitter.GetMeson());
     TLorentzVector  tot(fitter.GetTotal());
+    //std::cout << etap.M() << "   " << fitter.GetSub(0).M() << "   " << fitter.GetIterations() << std::endl;
     im.Fill(etap.M(), fitter.GetIterations());
     sub0im.Fill(fitter.GetSub(0).M(), fitter.GetIterations());
     sub1im.Fill(fitter.GetSub(1).M(), fitter.GetIterations());
@@ -626,6 +629,7 @@ Int_t       GHistIterativeFit::Fill(GFit& fitter)
     totPx.Fill(tot.Px(), fitter.GetIterations());
     totPy.Fill(tot.Py(), fitter.GetIterations());
     totPz.Fill(tot.Pz(), fitter.GetIterations());
+    zVertex.Fill(fitter.GetUnknown(),fitter.GetIterations());
     VchiSq.Fill(fitter.GetVariablesChi2(), fitter.GetIterations());
     VconfidenceLevel.Fill(fitter.VariablesConfidenceLevel(), fitter.GetIterations());
     CchiSq.Fill(fitter.GetConstraintsChi2(), fitter.GetIterations());
@@ -648,6 +652,7 @@ void    GHistIterativeFit::PrepareWriteList(GHistWriteList* arr, const char* nam
         totPx.PrepareWriteList(arr, "_TotPx");
         totPy.PrepareWriteList(arr, "_TotPy");
         totPz.PrepareWriteList(arr, "_TotPz");
+        zVertex.PrepareWriteList(arr, "_zVertex");
         VchiSq.PrepareWriteList(arr, "_VChiSq");
         VconfidenceLevel.PrepareWriteList(arr, "_VConfLev");
         CchiSq.PrepareWriteList(arr, "_CChiSq");
@@ -670,6 +675,7 @@ void        GHistIterativeFit::Reset(Option_t* option)
     totPx.Reset(option);
     totPy.Reset(option);
     totPz.Reset(option);
+    zVertex.Reset(option);
     VchiSq.Reset(option);
     VconfidenceLevel.Reset(option);
     CchiSq.Reset(option);
@@ -691,6 +697,7 @@ void        GHistIterativeFit::ScalerReadCorrection(const Double_t CorrectionFac
     totPx.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     totPy.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     totPz.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+    zVertex.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     VchiSq.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     VconfidenceLevel.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     CchiSq.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);

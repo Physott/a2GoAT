@@ -238,6 +238,7 @@ private:
     GHistBGSub2 totPx;
     GHistBGSub2 totPy;
     GHistBGSub2 totPz;
+    GHistBGSub2 zVertex;
     GHistBGSub2 VchiSq;
     GHistBGSub2 VconfidenceLevel;
     GHistBGSub2 CchiSq;

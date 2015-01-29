@@ -33,11 +33,16 @@ protected:
     Double_t Cchi2;
     Double_t Vchi2;
 
-    Double_t       GetParticleFactor(const Int_t ip);
-    Double_t       GetInitialParticleFactor(const Int_t ip);
-    Double_t       GetInitialParticleDerivateEnergyFactor(const Int_t ip);
-    Double_t       GetInitialParticleDerivatePzFactor(const Int_t ip);
-    Double_t       GetInitialParticleDerivateUnkFactor(const Int_t ip);
+    Double_t        GetParticleFactor(const Int_t ip, const Double_t length);
+    Double_t        GetInitialParticleFactor(const Int_t ip, const Double_t length);
+    Double_t        GetInitialParticleDerivatePxFactor(const Int_t ip, const Double_t length);
+    Double_t        GetInitialParticleDerivatePyFactor(const Int_t ip, const Double_t length);
+    Double_t        GetInitialParticleDerivatePzFactor(const Int_t ip, const Double_t length);
+    Double_t        GetInitialParticleDerivateUnkFactor(const Int_t ip, const Double_t length);
+    TLorentzVector  GetInitialParticleDerivatePx(const Int_t ip);
+    TLorentzVector  GetInitialParticleDerivatePy(const Int_t ip);
+    TLorentzVector  GetInitialParticleDerivatePz(const Int_t ip);
+    TLorentzVector  GetInitialParticleDerivateUnk(const Int_t ip);
 
 public:
     GKinFitter(const Int_t npart, const Int_t ncon);

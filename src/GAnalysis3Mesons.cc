@@ -95,7 +95,7 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeTagger& tagge
                 else
                     hist_fit3.FillFinal(fit3, tagger.GetTagged_t(i));
 
-                while(fit4.Solve()>0)
+                /*while(fit4.Solve()>0)
                     hist_fit4.Fill(fit4);
                 if(CreateHistogramsForTaggerBinning==kTRUE)
                     hist_fit4.FillFinal(fit4, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
@@ -107,7 +107,7 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeTagger& tagge
                 if(CreateHistogramsForTaggerBinning==kTRUE)
                     hist_fit4Beam.FillFinal(fit4Beam, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
                 else
-                    hist_fit4Beam.FillFinal(fit4Beam, tagger.GetTagged_t(i));
+                    hist_fit4Beam.FillFinal(fit4Beam, tagger.GetTagged_t(i));*/
             }
         }
     }
@@ -304,7 +304,7 @@ void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, const GTreeParticl
                 else
                     hist_fit3.FillFinal(fit3, tagger.GetTagged_t(i));
 
-                while(fit4.Solve()>0)
+                /*while(fit4.Solve()>0)
                     hist_fit4.Fill(fit4);
                 if(CreateHistogramsForTaggerBinning==kTRUE)
                     hist_fit4.FillFinal(fit4, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
@@ -330,7 +330,7 @@ void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, const GTreeParticl
                 if(CreateHistogramsForTaggerBinning==kTRUE)
                     hist_fit4BeamProton.FillFinal(fit4BeamProton, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
                 else
-                    hist_fit4BeamProton.FillFinal(fit4BeamProton, tagger.GetTagged_t(i));
+                    hist_fit4BeamProton.FillFinal(fit4BeamProton, tagger.GetTagged_t(i));*/
             }
         }
     }
