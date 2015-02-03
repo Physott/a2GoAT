@@ -92,7 +92,10 @@ Int_t GKinFitter::Solve(){
   }
   //fmV_D.Print();
   fmV_D.Invert();
-  //fmV_D.Print();
+  /*fmd.Print();
+  fmD.Print();
+  fmV_D.Print();
+  fmDUnk.Print();*/
 
 
   //Derive unknowns
@@ -110,8 +113,8 @@ Int_t GKinFitter::Solve(){
             //help1.Print();
   //if(iii>=19)
       //std::cout << "here" << fmUnk << "   " << fmUnk0 << "   " << U << "   " << iii << std::endl;
-  fmUnk = fmUnk0 - (U*help1[0][0]/10);
-  //std::cout << fmUnk << "   " << U << std::endl;
+  fmUnk = fmUnk0 - (U*help1[0][0]);
+  //std::cout << fmUnk << "   " << fmUnk0 << std::endl;
   /*if(iii>=19)
   {
       std::cout << "here" << fmUnk << "   " << fmUnk0 << "   " << U << "   " << iii << std::endl;
@@ -153,6 +156,59 @@ Int_t GKinFitter::Solve(){
 
 }
 
+//-----------------------------------------------------------------------------
+Int_t GKinFitter::SolveWithoutVertex(){
+
+  //Solve according to algorithm of Paul Avery:
+  //Applied Fitting Theory VI, Formulas for Kinematic Fitting
+  //see www.phys.ufl.edu/~avery/fitting.html
+
+  if(fNpart!=fNparti){
+    std::cout<<"GKinFitter::Solve() Added wrong number of particles. KinFit not completed"<<std::endl;
+    return -1;
+  }
+
+  fmUnk = fmUnk0;
+
+
+  TMatrixD mDT=fmD;
+  mDT.T();
+  TMatrixD mV_Dinv=fmD*fmV_Alpha0*mDT;
+  fmV_D=mV_Dinv;
+  TDecompLU lu(fmV_D);
+  if(!lu.Decompose()){
+    std::cout<<"GKinFitter::Solve() Cannot invert. KinFit not completed"<<std::endl;
+    return -1;
+  }
+  fmV_D.Invert();
+  /*fmd.Print();
+  fmD.Print();
+  fmV_D.Print();*/
+
+  //Derive langrian multipliers
+  fmlamda=fmV_D*fmd;
+  //fmlamda.Print();
+  //New parameters
+  fmAlpha2=fmAlpha1-fmV_Alpha0*mDT*fmlamda;
+  //fmAlpha2.Print();
+  //New Covariant matrix
+  fmV_Alpha=fmV_Alpha0-fmV_Alpha0*mDT*fmV_D*fmD*fmV_Alpha0;
+  //chi2
+  TMatrixD mlamdaT(fmlamda);
+  mlamdaT.T();
+  TMatrixD mchi2(mlamdaT*fmd);
+  Cchi2=mchi2[0][0];
+
+  TMatrixD diff(fmAlpha0);
+  diff  -= fmAlpha2;
+  TMatrixD diffT(diff);
+  diffT.T();
+  TMatrixD mvchi2(diffT*fmV_Alpha0*diff);
+  Vchi2=mvchi2[0][0];
+
+  return 1;
+
+}
 //-----------------------------------------------------------------------------
 void GKinFitter::AddInvMassConstraint(const Double_t Minv)
 {
@@ -401,9 +457,9 @@ TLorentzVector GKinFitter::GetTotalFitParticle()
 Double_t GKinFitter::GetParticleFactor(const Int_t ip, const Double_t length)
 {
     Double_t    denominator  = 16 * fmUnk * fmUnk;
-                denominator -= 8 * fmUnk * fmAlpha0[(ip*fNvar)+2][0] / length;
+                denominator -= 8 * fmUnk * fmAlpha2[(ip*fNvar)+2][0] / length;
                 denominator += 1;
-    return  1/denominator;
+    return  sqrt(1/denominator);
 }
 //-----------------------------------------------------------------------------
 TLorentzVector GKinFitter::GetParticle(Int_t ip){
@@ -414,11 +470,11 @@ TLorentzVector GKinFitter::GetParticle(Int_t ip){
     return TLorentzVector(0.0,0.0,0.0,0.0);
   }
 
-  TLorentzVector  ret(fmAlpha0[ip*fNvar][0], fmAlpha0[(ip*fNvar)+1][0], fmAlpha0[(ip*fNvar)+2][0], 0);
+  TLorentzVector  ret(fmAlpha2[ip*fNvar][0], fmAlpha2[(ip*fNvar)+1][0], fmAlpha2[(ip*fNvar)+2][0], 0);
   Double_t        r   = -ret.Mag();
-                  ret.SetPx(ret.Px()-(4*fmUnk*r));
+                  ret.SetPz(ret.Pz()-(4*fmUnk*r));
                   ret    *= GetInitialParticleFactor(ip, r);
-                  ret.SetE(fmAlpha0[(ip*fNvar)+3][0]);
+                  ret.SetE(fmAlpha2[(ip*fNvar)+3][0]);
   return ret;
 }
 
@@ -428,7 +484,7 @@ Double_t    GKinFitter::GetInitialParticleFactor(const Int_t ip, const Double_t 
     Double_t    denominator  = 16 * fmUnk0 * fmUnk0;
                 denominator -= 8 * fmUnk0 * fmAlpha1[(ip*fNvar)+2][0] / length;
                 denominator += 1;
-    return  1/denominator;
+    return  sqrt(1/denominator);
 }
 
 //-----------------------------------------------------------------------------
@@ -442,8 +498,10 @@ TLorentzVector GKinFitter::GetInitialParticle(Int_t ip)
 
     TLorentzVector  ret(fmAlpha1[ip*fNvar][0], fmAlpha1[(ip*fNvar)+1][0], fmAlpha1[(ip*fNvar)+2][0], 0);
     Double_t        r   = -ret.Mag();
-                    ret.SetPx(ret.Px()-(4*fmUnk0*r));
+                    ret.SetPz(ret.Pz()-(4*fmUnk0*r));
+                    //std::cout << "ret " << std::endl;
                     ret    *= GetInitialParticleFactor(ip, r);
+                    //std::cout << GetInitialParticleFactor(ip, r) << std::endl;
                     ret.SetE(fmAlpha1[(ip*fNvar)+3][0]);
     return ret;
 }
@@ -451,18 +509,20 @@ TLorentzVector GKinFitter::GetInitialParticle(Int_t ip)
 //-----------------------------------------------------------------------------
 Double_t       GKinFitter::GetInitialParticleDerivatePxFactor(const Int_t ip, const Double_t length)
 {
-    Double_t    ret  = -GetInitialParticleFactor(ip, length);
-                ret *= ret*ret;
-                ret *= 4 * fmUnk0 * fmAlpha1[(ip*fNvar)+2][0] * fmAlpha1[ip*fNvar][0] /(length * length * length);
+    Double_t    ret   = GetInitialParticleFactor(ip, length);
+                ret  *= ret*ret;
+                ret  *= -4 * fmAlpha1[ip*fNvar][0] * fmAlpha1[(ip*fNvar)+2][0] * fmUnk0;
+                ret  /= length * length * length;
     return  ret;
 }
 
 //-----------------------------------------------------------------------------
 Double_t       GKinFitter::GetInitialParticleDerivatePyFactor(const Int_t ip, const Double_t length)
 {
-    Double_t    ret  = -GetInitialParticleFactor(ip, length);
-                ret *= ret*ret;
-                ret *= 4 * fmUnk0 * fmAlpha1[(ip*fNvar)+2][0] * fmAlpha1[(ip*fNvar)+1][0] /(length * length * length);
+    Double_t    ret   = GetInitialParticleFactor(ip, length);
+                ret  *= ret*ret;
+                ret  *= -4 * fmAlpha1[(ip*fNvar)+1][0] * fmAlpha1[(ip*fNvar)+2][0] * fmUnk0;
+                ret  /= length * length * length;
     return  ret;
 }
 
@@ -471,7 +531,9 @@ Double_t       GKinFitter::GetInitialParticleDerivatePzFactor(const Int_t ip, co
 {
     Double_t    ret  = GetInitialParticleFactor(ip, length);
                 ret *= ret*ret;
-                ret *= 4 * ((length*length) - (fmAlpha1[(ip*fNvar)+2][0]*fmAlpha1[(ip*fNvar)+2][0])) * fmUnk0 / (length * length * length);
+                ret *= ((length*length)-(fmAlpha1[(ip*fNvar)+2][0]*fmAlpha1[(ip*fNvar)+2][0]));
+                ret *= 4 * fmUnk0;
+                ret /= length * length * length;
     return  ret;
 }
 
@@ -482,7 +544,6 @@ Double_t       GKinFitter::GetInitialParticleDerivateUnkFactor(const Int_t ip, c
                 ret *= ret*ret;
                 ret *= (4 * fmAlpha1[(ip*fNvar)+2][0]) - (16 * length * fmUnk0);
                 ret /= length;
-                //std::cout << ret << std::endl;
     return  ret;
 }
 
@@ -492,7 +553,7 @@ TLorentzVector  GKinFitter::GetInitialParticleDerivatePx(const Int_t ip)
     Double_t    factor  = GetInitialParticleDerivatePxFactor(ip, r);
     TVector3    ret(fmAlpha1[ip*fNvar][0], fmAlpha1[(ip*fNvar)+1][0], fmAlpha1[(ip*fNvar)+2][0]-(4*fmUnk0*r));
                 ret *= factor;
-                ret += GetInitialParticleFactor(ip, r) * TVector3(1.0, 0.0, 4 * fmUnk0 * fmAlpha1[ip*fNvar][0] / r);
+                ret += GetInitialParticleFactor(ip, r) * TVector3(1.0, 0.0, -4 * fmUnk0 * fmAlpha1[ip*fNvar][0] / r);
     return  TLorentzVector(ret, 0);
 }
 
@@ -502,7 +563,7 @@ TLorentzVector  GKinFitter::GetInitialParticleDerivatePy(const Int_t ip)
     Double_t    factor  = GetInitialParticleDerivatePyFactor(ip, r);
     TVector3    ret(fmAlpha1[ip*fNvar][0], fmAlpha1[(ip*fNvar)+1][0], fmAlpha1[(ip*fNvar)+2][0]-(4*fmUnk0*r));
                 ret *= factor;
-                ret += GetInitialParticleFactor(ip, r) * TVector3(0.0, 1.0, 4 * fmUnk0 * fmAlpha1[(ip*fNvar)+1][0] / r);
+                ret += GetInitialParticleFactor(ip, r) * TVector3(0.0, 1.0, -4 * fmUnk0 * fmAlpha1[(ip*fNvar)+1][0] / r);
     return  TLorentzVector(ret, 0);
 }
 
@@ -512,7 +573,7 @@ TLorentzVector  GKinFitter::GetInitialParticleDerivatePz(const Int_t ip)
     Double_t    factor  = GetInitialParticleDerivatePzFactor(ip, r);
     TVector3    ret(fmAlpha1[ip*fNvar][0], fmAlpha1[(ip*fNvar)+1][0], fmAlpha1[(ip*fNvar)+2][0]-(4*fmUnk0*r));
                 ret *= factor;
-                ret += GetInitialParticleFactor(ip, r) * TVector3(0.0, 0.0, 1 + (4 * fmUnk0 * fmAlpha1[(ip*fNvar)+2][0]) / r);
+                ret += GetInitialParticleFactor(ip, r) * TVector3(0.0, 0.0, 1-4 * fmUnk0 * fmAlpha1[(ip*fNvar)+2][0] / r);
     return  TLorentzVector(ret, 0);
 }
 
@@ -523,7 +584,6 @@ TLorentzVector  GKinFitter::GetInitialParticleDerivateUnk(const Int_t ip)
     TVector3    ret(fmAlpha1[ip*fNvar][0], fmAlpha1[(ip*fNvar)+1][0], fmAlpha1[(ip*fNvar)+2][0]-(4*fmUnk0*r));
                 ret *= factor;
                 ret += GetInitialParticleFactor(ip, r) * TVector3(0.0, 0.0, -4 * r);
-                //ret.Print();
     return  TLorentzVector(ret, 0);
 }
 
@@ -641,9 +701,116 @@ void GIterativeKinFitter::AddSubMissMassConstraint(const TLorentzVector Mom, con
 
 Int_t GIterativeKinFitter::Solve()
 {
+    /*fmUnk0  = 0;
+    for(int i=0; i<6; i++)
+        GetInitialParticle(i).Print();
+    fmd.Print();
+    fmDUnk.Print();
+    GetInitialParticleDerivatePx(0).Print();
+    std::cout << "factor " << GetInitialParticleFactor(0,GetInitialParticle(0).Vect().Mag()) << std::endl;
+    std::cout << "factorDiffPx " << GetInitialParticleDerivatePxFactor(0,GetInitialParticle(0).Vect().Mag()) << std::endl;
+    std::cout << "factorDiffPy " << GetInitialParticleDerivatePyFactor(0,GetInitialParticle(0).Vect().Mag()) << std::endl;
+    std::cout << "factorDiffPz " << GetInitialParticleDerivatePzFactor(0,GetInitialParticle(0).Vect().Mag()) << std::endl;
+    std::cout << "factorDiffUnk " << GetInitialParticleDerivateUnkFactor(0,GetInitialParticle(0).Vect().Mag()) << std::endl;
+    GetInitialParticleDerivatePx(0).Print();
+    GetInitialParticleDerivatePy(0).Print();
+    GetInitialParticleDerivatePz(0).Print();
+    GetInitialParticleDerivateUnk(0).Print();
+    std::cout << std::endl;
+
+    fmUnk0  = -0.1;
+    ResetConstraints();
+    fmD.Zero();
+    fmDUnk.Zero();
+    fmd.Zero();
+    fmlamda.Zero();
+    fmV_D.Zero();
+    for(int i=0; i<fNcon; i++)
+    {
+        switch(conType[i])
+        {
+        case ConstraintType_InvMass:
+            GKinFitter::AddInvMassConstraint(var[i]);
+            break;
+        case ConstraintType_SubInvMass:
+            GKinFitter::AddSubInvMassConstraint(nIndices[i], indices[i], var[i]);
+            break;
+        case ConstraintType_InvEnergy:
+            GKinFitter::AddTotEnergyConstraint(var[i]);
+            break;
+        case ConstraintType_InvMomentum:
+            GKinFitter::AddTotMomentumConstraint(momentum[i]);
+            i+=2;
+            break;
+        case ConstraintType_MisMass:
+            GKinFitter::AddSubMissMassConstraint(beam[i], nIndices[i], indices[i], var[i]);
+            break;
+        }
+    }
+    for(int i=0; i<6; i++)
+        GetInitialParticle(i).Print();
+    fmd.Print();
+    fmDUnk.Print();
+    GetInitialParticleDerivatePx(0).Print();
+    std::cout << "factor " << GetInitialParticleFactor(0,GetInitialParticle(0).Vect().Mag()) << std::endl;
+    std::cout << "factorDiffPx " << GetInitialParticleDerivatePxFactor(0,GetInitialParticle(0).Vect().Mag()) << std::endl;
+    std::cout << "factorDiffPy " << GetInitialParticleDerivatePyFactor(0,GetInitialParticle(0).Vect().Mag()) << std::endl;
+    std::cout << "factorDiffPz " << GetInitialParticleDerivatePzFactor(0,GetInitialParticle(0).Vect().Mag()) << std::endl;
+    std::cout << "factorDiffUnk " << GetInitialParticleDerivateUnkFactor(0,GetInitialParticle(0).Vect().Mag()) << std::endl;
+    GetInitialParticleDerivatePx(0).Print();
+    GetInitialParticleDerivatePy(0).Print();
+    GetInitialParticleDerivatePz(0).Print();
+    GetInitialParticleDerivateUnk(0).Print();
+    std::cout << std::endl;*/
+
+
+
     if(nIter==0)
     {
         //std::cout << "Solve Start" << std::endl;
+        fmUnk0  = 0;
+        Double_t    d   = fmd[0][0]/fmDUnk[0][0];
+        int i = 0;
+        while(fabs(d)>0.000001 && i<10)
+        {
+            //GetInitialParticle(0).Print();
+            //GetInitialParticle(1).Print();
+            i++;
+            fmUnk0 = fmUnk0 -d;
+            ResetConstraints();
+            fmD.Zero();
+            fmDUnk.Zero();
+            fmd.Zero();
+            fmlamda.Zero();
+            fmV_D.Zero();
+            for(int i=0; i<fNcon; i++)
+            {
+                switch(conType[i])
+                {
+                case ConstraintType_InvMass:
+                    GKinFitter::AddInvMassConstraint(var[i]);
+                    break;
+                case ConstraintType_SubInvMass:
+                    GKinFitter::AddSubInvMassConstraint(nIndices[i], indices[i], var[i]);
+                    break;
+                case ConstraintType_InvEnergy:
+                    GKinFitter::AddTotEnergyConstraint(var[i]);
+                    break;
+                case ConstraintType_InvMomentum:
+                    GKinFitter::AddTotMomentumConstraint(momentum[i]);
+                    i+=2;
+                    break;
+                case ConstraintType_MisMass:
+                    GKinFitter::AddSubMissMassConstraint(beam[i], nIndices[i], indices[i], var[i]);
+                    break;
+                }
+            }
+            /*GetInitialParticle(0).Print();
+            GetInitialParticle(1).Print();
+            fmd.Print();
+            fmDUnk.Print();*/
+            d   = fmd[0][0]/fmDUnk[0][0];
+        }
         if(GKinFitter::Solve()<0)
             return -1;
         nIter++;
@@ -651,6 +818,14 @@ Int_t GIterativeKinFitter::Solve()
     }
     if(nIter==5)
         return -1;
+
+    /*fmd.Print();
+    fmD.Print();
+    fmV_D.Print();
+    fmDUnk.Print();
+    fmlamda.Print();
+    fmAlpha2.Print();
+    std::cout << fmUnk << std::endl;*/
 
     fmAlpha1    = fmAlpha2;
     fmUnk0      = fmUnk;
@@ -696,8 +871,6 @@ Int_t GIterativeKinFitter::Solve()
         Vchi2       = VChiSq;
         return -1;
     }
-    else
-        nIter++;
-
+    nIter++;
     return 1;
 }

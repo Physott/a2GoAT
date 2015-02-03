@@ -49,6 +49,7 @@ public:
     virtual ~GKinFitter()							{}
 
     virtual Int_t Solve(); //do the least squares fit
+    virtual Int_t SolveWithoutVertex(); //do the least squares fit
 
 	//Form the D and d matrixes for the fit
     virtual void AddInvMassConstraint(const Double_t Minv);   //based on Invariant mass of added particles
