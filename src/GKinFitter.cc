@@ -259,10 +259,15 @@ void GKinFitter::AddSubInvMassConstraint(const Int_t Np, const Int_t pid[], cons
   TLorentzVector ptot(0.0,0.0,0.0,0.0);
   for(Int_t i=0; i<Np; i++){
     ptot+=GetInitialParticle(pid[i]);
-    //ptot.Print();
+    std::cout<<"part " << pid[i] << std::endl;
+    GetInitialParticle(pid[i]).Print();
   }
+  std::cout<<"ptot " << ptot.M2() << "   " << Minv*Minv << std::endl;
+  printf("%lf %lf", ptot.M2(), Minv*Minv);
+  ptot.Print();
   //d matrix (evaluate constraint eqn.)
   fmd[fNconi][0]=ptot.M2()-Minv*Minv;
+  fmd.Print();
   //std::cout << ptot.M2() << "   " << fmd[fNconi][0] << std::endl;
 
   //D matrix (derivitives of constraint eqn)
@@ -701,6 +706,10 @@ void GIterativeKinFitter::AddSubMissMassConstraint(const TLorentzVector Mom, con
 
 Int_t GIterativeKinFitter::Solve()
 {
+    printf("here\n");
+    for(int i=0; i<fNpar; i++)
+        printf("%lf\n",fmAlpha0[i][0]);
+    std::cout << std::endl;
     /*fmUnk0  = 0;
     for(int i=0; i<6; i++)
         GetInitialParticle(i).Print();
@@ -819,13 +828,14 @@ Int_t GIterativeKinFitter::Solve()
     if(nIter==5)
         return -1;
 
-    /*fmd.Print();
+    fmd.Print();
     fmD.Print();
     fmV_D.Print();
     fmDUnk.Print();
     fmlamda.Print();
     fmAlpha2.Print();
-    std::cout << fmUnk << std::endl;*/
+    std::cout << fmUnk0 << std::endl;
+    std::cout << fmUnk << std::endl;
 
     fmAlpha1    = fmAlpha2;
     fmUnk0      = fmUnk;
