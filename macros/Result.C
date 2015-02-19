@@ -563,16 +563,16 @@ void	Result(const char* dataFileName, const char* mcSignalFileName, const char* 
 	Double_t	dy[47];
 	for(int i=0; i<47; i++)
 	{
-		y[i]			= nEtapFit[i] / (RecEff->GetBinContent(i+1) * sc[i]);
-		dy[i]			= dNEtapFit[i] / (RecEff->GetBinContent(i+1) * sc[i]);
+		y[i]			= nEtapFit[i] * 29.425 * 1000000 / (RecEff->GetBinContent(i+1) * sc[i]);
+		dy[i]			= dNEtapFit[i] * 29.425 * 1000000 / (RecEff->GetBinContent(i+1) * sc[i]);
 	}
 	graph = new TGraphErrors(47, x, y, dx, dy);
 	can->cd(3);
 	graph->Draw();
 	for(int i=0; i<47; i++)
 	{
-		y[i]			= nEtapCut[i] * 2.353 / (RecEff->GetBinContent(i+1) * sc[i]);
-		dy[i]			= dNEtapCut[i] * 2.353 / (RecEff->GetBinContent(i+1) * sc[i]);
+		y[i]			= nEtapCut[i] * 29.425 * 1000000 / (RecEff->GetBinContent(i+1) * sc[i]);
+		dy[i]			= dNEtapCut[i] * 29.425 * 1000000 / (RecEff->GetBinContent(i+1) * sc[i]);
 	}
 	graph = new TGraphErrors(47, x, y, dx, dy);
 	can->cd(4);
