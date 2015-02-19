@@ -12,8 +12,8 @@ MyPhysics::MyPhysics()    :
     EPTscalersT("EPT_ScalerT", "EPT_ScalerT", 48, 0, 48),
     EPTscalersCorT("EPT_ScalerCorT", "EPT_ScalerCorT", 48, 0, 48)
 { 
-        GHistBGSub::InitCuts(-20, 20, -55, -35);
-        GHistBGSub::AddRandCut(35, 55);
+        GHistBGSub::InitCuts(-20, 20, -535, -35);
+        GHistBGSub::AddRandCut(35, 535);
 }
 
 MyPhysics::~MyPhysics()
