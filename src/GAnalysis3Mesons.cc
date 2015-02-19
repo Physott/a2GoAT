@@ -58,11 +58,15 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeTagger& tagge
 
     for(int i=0; i<tagger.GetNTagged(); i++)
     {
+        TLorentzVector  cm(meson.Particle(0));
+        cm.Boost(-tagger.GetVectorProtonTarget(i).BoostVector());
+        Double_t    theta  = cm.Theta() * TMath::RadToDeg();
+        Double_t    phi  = cm.Phi() * TMath::RadToDeg();
         mm  = (tagger.GetVectorProtonTarget(i)-meson.Particle(0)).M();
         if(CreateHistogramsForTaggerBinning==kTRUE)
-            hist_raw.Fill(im, mm, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+            hist_raw.Fill(im, mm, meson.Particle(0).E()-MASS_ETAP, theta, phi, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
         else
-            hist_raw.Fill(im, mm, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
+            hist_raw.Fill(im, mm, meson.Particle(0).E()-MASS_ETAP, theta, phi, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
     }
 
     if((sub_im_0>500 && sub_im_0<580) &&
@@ -71,11 +75,15 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeTagger& tagge
     {
         for(int i=0; i<tagger.GetNTagged(); i++)
         {
+            TLorentzVector  cm(meson.Particle(0));
+            cm.Boost(-tagger.GetVectorProtonTarget(i).BoostVector());
+            Double_t    theta  = cm.Theta() * TMath::RadToDeg();
+            Double_t    phi  = cm.Phi() * TMath::RadToDeg();
             mm  = (tagger.GetVectorProtonTarget(i)-meson.Particle(0)).M();if(CreateHistogramsForTaggerBinning==kTRUE)
             if(CreateHistogramsForTaggerBinning==kTRUE)
-                hist_SubImCut.Fill(im, mm, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                hist_SubImCut.Fill(im, mm, meson.Particle(0).E()-MASS_ETAP, theta, phi, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
             else
-                hist_SubImCut.Fill(im, mm, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
+                hist_SubImCut.Fill(im, mm, meson.Particle(0).E()-MASS_ETAP, theta, phi, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
 
             if(mm>850 && mm<1025)
             {
@@ -84,9 +92,9 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeTagger& tagge
                 fit4Beam.Set(meson.SubPhotons(0, 0), meson.SubPhotons(0, 1), meson.SubPhotons(0, 2), meson.SubPhotons(0, 3), meson.SubPhotons(0, 4), meson.SubPhotons(0, 5), tagger.GetVectorProtonTarget(i));
 
                 if(CreateHistogramsForTaggerBinning==kTRUE)
-                    hist_MMCut.Fill(im, mm, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                    hist_MMCut.Fill(im, mm, meson.Particle(0).E()-MASS_ETAP, theta, phi, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
                 else
-                    hist_MMCut.Fill(im, mm, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
+                    hist_MMCut.Fill(im, mm, meson.Particle(0).E()-MASS_ETAP, theta, phi, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
 
                 while(fit3.Solve()>0)
                     hist_fit3.Fill(fit3);
@@ -253,8 +261,6 @@ void   GAnalysis3MesonsProton::CalcResult()
 void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, const GTreeParticle& proton, const GTreeTagger& tagger, const Bool_t CreateHistogramsForTaggerBinning)
 {
     Double_t    im  = meson.Particle(0).M();
-    Double_t    theta  = meson.Particle(0).Theta();
-    Double_t    phi  = meson.Particle(0).Phi();
     Double_t    mm;
     Double_t    sub_im_0    = (meson.SubPhotons(0, 0) + meson.SubPhotons(0, 1)).M();
     Double_t    sub_im_1    = (meson.SubPhotons(0, 2) + meson.SubPhotons(0, 3)).M();
@@ -262,11 +268,19 @@ void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, const GTreeParticl
 
     for(int i=0; i<tagger.GetNTagged(); i++)
     {
+        TLorentzVector  cm(meson.Particle(0));
+        cm.Boost(-tagger.GetVectorProtonTarget(i).BoostVector());
+        Double_t    theta  = cm.Theta() * TMath::RadToDeg();
+        Double_t    phi  = cm.Phi() * TMath::RadToDeg();
+        TLorentzVector  cmProton(proton.Particle(0));
+        cmProton.Boost(-tagger.GetVectorProtonTarget(i).BoostVector());
+        Double_t    thetaProton  = cmProton.Theta() * TMath::RadToDeg();
+        Double_t    phiProton  = cmProton.Phi() * TMath::RadToDeg();
         mm  = (tagger.GetVectorProtonTarget(i)-meson.Particle(0)).M();
         if(CreateHistogramsForTaggerBinning==kTRUE)
-            hist_raw.Fill(im, mm, theta, phi, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+            hist_raw.Fill(im, mm, meson.Particle(0).E()-MASS_ETAP, theta, phi, sub_im_0, sub_im_1, sub_im_2, cmProton.E(), thetaProton, phiProton, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
         else
-            hist_raw.Fill(im, mm, theta, phi, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
+            hist_raw.Fill(im, mm, meson.Particle(0).E()-MASS_ETAP, theta, phi, sub_im_0, sub_im_1, sub_im_2, cmProton.E(), thetaProton, phiProton, tagger.GetTagged_t(i));
     }
 
     if((sub_im_0>500 && sub_im_0<580) &&
@@ -275,21 +289,29 @@ void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, const GTreeParticl
     {
         for(int i=0; i<tagger.GetNTagged(); i++)
         {
+            TLorentzVector  cm(meson.Particle(0));
+            cm.Boost(-tagger.GetVectorProtonTarget(i).BoostVector());
+            Double_t    theta  = cm.Theta() * TMath::RadToDeg();
+            Double_t    phi  = cm.Phi() * TMath::RadToDeg();
+            TLorentzVector  cmProton(proton.Particle(0));
+            cmProton.Boost(-tagger.GetVectorProtonTarget(i).BoostVector());
+            Double_t    thetaProton  = cmProton.Theta() * TMath::RadToDeg();
+            Double_t    phiProton  = cmProton.Phi() * TMath::RadToDeg();
             if(checkProton.Check(meson, proton, tagger.GetVectorProtonTarget(i), tagger.GetTagged_t(i))==kFALSE)
                 continue;
 
             mm  = (tagger.GetVectorProtonTarget(i)-meson.Particle(0)).M();if(CreateHistogramsForTaggerBinning==kTRUE)
             if(CreateHistogramsForTaggerBinning==kTRUE)
-                hist_SubImCut.Fill(im, mm, theta, phi, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                hist_SubImCut.Fill(im, mm, meson.Particle(0).E()-MASS_ETAP, theta, phi, sub_im_0, sub_im_1, sub_im_2, cmProton.E(), thetaProton, phiProton, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
             else
-                hist_SubImCut.Fill(im, mm, theta, phi, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
+                hist_SubImCut.Fill(im, mm, meson.Particle(0).E()-MASS_ETAP, theta, phi, sub_im_0, sub_im_1, sub_im_2, cmProton.E(), thetaProton, phiProton, tagger.GetTagged_t(i));
 
             if(mm>850 && mm<1025)
             {
                 if(CreateHistogramsForTaggerBinning==kTRUE)
-                    hist_MMCut.Fill(im, mm, theta, phi, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
+                    hist_MMCut.Fill(im, mm, meson.Particle(0).E()-MASS_ETAP, theta, phi, sub_im_0, sub_im_1, sub_im_2, cmProton.E(), thetaProton, phiProton, tagger.GetTagged_t(i), tagger.GetTagged_ch(i));
                 else
-                    hist_MMCut.Fill(im, mm, theta, phi, sub_im_0, sub_im_1, sub_im_2, tagger.GetTagged_t(i));
+                    hist_MMCut.Fill(im, mm, meson.Particle(0).E()-MASS_ETAP, theta, phi, sub_im_0, sub_im_1, sub_im_2, cmProton.E(), thetaProton, phiProton, tagger.GetTagged_t(i));
 
                 fit3.Set(meson.SubPhotons(0, 0), meson.SubPhotons(0, 1), meson.SubPhotons(0, 2), meson.SubPhotons(0, 3), meson.SubPhotons(0, 4), meson.SubPhotons(0, 5));
                 fit4.Set(meson.SubPhotons(0, 0), meson.SubPhotons(0, 1), meson.SubPhotons(0, 2), meson.SubPhotons(0, 3), meson.SubPhotons(0, 4), meson.SubPhotons(0, 5), tagger.GetVectorProtonTarget(i));

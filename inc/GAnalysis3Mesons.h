@@ -63,15 +63,15 @@ private:
 
     GCheckProton        checkProton;
 
-    GHistEvent3Mesons   hist_raw;
-    GHistEvent3Mesons   hist_SubImCut;
+    GHistEvent3MesonsProton   hist_raw;
+    GHistEvent3MesonsProton   hist_SubImCut;
     GHistIterativeFit   hist_SubImCut_fit3;
     GHistIterativeFit   hist_SubImCut_fit4;
     GHistIterativeFit   hist_SubImCut_fit4Beam;
     GHistIterativeFit   hist_SubImCut_fit4Proton;
     GHistIterativeFit   hist_SubImCut_fit4BeamProton;
 
-    GHistEvent3Mesons   hist_MMCut;
+    GHistEvent3MesonsProton   hist_MMCut;
     GHistIterativeFit   hist_fit3;
     GHistIterativeFit   hist_fit4;
     GHistIterativeFit   hist_fit4Beam;
