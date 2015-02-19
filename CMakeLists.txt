@@ -89,6 +89,11 @@ add_executable(goat_detailed
    inc/GHistManager.h
    inc/GTreeManager.h
    inc/GConfigFile.h
+   inc/GHistScaCor.h
+   inc/GHistScaCor2.h
+   inc/GHistScaCor3.h
+   inc/GHistBGSub.h
+   inc/GHistBGSub2.h
    inc/GDataChecks.h
    inc/GParticleReconstruction.h
    inc/GMesonReconstruction_6and7gamma.h
@@ -107,6 +112,11 @@ add_executable(goat_detailed
    src/GHistManager.cc
    src/GTreeManager.cc
    src/GConfigFile.cc
+   src/GHistScaCor.cc
+   src/GHistScaCor2.cc
+   src/GHistScaCor3.cc
+   src/GHistBGSub.cc
+   src/GHistBGSub2.cc
    src/GDataChecks.cc
    src/GParticleReconstruction.cc
    src/GMesonReconstruction_6and7gamma.cc

@@ -5,6 +5,9 @@ using namespace std;
 
 
 GMesonReconstruction_6and7gamma::GMesonReconstruction_6and7gamma()    :
+    histChiCL_6g("CLComp_6g", "CLComp_6g", 1000, 0, 1, 1000, 0, 1),
+    histChiCL_7g("CLComp_7g", "CLComp_7g", 1000, 0, 1, 1000, 0, 1),
+    histSteps_7g("Steps_7g", "Steps_7g", 8, -1, 7),
     width_pi0(22),
     width_eta(40),
     width_etap(60)
@@ -87,12 +90,17 @@ Bool_t  GMesonReconstruction_6and7gamma::ProcessEventWithoutFilling()
     if(GetNReconstructed()==6)
     {
         Reconstruct6g();
+        histChiCL_6g.Fill(TMath::Prob(minChiSqEtap, 3), TMath::Prob(minChiSq3Pi0, 3));
         return kTRUE;
     }
     else if(GetNReconstructed()==7)
     {
         Reconstruct7g();
+        histChiCL_7g.Fill(TMath::Prob(minChiSqEtap, 3), TMath::Prob(minChiSq3Pi0, 3));
+        histSteps_7g.Fill(bestIndex_7g);
         //CheckProton();
+        if(bestIndex_7g==-1)
+            return kFALSE;
         return kTRUE;
     }
 
@@ -121,8 +129,8 @@ Bool_t    GMesonReconstruction_6and7gamma::CheckProton()
         }
     }
     foundTaggerHitForProton = bestIndex;
-    if(smallestAngle > 4)
-        return kFALSE;
+    //if(smallestAngle > 4)
+        //return kFALSE;
     return kTRUE;
 }
 
@@ -150,6 +158,8 @@ void    GMesonReconstruction_6and7gamma::Reconstruct6g()
     }
 
     minChiSq        = ChiSq[0][0];
+    minChiSqEtap    = ChiSq[0][0];
+    minChiSq3Pi0    = ChiSq[0][3];
     minDecayIndex   = 0;
     minIndex        = 0;
 
@@ -162,6 +172,17 @@ void    GMesonReconstruction_6and7gamma::Reconstruct6g()
                 minChiSq        = ChiSq[i][d];
                 minIndex        = i;
                 minDecayIndex   = d;
+            }
+
+            if(d == 3)
+            {
+                if(ChiSq[i][d]<=minChiSq3Pi0)
+                    minChiSq3Pi0    = ChiSq[i][d];
+            }
+            else
+            {
+                if(ChiSq[i][d]<=minChiSqEtap)
+                    minChiSqEtap    = ChiSq[i][d];
             }
         }
     }
@@ -289,6 +310,17 @@ void    GMesonReconstruction_6and7gamma::Reconstruct6g(TLorentzVector** vec)
                 minIndex        = i;
                 minDecayIndex   = d;
             }
+
+            if(d == 3)
+            {
+                if(ChiSq[i][d]<=minChiSq3Pi0)
+                    minChiSq3Pi0    = ChiSq[i][d];
+            }
+            else
+            {
+                if(ChiSq[i][d]<=minChiSqEtap)
+                    minChiSqEtap    = ChiSq[i][d];
+            }
         }
     }
 
@@ -374,17 +406,18 @@ void    GMesonReconstruction_6and7gamma::Reconstruct6g(TLorentzVector** vec)
 
 void    GMesonReconstruction_6and7gamma::Reconstruct7g()
 {
-    Double_t    bestChiSq;
-    Double_t    bestIndex;
+    minChiSqEtap    = 1e30;
+    minChiSq3Pi0    = 1e30;
+    Double_t    bestChiSq   = 1e30;
     TLorentzVector* vec[6];
-    for(int l=1; l<7; l++)
-        vec[l-1] = &photons->Particle(l);
-    Reconstruct6g(vec);
-    bestChiSq   = minChiSq;
-    bestIndex   = 0;
-    for(int i=1; i<7; i++)
+    Int_t       steps   = 0;
+    for(int i=0; i<7; i++)
     {
+        if(photons->Particle(i).Theta()>30)
+            continue;
+
         int k   = 0;
+        steps++;
         for(int l=0; l<7; l++)
         {
             if(l!=i)
@@ -394,14 +427,16 @@ void    GMesonReconstruction_6and7gamma::Reconstruct7g()
             }
         }
         Reconstruct6g(vec);
-        if(minChiSq < bestChiSq)
+        if(minChiSq <= bestChiSq)
         {
-            bestChiSq   = minChiSq;
-            bestIndex   = i;
+            bestChiSq       = minChiSq;
+            bestIndex_7g    = i;
         }
     }
+    if(bestIndex_7g==-1)
+        return;
 
-    protons->AddParticle(SetMass(photons->Particle(bestIndex), pdgDB->GetParticle("proton")->Mass()), photons->GetApparatus(bestIndex), photons->Get_dE(bestIndex), photons->GetWC0_E(bestIndex), photons->GetWC1_E(bestIndex), photons->GetTime(bestIndex), photons->GetClusterSize(bestIndex));
+    protons->AddParticle(SetMass(photons->Particle(bestIndex_7g), pdgDB->GetParticle("proton")->Mass()), photons->GetApparatus(bestIndex_7g), photons->Get_dE(bestIndex_7g), photons->GetWC0_E(bestIndex_7g), photons->GetWC1_E(bestIndex_7g), photons->GetTime(bestIndex_7g), photons->GetClusterSize(bestIndex_7g));
 
     if(minDecayIndex == 3)      //found 3Pi0
     {

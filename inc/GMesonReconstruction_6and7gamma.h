@@ -3,6 +3,7 @@
 
 
 #include "GTreeManager.h"
+#include "GH1.h"
 
 #define DEFAULT_PI0_IM_WIDTH 20.0
 #define DEFAULT_ETA_IM_WIDTH 44.0
@@ -20,8 +21,11 @@ private:
     Double_t	meson_theta_max;
 
     Double_t    minChiSq;
+    Double_t    minChiSqEtap;
+    Double_t    minChiSq3Pi0;
     UInt_t      minDecayIndex;
     UInt_t      minIndex;
+    Int_t       bestIndex_7g;
     TLorentzVector  reconstructedEta;
     TLorentzVector  reconstructedEtap;
     Int_t           daughter_index[6];
@@ -29,6 +33,10 @@ private:
     UInt_t          foundTaggerHitForProton;
 
     static  Int_t   perm6g[15][6];
+
+    GHistBGSub2 histChiCL_6g;
+    GHistBGSub2 histChiCL_7g;
+    GHistBGSub  histSteps_7g;
 
     void    Reconstruct6g();
     void    Reconstruct6g(TLorentzVector** vec);
