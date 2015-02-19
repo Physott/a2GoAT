@@ -163,34 +163,8 @@ void TaggEff(Double_t* array, Double_t* darray)
 	for(int i=0; i<48; i++)
 		darray[i]	= 2.0/100.0;
 }
-void	Result(const char* dataFileName, const char* mcSignalFileName, const char* mcBGFileName)
+void	ResultSimpleCuts(const TFile* dataFile, const TFile* mcSignalFile, const TFile* mcBGFile, TFile* out)
 {
-	TFile*	dataFile		= TFile::Open(dataFileName);
-	if(!dataFile)
-	{
-		std::cout << "Can not open dataFile " << dataFileName << std::endl;
-		return;
-	}
-	TFile*	mcSignalFile	= TFile::Open(mcSignalFileName);
-	if(!mcSignalFile)
-	{
-		std::cout << "Can not open mcSignalFile " << mcSignalFileName << std::endl;
-		return;
-	}
-	TFile*	mcBGFile		= TFile::Open(mcBGFileName);
-	if(!mcBGFile)
-	{
-		std::cout << "Can not open mcBGFile " << mcBGFileName << std::endl;
-		return;
-	}
-	TFile*	out				= TFile::Open("result.root", "RECREATE");
-	if(!out)
-	{
-		std::cout << "Can not open output file result.root" << std::endl;
-		return;
-	}	
-	
-	
 	TCanvas*		can	= new TCanvas("CanCheckProton", "CheckProton", 1500, 800);
 	can->Divide(4,2);
 	
@@ -270,7 +244,9 @@ void	Result(const char* dataFileName, const char* mcSignalFileName, const char* 
 	
 	out->cd();
 	can->Write();
-	
+}
+void	ResultFindBestFit(const TFile* dataFile, const TFile* mcSignalFile, const TFile* mcBGFile, TFile* out, const Double_t* fitWidthSignal, const Double_t* fitWidthBG, const Double_t* fitdWidthSignal, const Double_t* fitdWidthBG)
+{
 	can	= new TCanvas("CanFindBestFit", "FindBestFit", 1500, 800);
 	can->Divide(6,3);
 	
@@ -285,10 +261,6 @@ void	Result(const char* dataFileName, const char* mcSignalFileName, const char* 
 	can->cd(5);
 	OpenHistogram(dataFile, mcSignalFile, mcBGFile, "WithProton/MM_Cut/fit4BeamProton/Final/Final_IM");
 	
-	Double_t	fitWidthSignal[5];
-	Double_t	fitWidthBG[5];
-	Double_t	fitdWidthSignal[5];
-	Double_t	fitdWidthBG[5];
 	TH1D*	fitdata		= (TH1D*)mcSignalFile->Get("WithProton/MM_Cut/fit3/Final/Final_IM");
 	can->cd(13);
 	fitdata->Draw();
@@ -387,7 +359,41 @@ void	Result(const char* dataFileName, const char* mcSignalFileName, const char* 
 	
 	out->cd();
 	can->Write();
+}
+void	Result(const char* dataFileName, const char* mcSignalFileName, const char* mcBGFileName)
+{
+	TFile*	dataFile		= TFile::Open(dataFileName);
+	if(!dataFile)
+	{
+		std::cout << "Can not open dataFile " << dataFileName << std::endl;
+		return;
+	}
+	TFile*	mcSignalFile	= TFile::Open(mcSignalFileName);
+	if(!mcSignalFile)
+	{
+		std::cout << "Can not open mcSignalFile " << mcSignalFileName << std::endl;
+		return;
+	}
+	TFile*	mcBGFile		= TFile::Open(mcBGFileName);
+	if(!mcBGFile)
+	{
+		std::cout << "Can not open mcBGFile " << mcBGFileName << std::endl;
+		return;
+	}
+	TFile*	out				= TFile::Open("result.root", "RECREATE");
+	if(!out)
+	{
+		std::cout << "Can not open output file result.root" << std::endl;
+		return;
+	}	
 	
+	ResultSimpleCuts(dataFile, mcSignalFile, mcBGFile, out);
+	
+	Double_t	fitWidthSignal[5];
+	Double_t	fitWidthBG[5];
+	Double_t	fitdWidthSignal[5];
+	Double_t	fitdWidthBG[5];
+	ResultFindBestFit(dataFile, mcSignalFile, mcBGFile, out, fitWidthSignal, fitWidthBG, fitdWidthSignal, fitdWidthBG);
 	Int_t	bestFitIndex	= 2;
 	char	bestFitName[150];
 	char	bestFitNameBuffer[150];
