@@ -52,7 +52,7 @@ SortRaw-CBEnergySum:	400+
 Sort-NParticles: 	1+
 
 #		Type 	Number	Theta-min 	Theta-max
-Sort-Particle:	eta		1-	0		180
+#Sort-Particle:	eta		1-	0		180
 Sort-Particle:	eta'	1-	0		180
 Sort-Particle:	proton	0+	0		180
 
