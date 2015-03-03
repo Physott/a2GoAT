@@ -23,10 +23,11 @@ public:
     GHistTaggerBinning2(const char* name, const char* title,
                        const Int_t nbinsx, const Double_t xlow, const Double_t xup,
                        const Int_t nbinsy, const Double_t ylow, const Double_t yup,
-                       const Int_t nTaggerBins,
+                       const Int_t nTaggerBins = 352,
                        const Bool_t linkHistogram = kTRUE);
     virtual ~GHistTaggerBinning2();
 
+    virtual void            CalcResult();
     virtual Int_t           Fill(const Double_t value);
     virtual Int_t           Fill(const Double_t x, const Double_t y)                                                          {return ((GHistBGSub2*)sum)->Fill(x, y);}
     virtual Int_t           Fill(const Double_t x, const Double_t y, const Double_t taggerTime)                               {return ((GHistBGSub2*)sum)->Fill(x, y, taggerTime);}

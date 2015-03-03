@@ -33,6 +33,8 @@ public:
     virtual void	SetBins(Int_t nx, Double_t xmin, Double_t xmax,
                             Int_t ny, Double_t ymin, Double_t ymax,
                             Int_t nz, Double_t zmin, Double_t zmax);
+
+    virtual GHistScaCor2*    ProjectionXY(const char* name = "_pxy", Int_t firstzbin = 0, Int_t lastzbin = -1, Option_t* option = "");
 };
 
 

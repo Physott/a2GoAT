@@ -95,3 +95,26 @@ void	GHistScaCor3::SetBins(Int_t nx, Double_t xmin, Double_t xmax, Int_t ny, Dou
     }
 }
 
+GHistScaCor2*    GHistScaCor3::ProjectionXY(const char* name, Int_t firstzbin, Int_t lastzbin, Option_t* option)
+{
+    GHistScaCor2*    ret = new GHistScaCor2(name, name, buffer->GetNbinsX(), buffer->GetXaxis()->GetXmin(), buffer->GetXaxis()->GetXmax(), buffer->GetNbinsY(), buffer->GetYaxis()->GetXmin(), buffer->GetYaxis()->GetXmax(), kFALSE);
+
+    buffer->GetZaxis()->SetRange(firstzbin, lastzbin);
+    accumulated->GetZaxis()->SetRange(firstzbin, lastzbin);
+    accumulatedCorrected->GetZaxis()->SetRange(firstzbin, lastzbin);
+
+    TH2D*   help1   = (TH2D*)(((TH3D*)buffer)->Project3D("pbuf_yx"));
+    TH2D*   help2   = (TH2D*)(((TH3D*)accumulated)->Project3D("pacc_yx"));
+    TH2D*   help3   = (TH2D*)(((TH3D*)accumulatedCorrected)->Project3D("pacccor_yx"));
+
+    buffer->GetZaxis()->SetRange();
+    accumulated->GetZaxis()->SetRange();
+    accumulatedCorrected->GetZaxis()->SetRange();
+
+    ret->Add(help1, help2, help3, IsCorrected());
+    if(help1)   delete help1;
+    if(help2)   delete help2;
+    if(help3)   delete help3;
+    return ret;
+}
+

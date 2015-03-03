@@ -5,6 +5,7 @@
 #include <TDirectory.h>
 
 #include "GHistBGSub.h"
+#include "GHistBGSub2.h"
 #include "GHistScaCor3.h"
 
 
@@ -33,6 +34,8 @@ public:
     virtual Int_t   Fill(const Double_t x, const Double_t y, const Double_t z)          {return ((GHistScaCor2*)result)->Fill(x, y);}
     virtual Int_t   Fill(const Double_t x, const Double_t y, const Double_t z, const Double_t taggerTime);
     virtual Int_t   Fill(const Double_t x, const Double_t y, const Double_t z, const GTreeTagger& tagger);
+
+    virtual GHistBGSub2*    ProjectionXY(const char* name = "_pxy", Int_t firstzbin = 0, Int_t lastzbin = -1, Option_t* option = "");
 };
 
 
