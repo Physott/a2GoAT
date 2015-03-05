@@ -64,12 +64,12 @@ void	MyPhysics::ProcessEvent()
             {
                 if(protons->Get_dE(0)>0)
                 {
-                    TOF.Fill(protons->GetTime(0)-tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
-                    TOFProton.Fill(protons->GetTime(0)-tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
+                    TOF.Fill(protons->GetTime(0)+tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
+                    TOFProton.Fill(protons->GetTime(0)+tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
                     if(tagger->GetTagged_ch(i)==10)
                     {
-                        TOFvsTagger.Fill(protons->GetTime(0)-tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
-                        TOFvsTaggerProton.Fill(protons->GetTime(0)-tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
+                        TOFvsTagger.Fill(protons->GetTime(0)+tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
+                        TOFvsTaggerProton.Fill(protons->GetTime(0)+tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
                     }
                 }
             }
@@ -80,13 +80,13 @@ void	MyPhysics::ProcessEvent()
                     //std::cout << rawEvent->Get_dE(p) << std::endl;
                     if(rawEvent->Get_dE(p)<1)
                     {
-                        TOF.Fill(rawEvent->GetTime(p)-tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
-                        TOFPhoton.Fill(rawEvent->GetTime(p)-tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
+                        TOF.Fill(rawEvent->GetTime(p)+tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
+                        TOFPhoton.Fill(rawEvent->GetTime(p)+tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
                         if(tagger->GetTagged_ch(i)==10)
                         {
-                            TOFvsTagger.Fill(rawEvent->GetTime(p)-tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
-                            TOFvsTaggerPhoton.Fill(rawEvent->GetTime(p)-tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
-                            TOFvsTaggerPhotonTheta.Fill(rawEvent->GetTime(p)-tagger->GetTagged_t(i), rawEvent->GetVector(p).Theta()*TMath::RadToDeg(), tagger->GetTagged_t(i));
+                            TOFvsTagger.Fill(rawEvent->GetTime(p)+tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
+                            TOFvsTaggerPhoton.Fill(rawEvent->GetTime(p)+tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
+                            TOFvsTaggerPhotonTheta.Fill(rawEvent->GetTime(p)+tagger->GetTagged_t(i), rawEvent->GetVector(p).Theta()*TMath::RadToDeg(), tagger->GetTagged_t(i));
                         }
                     }
                 }
