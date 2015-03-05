@@ -11,13 +11,13 @@ MyPhysics::MyPhysics()    :
     EPTscalersCor("EPT_ScalerCor", "EPT_ScalerCor", 1000, 0, 100000000, 48),
     EPTscalersT("EPT_ScalerT", "EPT_ScalerT", 48, 0, 48),
     EPTscalersCorT("EPT_ScalerCorT", "EPT_ScalerCorT", 48, 0, 48),*/
-    TOF("TOF", "TOF", 500, -10, 10, 500, 0, 500, 48),
-    TOFPhoton("TOFPhoton", "TOFPhoton", 500, -10, 10, 500, 0, 500, 48),
-    TOFProton("TOFProton", "TOFProton", 500, -10, 10, 500, 0, 500, 48),
-    TOFvsTagger("TOFvsTagger", "TOFvsTagger", 500, -10, 10, 500, 0, 500, 48),
-    TOFvsTaggerPhoton("TOFvsTaggerPhoton", "TOFvsTaggerPhoton", 500, -10, 10, 500, 0, 500, 48),
-    TOFvsTaggerProton("TOFvsTaggerProton", "TOFvsTaggerProton", 500, -10, 10, 500, 0, 500, 48),
-    TOFvsTaggerPhotonTheta("TOFvsTaggerPhotonTheta", "TOFvsTaggerPhotonTheta", 500, -10, 10, 110, 0, 22, 48)
+    TOF("TOF", "TOF", 500, -20, 20, 500, 0, 500, 48),
+    TOFPhoton("TOFPhoton", "TOFPhoton", 500, -20, 20, 500, 0, 500, 48),
+    TOFProton("TOFProton", "TOFProton", 500, -20, 20, 500, 0, 500, 48),
+    TOFvsTagger("TOFvsTagger", "TOFvsTagger", 500, -20, 20, 500, 0, 500, 48),
+    TOFvsTaggerPhoton("TOFvsTaggerPhoton", "TOFvsTaggerPhoton", 500, -20, 20, 500, 0, 500, 48),
+    TOFvsTaggerProton("TOFvsTaggerProton", "TOFvsTaggerProton", 500, -20, 20, 500, 0, 500, 48),
+    TOFvsTaggerPhotonTheta("TOFvsTaggerPhotonTheta", "TOFvsTaggerPhotonTheta", 500, -20, 20, 110, 0, 22, 48)
 { 
         GHistBGSub::InitCuts(-20, 20, -535, -35);
         GHistBGSub::AddRandCut(35, 535);
@@ -60,11 +60,12 @@ void	MyPhysics::ProcessEvent()
         //TOF
         for(int i=0; i<tagger->GetNTagged(); i++)
         {
+            for(int k=0; k<rawEvent->GetNParticles(); k++)
+                TOF.Fill(rawEvent->GetTime(k)+tagger->GetTagged_t(i), rawEvent->GetEk(k), tagger->GetTagged_t(i));
             if(protons->GetNParticles()>0)
             {
                 if(protons->Get_dE(0)>0)
                 {
-                    TOF.Fill(protons->GetTime(0)+tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
                     TOFProton.Fill(protons->GetTime(0)+tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
                     if(tagger->GetTagged_ch(i)==10)
                     {
@@ -80,12 +81,11 @@ void	MyPhysics::ProcessEvent()
                     //std::cout << rawEvent->Get_dE(p) << std::endl;
                     if(rawEvent->Get_dE(p)<1)
                     {
-                        TOF.Fill(rawEvent->GetTime(p)+tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
-                        TOFPhoton.Fill(rawEvent->GetTime(p)+tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
+                        TOFPhoton.Fill(rawEvent->GetTime(p)+tagger->GetTagged_t(i), rawEvent->GetEk(p), tagger->GetTagged_t(i));
                         if(tagger->GetTagged_ch(i)==10)
                         {
-                            TOFvsTagger.Fill(rawEvent->GetTime(p)+tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
-                            TOFvsTaggerPhoton.Fill(rawEvent->GetTime(p)+tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
+                            TOFvsTagger.Fill(rawEvent->GetTime(p)+tagger->GetTagged_t(i), rawEvent->GetEk(p), tagger->GetTagged_t(i));
+                            TOFvsTaggerPhoton.Fill(rawEvent->GetTime(p)+tagger->GetTagged_t(i), rawEvent->GetEk(p), tagger->GetTagged_t(i));
                             TOFvsTaggerPhotonTheta.Fill(rawEvent->GetTime(p)+tagger->GetTagged_t(i), rawEvent->GetVector(p).Theta()*TMath::RadToDeg(), tagger->GetTagged_t(i));
                         }
                     }
