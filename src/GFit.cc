@@ -32,11 +32,14 @@ void    GFit3Constraints::Set(const TLorentzVector& p0,
     photons[3].Set4Vector(p3);
     photons[4].Set4Vector(p4);
     photons[5].Set4Vector(p5);
+    photons[0].SetResolutions(3, 3/sin(p0.Theta()), 0.02*TMath::Power(p0.E(), 0.36));
+    photons[1].SetResolutions(3, 3/sin(p1.Theta()), 0.02*TMath::Power(p1.E(), 0.36));
+    photons[2].SetResolutions(3, 3/sin(p2.Theta()), 0.02*TMath::Power(p2.E(), 0.36));
+    photons[3].SetResolutions(3, 3/sin(p3.Theta()), 0.02*TMath::Power(p3.E(), 0.36));
+    photons[4].SetResolutions(3, 3/sin(p4.Theta()), 0.02*TMath::Power(p4.E(), 0.36));
+    photons[5].SetResolutions(3, 3/sin(p5.Theta()), 0.02*TMath::Power(p5.E(), 0.36));
     for(int i=0; i<6; i++)
-    {
-        photons[i].SetResolutions(3, 3, 10);
         fitter.AddPosKFParticle(photons[i]);
-    }
 
     Int_t   index[6]    = {0, 1, 2, 3, 4, 5};
     if(isEtap==kTRUE)
@@ -93,11 +96,14 @@ void    GFit4Constraints::Set(const TLorentzVector& p0,
     photons[3].Set4Vector(p3);
     photons[4].Set4Vector(p4);
     photons[5].Set4Vector(p5);
+    photons[0].SetResolutions(3, 3/sin(p0.Theta()), 0.02*TMath::Power(p0.E(), 0.36));
+    photons[1].SetResolutions(3, 3/sin(p1.Theta()), 0.02*TMath::Power(p1.E(), 0.36));
+    photons[2].SetResolutions(3, 3/sin(p2.Theta()), 0.02*TMath::Power(p2.E(), 0.36));
+    photons[3].SetResolutions(3, 3/sin(p3.Theta()), 0.02*TMath::Power(p3.E(), 0.36));
+    photons[4].SetResolutions(3, 3/sin(p4.Theta()), 0.02*TMath::Power(p4.E(), 0.36));
+    photons[5].SetResolutions(3, 3/sin(p5.Theta()), 0.02*TMath::Power(p5.E(), 0.36));
     for(int i=0; i<6; i++)
-    {
-        photons[i].SetResolutions(3, 3, 10);
         fitter.AddPosKFParticle(photons[i]);
-    }
 
     Int_t   index[6]    = {0, 1, 2, 3, 4, 5};
     if(isEtap==kTRUE)
@@ -167,13 +173,16 @@ void    GFit4ConstraintsBeam::Set(const TLorentzVector& p0,
     photons[3].Set4Vector(p3);
     photons[4].Set4Vector(p4);
     photons[5].Set4Vector(p5);
+    photons[0].SetResolutions(3, 3/sin(p0.Theta()), 0.02*TMath::Power(p0.E(), 0.36));
+    photons[1].SetResolutions(3, 3/sin(p1.Theta()), 0.02*TMath::Power(p1.E(), 0.36));
+    photons[2].SetResolutions(3, 3/sin(p2.Theta()), 0.02*TMath::Power(p2.E(), 0.36));
+    photons[3].SetResolutions(3, 3/sin(p3.Theta()), 0.02*TMath::Power(p3.E(), 0.36));
+    photons[4].SetResolutions(3, 3/sin(p4.Theta()), 0.02*TMath::Power(p4.E(), 0.36));
+    photons[5].SetResolutions(3, 3/sin(p5.Theta()), 0.02*TMath::Power(p5.E(), 0.36));
     for(int i=0; i<6; i++)
-    {
-        photons[i].SetResolutions(3, 3, 10);
         fitter.AddPosKFParticle(photons[i]);
-    }
     beam.Set4Vector(beamAndTarget);
-    beam.SetResolutions(1, 1, 2);
+    beam.SetResolutions(1, 1, 0.1);
     fitter.AddNegKFParticle(beam);
 
     Int_t   index[6]    = {0, 1, 2, 3, 4, 5};
@@ -242,11 +251,14 @@ void    GFit7ConstraintsProton::Set(const TLorentzVector& p0,
     photons[3].Set4Vector(p3);
     photons[4].Set4Vector(p4);
     photons[5].Set4Vector(p5);
+    photons[0].SetResolutions(3, 3/sin(p0.Theta()), 0.02*TMath::Power(p0.E(), 0.36));
+    photons[1].SetResolutions(3, 3/sin(p1.Theta()), 0.02*TMath::Power(p1.E(), 0.36));
+    photons[2].SetResolutions(3, 3/sin(p2.Theta()), 0.02*TMath::Power(p2.E(), 0.36));
+    photons[3].SetResolutions(3, 3/sin(p3.Theta()), 0.02*TMath::Power(p3.E(), 0.36));
+    photons[4].SetResolutions(3, 3/sin(p4.Theta()), 0.02*TMath::Power(p4.E(), 0.36));
+    photons[5].SetResolutions(3, 3/sin(p5.Theta()), 0.02*TMath::Power(p5.E(), 0.36));
     for(int i=0; i<6; i++)
-    {
-        photons[i].SetResolutions(3, 3, 10);
         fitter.AddPosKFParticle(photons[i]);
-    }
     TLorentzVector  help(proton);
     help.SetE(beamAndTarget.E()-p0.E()-p1.E()-p2.E()-p3.E()-p4.E()-p5.E());
     help.SetVect(proton.Vect().Unit()*(TMath::Sqrt(help.E()*help.E() - MASS_PROTON*MASS_PROTON)));
@@ -330,13 +342,16 @@ void    GFit7ConstraintsBeamProton::Set(const TLorentzVector& p0,
     photons[3].Set4Vector(p3);
     photons[4].Set4Vector(p4);
     photons[5].Set4Vector(p5);
+    photons[0].SetResolutions(3, 3/sin(p0.Theta()), 0.02*TMath::Power(p0.E(), 0.36));
+    photons[1].SetResolutions(3, 3/sin(p1.Theta()), 0.02*TMath::Power(p1.E(), 0.36));
+    photons[2].SetResolutions(3, 3/sin(p2.Theta()), 0.02*TMath::Power(p2.E(), 0.36));
+    photons[3].SetResolutions(3, 3/sin(p3.Theta()), 0.02*TMath::Power(p3.E(), 0.36));
+    photons[4].SetResolutions(3, 3/sin(p4.Theta()), 0.02*TMath::Power(p4.E(), 0.36));
+    photons[5].SetResolutions(3, 3/sin(p5.Theta()), 0.02*TMath::Power(p5.E(), 0.36));
     for(int i=0; i<6; i++)
-    {
-        photons[i].SetResolutions(3, 3, 10);
         fitter.AddPosKFParticle(photons[i]);
-    };
     beam.Set4Vector(beamAndTarget);
-    beam.SetResolutions(1, 1, 2);
+    beam.SetResolutions(1, 1, 0.1);
     fitter.AddNegKFParticle(beam);
     TLorentzVector  help(proton);
     help.SetE(beamAndTarget.E()-p0.E()-p1.E()-p2.E()-p3.E()-p4.E()-p5.E());
