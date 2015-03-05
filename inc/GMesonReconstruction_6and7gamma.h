@@ -3,6 +3,7 @@
 
 
 #include "GTreeManager.h"
+#include "GH1.h"
 
 #define DEFAULT_PI0_IM_WIDTH 20.0
 #define DEFAULT_ETA_IM_WIDTH 44.0
@@ -29,6 +30,10 @@ private:
     UInt_t          foundTaggerHitForProton;
 
     static  Int_t   perm6g[15][6];
+
+    GH2     TOF;
+    GH2     TOF_6Hits;
+    GH2     TOF_7Hits;
 
     void    Reconstruct6g();
     void    Reconstruct6g(TLorentzVector** vec);

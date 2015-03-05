@@ -7,7 +7,10 @@ using namespace std;
 GMesonReconstruction_6and7gamma::GMesonReconstruction_6and7gamma()    :
     width_pi0(22),
     width_eta(40),
-    width_etap(60)
+    width_etap(60),
+    TOF("TOF", "TOF", 100, 0, 100, 100, 0, 100, 48),
+    TOF_6Hits("TOF_6Hits", "TOF_6Hits", 100, 0, 1000, 100, 0, 1000, 48),
+    TOF_7Hits("TOF_7Hits", "TOF_7Hits", 100, 0, 1000, 100, 0, 1000, 48)
 {
 }
 
@@ -128,6 +131,18 @@ Bool_t    GMesonReconstruction_6and7gamma::CheckProton()
 
 void    GMesonReconstruction_6and7gamma::Reconstruct6g()
 {
+    //TOF
+    for(int i=0; i<tagger->GetNTagged(); i++)
+    {
+        for(int p=0; p<6; p++)
+        {
+            if(photons->GetApparatus(p)==2)
+            TOF.Fill(photons->GetTime(p)-tagger->GetTagged_t(i), photons->Particle(p).E(), tagger->GetTagged_t(i));
+            TOF_6Hits.Fill(photons->GetTime(p)-tagger->GetTagged_t(i), photons->Particle(p).E(), tagger->GetTagged_t(i));
+        }
+    }
+    //
+
     TLorentzVector  meson[15][3];
     Double_t        help[2][3];
     Double_t        ChiSq[15][4];
@@ -402,6 +417,14 @@ void    GMesonReconstruction_6and7gamma::Reconstruct7g()
     }
 
     protons->AddParticle(SetMass(photons->Particle(bestIndex), pdgDB->GetParticle("proton")->Mass()), photons->GetApparatus(bestIndex), photons->Get_dE(bestIndex), photons->GetWC0_E(bestIndex), photons->GetWC1_E(bestIndex), photons->GetTime(bestIndex), photons->GetClusterSize(bestIndex));
+
+    //TOF
+    for(int i=0; i<tagger->GetNTagged(); i++)
+    {
+        TOF.Fill(protons->GetTime(0)-tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
+        TOF_6Hits.Fill(protons->GetTime(0)-tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
+    }
+    //
 
     if(minDecayIndex == 3)      //found 3Pi0
     {
