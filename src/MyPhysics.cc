@@ -3,14 +3,21 @@
 
 
 MyPhysics::MyPhysics()    :
-    hist_eta("eta", "eta", kTRUE),
+    /*hist_eta("eta", "eta", kTRUE),
     hist_eta_proton("eta_proton", "eta_proton", kTRUE),
     hist_etap("etap", "etap", kTRUE),
     hist_etap_proton("etap_proton", "etap_proton", kTRUE),
     EPTscalers("EPT_Scaler", "EPT_Scaler", 1000, 0, 100000000, 48),
     EPTscalersCor("EPT_ScalerCor", "EPT_ScalerCor", 1000, 0, 100000000, 48),
     EPTscalersT("EPT_ScalerT", "EPT_ScalerT", 48, 0, 48),
-    EPTscalersCorT("EPT_ScalerCorT", "EPT_ScalerCorT", 48, 0, 48)
+    EPTscalersCorT("EPT_ScalerCorT", "EPT_ScalerCorT", 48, 0, 48),*/
+    TOF("TOF", "TOF", 500, -10, 10, 500, 0, 500, 48),
+    TOFPhoton("TOFPhoton", "TOFPhoton", 500, -10, 10, 500, 0, 500, 48),
+    TOFProton("TOFProton", "TOFProton", 500, -10, 10, 500, 0, 500, 48),
+    TOFvsTagger("TOFvsTagger", "TOFvsTagger", 500, -10, 10, 500, 0, 500, 48),
+    TOFvsTaggerPhoton("TOFvsTaggerPhoton", "TOFvsTaggerPhoton", 500, -10, 10, 500, 0, 500, 48),
+    TOFvsTaggerProton("TOFvsTaggerProton", "TOFvsTaggerProton", 500, -10, 10, 500, 0, 500, 48),
+    TOFvsTaggerPhotonTheta("TOFvsTaggerPhotonTheta", "TOFvsTaggerPhotonTheta", 500, -10, 10, 110, 0, 22, 48)
 { 
         GHistBGSub::InitCuts(-20, 20, -535, -35);
         GHistBGSub::AddRandCut(35, 535);
@@ -34,25 +41,62 @@ Bool_t	MyPhysics::Start()
     TraverseValidEvents();
 
     file_out->cd();
-    EPTscalersT.Write();
-    EPTscalersCorT.Write();
+    //EPTscalersT.Write();
+    //EPTscalersCorT.Write();
 
 	return kTRUE;
 }
 
 void	MyPhysics::ProcessEvent()
 {
-    if(eta->GetNParticles()>0)
+    /*if(eta->GetNParticles()>0)
     {
         hist_eta.Fill(*eta, *tagger, kTRUE);
         if(protons->GetNParticles()>0)
             hist_eta_proton.Fill(*eta, *protons, *tagger, kTRUE);
-    }
+    }*/
     if(etap->GetNParticles()>0)
     {
-        hist_etap.Fill(*etap, *tagger, kTRUE);
+        //TOF
+        for(int i=0; i<tagger->GetNTagged(); i++)
+        {
+            if(protons->GetNParticles()>0)
+            {
+                if(protons->Get_dE(0)>0)
+                {
+                    TOF.Fill(protons->GetTime(0)-tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
+                    TOFProton.Fill(protons->GetTime(0)-tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
+                    if(tagger->GetTagged_ch(i)==10)
+                    {
+                        TOFvsTagger.Fill(protons->GetTime(0)-tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
+                        TOFvsTaggerProton.Fill(protons->GetTime(0)-tagger->GetTagged_t(i), protons->Particle(0).E(), tagger->GetTagged_t(i));
+                    }
+                }
+            }
+            else
+            {
+                for(int p=0; p<6; p++)
+                {
+                    //std::cout << rawEvent->Get_dE(p) << std::endl;
+                    if(rawEvent->Get_dE(p)<1)
+                    {
+                        TOF.Fill(rawEvent->GetTime(p)-tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
+                        TOFPhoton.Fill(rawEvent->GetTime(p)-tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
+                        if(tagger->GetTagged_ch(i)==10)
+                        {
+                            TOFvsTagger.Fill(rawEvent->GetTime(p)-tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
+                            TOFvsTaggerPhoton.Fill(rawEvent->GetTime(p)-tagger->GetTagged_t(i), rawEvent->GetVector(p).E(), tagger->GetTagged_t(i));
+                            TOFvsTaggerPhotonTheta.Fill(rawEvent->GetTime(p)-tagger->GetTagged_t(i), rawEvent->GetVector(p).Theta()*TMath::RadToDeg(), tagger->GetTagged_t(i));
+                        }
+                    }
+                }
+            }
+        }
+        //
+
+        /*hist_etap.Fill(*etap, *tagger, kTRUE);
         if(protons->GetNParticles()>0)
-            hist_etap_proton.Fill(*etap, *protons, *tagger, kTRUE);
+            hist_etap_proton.Fill(*etap, *protons, *tagger, kTRUE);*/
     }
 }
 
@@ -64,13 +108,13 @@ void	MyPhysics::ProcessScalerRead()
     hist_etap_proton.ScalerReadCorrection(Double_t(scalers->GetScaler(0))/scalers->GetScaler(1));*/
 
     //std::cout << scalers->GetScaler(140) * Double_t(scalers->GetScaler(1)) / scalers->GetScaler(0) << "   " << scalers->GetScaler(140) << "   " << scalers->GetScaler(0) << "   " << scalers->GetScaler(1) << std::endl;
-    for(int i=140; i<188; i++)
+    /*for(int i=140; i<188; i++)
     {
         EPTscalers.Fill(Double_t(scalers->GetScaler(i)), 0, i-140);
         EPTscalersCor.Fill(scalers->GetScaler(i) * Double_t(scalers->GetScaler(1)) / scalers->GetScaler(0), 0, i-140);
         EPTscalersT.SetBinContent(i-140, EPTscalersT.GetBinContent(i-140) + Double_t(scalers->GetScaler(i)));
         EPTscalersCorT.SetBinContent(i-140, EPTscalersT.GetBinContent(i-140) + (scalers->GetScaler(i) * Double_t(scalers->GetScaler(1)) / scalers->GetScaler(0)));
-    }
+    }*/
 }
 
 

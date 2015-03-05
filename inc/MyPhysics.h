@@ -12,15 +12,23 @@
 class	MyPhysics  : public GTreeManager
 {
 private:
-    GAnalysis3Mesons        hist_eta;
-    GAnalysis3MesonsProton  hist_eta_proton;
-    GAnalysis3Mesons        hist_etap;
-    GAnalysis3MesonsProton  hist_etap_proton;
+    //GAnalysis3Mesons        hist_eta;
+    //GAnalysis3MesonsProton  hist_eta_proton;
+    //GAnalysis3Mesons        hist_etap;
+    //GAnalysis3MesonsProton  hist_etap_proton;
 
-    GH1     EPTscalers;
-    GH1     EPTscalersCor;
-    TH1D    EPTscalersT;
-    TH1D    EPTscalersCorT;
+    //GH1     EPTscalers;
+    //GH1     EPTscalersCor;
+    //TH1D    EPTscalersT;
+    //TH1D    EPTscalersCorT;
+
+    GHistBGSub2     TOF;
+    GHistBGSub2     TOFPhoton;
+    GHistBGSub2     TOFProton;
+    GHistBGSub2     TOFvsTagger;
+    GHistBGSub2     TOFvsTaggerPhoton;
+    GHistBGSub2     TOFvsTaggerProton;
+    GHistBGSub2     TOFvsTaggerPhotonTheta;
 
 protected:
     virtual Bool_t  Start();
