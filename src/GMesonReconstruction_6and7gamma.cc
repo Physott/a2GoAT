@@ -87,7 +87,21 @@ Bool_t  GMesonReconstruction_6and7gamma::ProcessEventWithoutFilling()
     eta->Clear();
     etap->Clear();
 
-    if(GetNReconstructed()==6)
+
+    photons->RemoveAllParticles();
+    for(int i=0; i<rawEvent->GetNParticles(); i++)
+    {
+        for(int t=0; t<rawEvent->GetNParticles(); t++)
+            if(tagger->GetTagged_t(t)>-20 && tagger->GetTagged_t(t)<20)
+            {
+                if(rawEvent->GetTime(i)+tagger->GetTagged_t(t) > 2 && rawEvent->GetTime(i)+tagger->GetTagged_t(t) < 20)
+                    protons->AddParticle(rawEvent->GetVector(i, 938), rawEvent->GetApparatus(i), rawEvent->Get_dE(i), rawEvent->GetWC0_E(i), rawEvent->GetWC1_E(i), rawEvent->GetTime(i), rawEvent->GetClusterSize(i));
+                else
+                    photons->AddParticle(rawEvent->GetVector(i), rawEvent->GetApparatus(i), rawEvent->Get_dE(i), rawEvent->GetWC0_E(i), rawEvent->GetWC1_E(i), rawEvent->GetTime(i), rawEvent->GetClusterSize(i));
+            }
+    }
+
+    /*if(GetNReconstructed()==6)
     {
         Reconstruct6g();
         return kTRUE;
@@ -97,7 +111,7 @@ Bool_t  GMesonReconstruction_6and7gamma::ProcessEventWithoutFilling()
         Reconstruct7g();
         //CheckProton();
         return kTRUE;
-    }
+    }*/
 
     return kFALSE;
 }
