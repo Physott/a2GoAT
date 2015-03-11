@@ -135,6 +135,15 @@ add_executable(pi0-example
    )
 target_link_libraries(pi0-example ${LIBS} ${ROOT_LIBRARIES})
 
+add_executable(gh-example
+   ${GOAT_BASE}
+   ${GOAT_GHIST}
+   inc/GHExample.h
+   src/GHExample.cc
+   src/gh_example_main.cc
+   )
+target_link_libraries(gh-example ${LIBS} ${ROOT_LIBRARIES})
+
 # install some scripts to the bin directory
 # by creating symlinks
 file(GLOB CORE_EXTRA_SCRIPTS "scripts/*")
