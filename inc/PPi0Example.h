@@ -23,6 +23,8 @@ private:
     GH1*	MM;
     GH1*	MM_2g;
 
+    GH1     IM_Sub;
+
     TH1*	TaggerAccScal;
 
 protected:

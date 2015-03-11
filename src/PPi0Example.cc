@@ -1,6 +1,7 @@
 #include "PPi0Example.h"
 
-PPi0Example::PPi0Example()
+PPi0Example::PPi0Example():
+    IM_Sub("IM_Sub", 	"IM_Sub", 		400,   0, 400)
 { 
     time 	= new GH1("time", 	"time", 	1400, -700, 700);
     time_cut 	= new GH1("time_cut", 	"time_cut", 	1400, -700, 700);
@@ -78,7 +79,11 @@ void	PPi0Example::ProcessEvent()
         }
 
     }
-
+    if(GetEtaPrimes()->GetNParticles()>0)
+    {
+        (GetEtaPrimes()->SubParticles(0,0)+GetEtaPrimes()->SubParticles(0,1)).Print();
+        IM_Sub.Fill((GetEtaPrimes()->SubParticles(0,0)+GetEtaPrimes()->SubParticles(0,1)).M());
+    }
 }
 
 void	PPi0Example::ProcessScalerRead()

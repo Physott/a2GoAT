@@ -182,6 +182,64 @@ void    GTreeMeson::AddParticle(const Int_t subParticle_index0, const TLorentzVe
 }
 
 
+TLorentzVector GTreeMeson::SubParticles(const Int_t meson, const Int_t particleIndex)
+{
+    if(meson>=nParticles || meson<0)    return TLorentzVector();
+    if(particleIndex>=nSubParticles[meson] || particleIndex<0)    return TLorentzVector();
+    manager->GetTracks()->GetVector(trackIndex[particleIndex]).Print();
+    return manager->GetTracks()->GetVector(trackIndex[particleIndex]);
+}
+
+const   TLorentzVector GTreeMeson::SubParticles(const Int_t meson, const Int_t particleIndex) const
+{
+    if(meson>=nParticles || meson<0)    return TLorentzVector();
+    if(particleIndex>=nSubParticles[meson] || particleIndex<0)    return TLorentzVector();
+    return manager->GetTracks()->GetVector(trackIndex[particleIndex]);
+}
+
+TLorentzVector GTreeMeson::SubRootinos(const Int_t meson, const Int_t rootinoIndex)
+{
+    if(meson>=nParticles || meson<0)    return TLorentzVector();
+    if(rootinoIndex>=nSubRootinos[meson] || rootinoIndex<0)    return TLorentzVector();
+    return manager->GetTracks()->GetVector(trackIndex[rootinoIndex]);
+}
+
+const   TLorentzVector GTreeMeson::SubRootinos(const Int_t meson, const Int_t rootinoIndex) const
+{
+    if(meson>=nParticles || meson<0)    return TLorentzVector();
+    if(rootinoIndex>=nSubRootinos[meson] || rootinoIndex<0)    return TLorentzVector();
+    return manager->GetTracks()->GetVector(trackIndex[rootinoIndex]);
+}
+
+TLorentzVector GTreeMeson::SubPhotons(const Int_t meson, const Int_t photonIndex)
+{
+    if(meson>=nParticles || meson<0)    return TLorentzVector();
+    if(photonIndex>=nSubPhotons[meson] || photonIndex<0)    return TLorentzVector();
+    return manager->GetTracks()->GetVector(trackIndex[nSubRootinos[meson]+photonIndex]);
+}
+
+const   TLorentzVector GTreeMeson::SubPhotons(const Int_t meson, const Int_t photonIndex) const
+{
+    if(meson>=nParticles || meson<0)    return TLorentzVector();
+    if(photonIndex>=nSubPhotons[meson] || photonIndex<0)    return TLorentzVector();
+    return manager->GetTracks()->GetVector(trackIndex[nSubRootinos[meson]+photonIndex]);
+}
+
+TLorentzVector GTreeMeson::SubChargedPi(const Int_t meson, const Int_t chargedPiIndex)
+{
+    if(meson>=nParticles || meson<0)    return TLorentzVector();
+    if(chargedPiIndex>=nSubChargedPions[meson] || chargedPiIndex<0)    return TLorentzVector();
+    return manager->GetTracks()->GetVector(trackIndex[nSubRootinos[meson]+nSubPhotons[meson]+chargedPiIndex]);
+}
+
+const   TLorentzVector GTreeMeson::SubChargedPi(const Int_t meson, const Int_t chargedPiIndex) const
+{
+    if(meson>=nParticles || meson<0)    return TLorentzVector();
+    if(chargedPiIndex>=nSubChargedPions[meson] || chargedPiIndex<0)    return TLorentzVector();
+    return manager->GetTracks()->GetVector(trackIndex[nSubRootinos[meson]+nSubPhotons[meson]+chargedPiIndex]);
+}
+
+
 void    GTreeMeson::Print() const
 {
     GTree::Print();

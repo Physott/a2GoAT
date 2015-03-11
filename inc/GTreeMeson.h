@@ -42,6 +42,14 @@ public:
             Bool_t         HasTrack(const Int_t meson, const Int_t track) const {return (trackIndex[meson] & 1<<track);}
             TLorentzVector Meson(const Int_t meson)             {return Particle(meson);}
     const   TLorentzVector Meson(const Int_t meson) const       {return Particle(meson);}
+            TLorentzVector SubParticles(const Int_t meson, const Int_t particleIndex);
+    const   TLorentzVector SubParticles(const Int_t meson, const Int_t particleIndex) const;
+            TLorentzVector SubPhotons(const Int_t meson, const Int_t photonIndex);
+    const   TLorentzVector SubPhotons(const Int_t meson, const Int_t photonIndex) const;
+            TLorentzVector SubRootinos(const Int_t meson, const Int_t rootinoIndex);
+    const   TLorentzVector SubRootinos(const Int_t meson, const Int_t rootinoIndex) const;
+            TLorentzVector SubChargedPi(const Int_t meson, const Int_t chargedPiIndex);
+    const   TLorentzVector SubChargedPi(const Int_t meson, const Int_t chargedPiIndex) const;
     virtual void            Print() const;
 };
 
