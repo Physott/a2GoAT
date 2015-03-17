@@ -8,6 +8,8 @@ GMesonReconstruction_6and7gamma::GMesonReconstruction_6and7gamma()    :
     width_pi0(22),
     width_eta(40),
     width_etap(60),
+    particleTime("particleTime", "particleTime", 1000, -50, 50),
+    particleTimeCut("particleTimeCut", "particleTimeCut", 500, -25, 25),
     IMSub0Etap("IMSub0Etap", "IMSub0Etap", 1000, 0, 1000),
     IMSub03Pi0("IMSub03Pi0", "IMSub03Pi0", 1000, 0, 1000),
     IMSub1Etap("IMSub1Etap", "IMSub1Etap", 300, 0, 300),
@@ -111,10 +113,44 @@ Bool_t  GMesonReconstruction_6and7gamma::ProcessEventWithoutFilling()
     GetEtas()->Clear();
     GetEtaPrimes()->Clear();
 
+    //Check for timing
+
+    Int_t   nReconstructed = 0;
+    Int_t   indexReconstructed[GTreeTrack_MAX];
+    Int_t   t   = 0;
+    for(int i=0; i<GetPhotons()->GetNParticles(); i++)
+    {
+        particleTime.Fill(GetPhotons()->GetTime(i));
+        if(GetPhotons()->GetTime(i) < -20 || GetPhotons()->GetTime(i) > 20) continue;
+        particleTimeCut.Fill(GetPhotons()->GetTime(i));
+        nReconstructed++;
+        indexReconstructed[t]   = GetPhotons()->GetTrackIndex(i);
+        t++;
+    }
+    if(nReconstructed != GetNReconstructed())
+    {
+        GetPhotons()->RemoveAllParticles();
+        for(int i=0; i<nReconstructed; i++)
+            GetPhotons()->AddParticle(GetTracks()->GetClusterEnergy(indexReconstructed[i]),
+                                      GetTracks()->GetTheta(indexReconstructed[i]),
+                                      GetTracks()->GetPhi(indexReconstructed[i]),
+                                      0,
+                                      GetTracks()->GetTime(indexReconstructed[i]),
+                                      GetTracks()->GetClusterSize(indexReconstructed[i]),
+                                      GetTracks()->GetCentralCrystal(indexReconstructed[i]),
+                                      GetTracks()->GetCentralVeto(indexReconstructed[i]),
+                                      GetTracks()->GetDetectors(indexReconstructed[i]),
+                                      GetTracks()->GetVetoEnergy(indexReconstructed[i]),
+                                      GetTracks()->GetMWPC0Energy(indexReconstructed[i]),
+                                      GetTracks()->GetMWPC1Energy(indexReconstructed[i]),
+                                      indexReconstructed[i]);
+    }
+
+
     ChiSq3Pi0 = 1e10;
     ChiSqEtap = 1e10;
 
-    if(GetNReconstructed()==6)
+    if(nReconstructed==6)
     {
         Reconstruct6g();
         for(int t=0; t<GetTagger()->GetNTagged(); t++)
@@ -130,7 +166,7 @@ Bool_t  GMesonReconstruction_6and7gamma::ProcessEventWithoutFilling()
         //if(minDecayIndex!=3)
             ChiSqDist6Hits.Fill(TMath::Prob(ChiSqEtap, 3), TMath::Prob(ChiSq3Pi0, 3));
     }
-    else if(GetNReconstructed()==7)
+    else if(nReconstructed==7)
     {
         if(!Reconstruct7g()) return kFALSE;
         for(int t=0; t<GetTagger()->GetNTagged(); t++)

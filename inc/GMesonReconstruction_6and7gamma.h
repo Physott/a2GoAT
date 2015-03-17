@@ -33,6 +33,8 @@ private:
 
     static  Int_t   perm6g[15][6];
 
+    GHistBGSub      particleTime;
+    GHistBGSub      particleTimeCut;
     GHistBGSub      IMSub0Etap;
     GHistBGSub      IMSub03Pi0;
     GHistBGSub      IMSub1Etap;
