@@ -56,7 +56,7 @@ void	MyPhysics::ProcessScalerRead()
         EPTscalers.Fill(Double_t(GetScalers()->GetScaler(i)), 0, i-140);
         EPTscalersCor.Fill(GetScalers()->GetScaler(i) * Double_t(GetScalers()->GetScaler(1)) / GetScalers()->GetScaler(0), 0, i-140);
         EPTscalersT.SetBinContent(i-140+1, EPTscalersT.GetBinContent(i-140+1) + Double_t(GetScalers()->GetScaler(i)));
-        EPTscalersCorT.SetBinContent(i-140+1, EPTscalersT.GetBinContent(i-140+1) + (GetScalers()->GetScaler(i) * Double_t(GetScalers()->GetScaler(1)) / GetScalers()->GetScaler(0)));
+        EPTscalersCorT.SetBinContent(i-140+1, EPTscalersCorT.GetBinContent(i-140+1) + (GetScalers()->GetScaler(i) * Double_t(GetScalers()->GetScaler(1)) / GetScalers()->GetScaler(0)));
     }
 }
 
