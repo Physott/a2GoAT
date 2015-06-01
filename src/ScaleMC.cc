@@ -77,10 +77,7 @@ void	ScaleMC::ProcessEvent()
 
     if(GetTagger()->GetNTagged()!=1) return;
 
-    GetTracks()->Fill();
-    GetTagger()->Fill();
-    GetDetectorHits()->Fill();
-    GetTrigger()->Fill();
+    FillReadList();
 }
 
 void	ScaleMC::ProcessScalerRead()
