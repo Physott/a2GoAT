@@ -3,7 +3,8 @@
 
 GoAT_Detailed::GoAT_Detailed() :
     UseParticleReconstruction(0),
-    nEvents_written(0)
+    nEvents_written(0),
+    AcceptanceTrue("AcceptanceTrue", "AcceptanceTrue", 180, 0, 180, 48)
 { 
 }
 
@@ -131,6 +132,13 @@ void	GoAT_Detailed::ProcessEvent()
         GetChargedPions()->Fill();
         FillReadList();
         nEvents_written++;
+
+        for(int i=0; i<GetTagger()->GetNTagged(); i++)
+        {
+            TLorentzVector  helpCM(GetGeant()->GetTrueVector(2));
+            helpCM.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+            AcceptanceTrue.Fill(helpCM.Theta()*TMath::RadToDeg(), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+        }
     }
 }
 

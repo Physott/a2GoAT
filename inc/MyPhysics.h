@@ -22,6 +22,9 @@ private:
     TH1D    EPTscalersT;
     TH1D    EPTscalersCorT;
 
+    GH1             AcceptanceTrue;
+    GH1             AcceptanceProtonTrue;
+
 protected:
     virtual Bool_t  Start();
 

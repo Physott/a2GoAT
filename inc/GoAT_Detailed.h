@@ -22,6 +22,9 @@ private:
     Bool_t 	UseMesonReconstruction;
 
 	Int_t 	nEvents_written;
+
+    GH1             AcceptanceTrue;
+
 protected:
     virtual void 	ProcessEvent();
     virtual Bool_t	Start();

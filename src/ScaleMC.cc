@@ -6,7 +6,8 @@ ScaleMC::ScaleMC()  :
     CalibCB("CalibCB", "CalibCB", 800, 0, 800, 720, 0, 720),
     CalibTAPS("CalibTAPS", "CalibTAPS", 800, 0, 800, 428, 0, 428),
     CalibCBCorr("CalibCBCorr", "CalibCBCorr", 800, 0, 800, 720, 0, 720),
-    CalibTAPSCorr("CalibTAPSCorr", "CalibTAPSCorr", 800, 0, 800, 428, 0, 428)
+    CalibTAPSCorr("CalibTAPSCorr", "CalibTAPSCorr", 800, 0, 800, 428, 0, 428),
+    AcceptanceTrue("AcceptanceTrue", "AcceptanceTrue", 180, 0, 180, 48)
 {
         GHistBGSub::InitCuts(-20, 20, -535, -35);
         GHistBGSub::AddRandCut(35, 535);
@@ -49,6 +50,13 @@ void	ScaleMC::ProcessEvent()
                     CalibTAPS.Fill((GetTracks()->GetVector(i)+GetTracks()->GetVector(j)).M(), GetTracks()->GetCentralCrystal(j));
             }
         }
+    }
+
+    for(int i=0; i<GetTagger()->GetNTagged(); i++)
+    {
+        TLorentzVector  helpCM(GetGeant()->GetTrueVector(2));
+        helpCM.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+        AcceptanceTrue.Fill(helpCM.Theta()*TMath::RadToDeg(), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
     }
 
 

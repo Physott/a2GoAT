@@ -16,6 +16,7 @@ private:
     GHistBGSub2     CalibTAPS;
     GHistBGSub2     CalibCBCorr;
     GHistBGSub2     CalibTAPSCorr;
+    GH1             AcceptanceTrue;
 
 protected:
     virtual Bool_t  Start();

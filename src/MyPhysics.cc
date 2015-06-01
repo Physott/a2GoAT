@@ -10,7 +10,9 @@ MyPhysics::MyPhysics()    :
     EPTscalers("EPT_Scaler", "EPT_Scaler", 1000, 0, 100000000, 48),
     EPTscalersCor("EPT_ScalerCor", "EPT_ScalerCor", 1000, 0, 100000000, 48),
     EPTscalersT("EPT_ScalerT", "EPT_ScalerT", 48, 0, 48),
-    EPTscalersCorT("EPT_ScalerCorT", "EPT_ScalerCorT", 48, 0, 48)
+    EPTscalersCorT("EPT_ScalerCorT", "EPT_ScalerCorT", 48, 0, 48),
+    AcceptanceTrue("AcceptanceTrue", "AcceptanceTrue", 180, 0, 180, 48),
+    AcceptanceProtonTrue("AcceptanceProtonTrue", "AcceptanceProtonTrue", 180, 0, 180, 48)
 { 
         GHistBGSub::InitCuts(-20, 20, -535, -35);
         GHistBGSub::AddRandCut(35, 535);
@@ -53,9 +55,25 @@ void	MyPhysics::ProcessEvent()
     if(GetEtaPrimes()->GetNParticles()>0)
     {
         if(GetProtons()->GetNParticles()>0)
+        {
             hist_etap_proton.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetTagger());
+            for(int i=0; i<GetTagger()->GetNTagged(); i++)
+            {
+                TLorentzVector  helpCM(GetGeant()->GetTrueVector(2));
+                helpCM.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+                AcceptanceProtonTrue.Fill(helpCM.Theta()*TMath::RadToDeg(), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+            }
+        }
         else
+        {
             hist_etap.Fill(*GetEtaPrimes(), *GetPhotons(), *GetTagger());
+            for(int i=0; i<GetTagger()->GetNTagged(); i++)
+            {
+                TLorentzVector  helpCM(GetGeant()->GetTrueVector(2));
+                helpCM.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+                AcceptanceTrue.Fill(helpCM.Theta()*TMath::RadToDeg(), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+            }
+        }
     }
 }
 
