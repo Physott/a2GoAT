@@ -58,6 +58,17 @@ protected:
             TLorentzVector l(pv, E);
             return l;
         }
+        static TLorentzVector Make(const Double_t Ek,
+                                   const Double_t Theta,
+                                   const Double_t Phi,
+                                   const Double_t m){
+            const double E = Ek + m;
+            const Double_t p = sqrt( E*E - m*m );
+            TVector3 pv(1,0,0);
+            pv.SetMagThetaPhi(p, Theta, Phi);
+            TLorentzVector l(pv, E);
+            return l;
+        }
         static TLorentzVector Make(const FitParticle& p,
                                    const Double_t m) {
             return Make(std::vector<double>{p.Ek, p.Theta, p.Phi}, m);
@@ -114,6 +125,7 @@ public:
     virtual void    AddConstraintMM();
     virtual void    CalcResult();
     virtual Int_t   Fill(Double_t x)    {return 0;}
+    inline  const FitParticle& GetFittedPhoton(const int i) const;
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void    Reset(Option_t* option = "");
     virtual Int_t   WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)   {return 0;}
@@ -135,6 +147,18 @@ public:
     virtual bool    Solve(const double time, const int channel);
 };
 
+const GFit::FitParticle& GFit::GetFittedPhoton(const int i) const
+{
+    try
+    {
+        return  aplconPhotons[i];
+    }
+    catch(...)
+    {
+        std::cout << "There is no " << i << "th photon in GFit!" << std::endl;
+        return aplconPhotons[0];
+    }
+}
 
 
 

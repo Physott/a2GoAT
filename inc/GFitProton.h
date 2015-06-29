@@ -29,6 +29,7 @@ public:
     virtual void    AddConstraintsTotMomentum();
     virtual void    AddConstraintsTotEnergy();
     virtual void    CalcResult();
+    inline  const GFit::FitParticle& GetFittedProton() const;
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void    Reset(Option_t* option = "");
     virtual void    SetProton(const TLorentzVector proton){
@@ -45,9 +46,18 @@ public:
     virtual bool    Solve(const double time, const int channel);
 };
 
-
-
-
+const   GFit::FitParticle&    GFitProton::GetFittedProton() const
+{
+    const APLCON::Result_Variable_t& pe = result.Variables.at("PE");
+    static FitParticle p;
+    p.Ek            = pe.Value.After;
+    p.Ek_Sigma      = pe.Sigma.After;
+    p.Theta         = aplconProtonTheta;
+    p.Theta_Sigma   = aplconProtonThetaSigma;
+    p.Phi         = aplconProtonPhi;
+    p.Phi_Sigma   = aplconProtonPhiSigma;
+    return p;
+}
 
 class	GFitProtonVertex    : public GFitProton
 {
