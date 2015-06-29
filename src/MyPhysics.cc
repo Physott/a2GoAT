@@ -59,9 +59,16 @@ void	MyPhysics::ProcessEvent()
             hist_etap_proton.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetTagger());
             for(int i=0; i<GetTagger()->GetNTagged(); i++)
             {
-                TLorentzVector  helpCM(GetGeant()->GetTrueVector(2));
-                helpCM.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
-                AcceptanceProtonTrue.Fill(helpCM.Theta()*TMath::RadToDeg(), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                try
+                {
+                    TLorentzVector  helpCM(GetGeant()->GetTrueVector(2));
+                    helpCM.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+					AcceptanceProtonTrue.Fill(helpCM.Theta()*TMath::RadToDeg(), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+				}
+				catch (...)
+				{
+
+				}
             }
         }
         else
@@ -69,9 +76,16 @@ void	MyPhysics::ProcessEvent()
             hist_etap.Fill(*GetEtaPrimes(), *GetPhotons(), *GetTagger());
             for(int i=0; i<GetTagger()->GetNTagged(); i++)
             {
-                TLorentzVector  helpCM(GetGeant()->GetTrueVector(2));
-                helpCM.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
-                AcceptanceTrue.Fill(helpCM.Theta()*TMath::RadToDeg(), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                try
+                {
+                    TLorentzVector  helpCM(GetGeant()->GetTrueVector(2));
+                    helpCM.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+					AcceptanceTrue.Fill(helpCM.Theta()*TMath::RadToDeg(), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+				}
+				catch (...)
+				{
+
+				}
             }
         }
     }
