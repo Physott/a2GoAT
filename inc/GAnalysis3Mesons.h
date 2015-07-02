@@ -73,7 +73,7 @@ public:
     virtual void    CalcResult();
             Bool_t  IsEtap()    const   {return isEtap;}
     virtual Int_t   Fill(Double_t x)    {return 0;}
-    virtual void    Fill(const GTreeMeson& meson, GTreeParticle& photons, const GTreeTagger& tagger, const GTreeA2Geant &geantTree);
+    virtual void    Fill(const GTreeMeson &meson, GTreeParticle& photons, const GTreeTagger& tagger, const GTreeA2Geant &geantTree);
             bool    IsSuccess() const   {return success;}
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void    Reset(Option_t* option = "");

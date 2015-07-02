@@ -2,6 +2,8 @@
 #define __GHistPhysics_h__
 
 
+#include <TLorentzVector.h>
+
 #include "GHistManager.h"
 #include "GH1.h"
 
@@ -33,19 +35,71 @@ private:
 protected:
 
 public:
-    GHistParticle(const char* Name, const char* title, Bool_t linkHistogram = kTRUE);
+    GHistParticle(const char* Name, Bool_t linkHistogram = kTRUE);
     virtual ~GHistParticle()                                                                                                    {}
 
     virtual void    CalcResult();
     virtual Int_t   Fill(Double_t x)                                                                                            {return 0;}
     virtual void    Fill(const GTreeParticle& particle, const int index, const double beam, const double Time);
     virtual void    Fill(const GTreeParticle& particle, const int index, const double beam, const double Time, const double channel);
+    virtual void    Fill(const TLorentzVector& particle, const double beam, const double Time, const double channel);
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* Name = 0);
     virtual void    Reset(Option_t* option);
     virtual void    ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads);
     virtual Int_t   WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)                           {return 0;}
 };
 
+
+
+class   GTreeTagger;
+class   GTreeMeson;
+
+class	GHistPhysics  : public GHistLinked
+{
+private:
+    TString         name;
+    GHistParticle   proton;
+    GHistParticle   etap;
+    GHistParticle   etaPhotons;
+    GHistParticle   pi0Photons;
+    GHistParticle   allPhotons;
+
+protected:
+
+public:
+    GHistPhysics(const char* Name, Bool_t linkHistogram = kTRUE);
+    virtual ~GHistPhysics()                                                                                                    {}
+
+    virtual void    CalcResult();
+    virtual Int_t   Fill(Double_t x)                                                                                            {return 0;}
+    virtual void    Fill(const GTreeMeson &meson, const GTreeParticle& photons, const GTreeParticle &protons, const GTreeTagger &tagger);
+    virtual void    FillFitted(const GTreeParticle& photons, const GTreeParticle &protons, const GTreeTagger &tagger);
+    virtual void    PrepareWriteList(GHistWriteList* arr, const char* Name = 0);
+    virtual void    Reset(Option_t* option);
+    virtual void    ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads);
+    virtual Int_t   WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)                           {return 0;}
+};
+
+
+
+class	GHistPhysicsFitted  : public GHistPhysics
+{
+private:
+    TString         name;
+    GHistPhysics    fitted;
+
+public:
+    GHistPhysicsFitted(const char* Name, Bool_t linkHistogram = kTRUE);
+    ~GHistPhysicsFitted()                                                                                                       {}
+
+    virtual void    CalcResult();
+    virtual Int_t   Fill(Double_t x)                                                                                            {return 0;}
+    virtual void    Fill(const GTreeMeson &meson, const GTreeParticle& photons, const GTreeParticle &protons, const GTreeTagger &tagger);
+    virtual void    PrepareWriteList(GHistWriteList* arr, const char* Name = 0);
+    virtual void    Reset(Option_t* option);
+    virtual void    ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads);
+    virtual Int_t   WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)                           {return 0;}
+};
 
 
 #endif

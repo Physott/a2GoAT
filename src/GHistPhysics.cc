@@ -1,9 +1,11 @@
 #include "GHistPhysics.h"
 #include "GTreeParticle.h"
+#include "GTreeTagger.h"
+#include "GTreeMeson.h"
 
 
 
-GHistParticle::GHistParticle(const char* Name, const char* title, Bool_t linkHistogram) :
+GHistParticle::GHistParticle(const char* Name, Bool_t linkHistogram) :
     GHistLinked(linkHistogram),
     name(Name),
     kinEnergy(TString(Name).Append("_kinEnergy"), "kinEnergy", 1600, 0, 1600, 48, kFALSE),
@@ -107,12 +109,34 @@ void    GHistParticle::Fill(const GTreeParticle& particle, const int index, cons
     }
 }
 
+void    GHistParticle::Fill(const TLorentzVector& particle, const double beam, const double Time, const double channel)
+{
+    double  m   = particle.M();
+    kinEnergy.Fill(particle.E()-m, Time, channel);
+    theta.Fill(particle.Theta()*TMath::RadToDeg(), Time, channel);
+    if(beam>0)
+    {
+        TLorentzVector  helpCM(particle);
+        TLorentzVector  helpCM3(0.0, 0.0, beam, beam + MASS_PROTON);
+        helpCM.Boost(-helpCM3.BoostVector());
+        thetaCM.Fill(helpCM.Theta()*TMath::RadToDeg(), Time, channel);
+    }
+    phi.Fill(particle.Phi()*TMath::RadToDeg(), Time, channel);
+    mass.Fill(m, Time, channel);
+    energy.Fill(particle.E(), Time, channel);
+    px.Fill(particle.Px(), Time, channel);
+    py.Fill(particle.Py(), Time, channel);
+    pz.Fill(particle.Pz(), Time, channel);
+}
+
 void    GHistParticle::PrepareWriteList(GHistWriteList* arr, const char* Name)
 {
     if(!arr)
         return;
 
-    GHistWriteList* folder  = arr->GetDirectory(name);
+    GHistWriteList* folder  = arr;
+    if(Name)
+        folder  = arr->GetDirectory(Name);
 
     kinEnergy.PrepareWriteList(folder, "kinEnergy");
     theta.PrepareWriteList(folder, "theta");
@@ -164,4 +188,202 @@ void    GHistParticle::ScalerReadCorrection(const Double_t CorrectionFactor, con
     centralCrystal.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     detectors.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     trackIndex.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GHistPhysics::GHistPhysics(const char* Name, Bool_t linkHistogram) :
+    GHistLinked(linkHistogram),
+    name(Name),
+    proton(TString(Name).Append("_proton"), kFALSE),
+    etap(TString(Name).Append("_etap"), kFALSE),
+    etaPhotons(TString(Name).Append("_etaPhotons"), kFALSE),
+    pi0Photons(TString(Name).Append("_pi0Photons"), kFALSE),
+    allPhotons(TString(Name).Append("_allPhotons"), kFALSE)
+{
+}
+
+void    GHistPhysics::CalcResult()
+{
+    proton.CalcResult();
+    etap.CalcResult();
+    etaPhotons.CalcResult();
+    pi0Photons.CalcResult();
+    allPhotons.CalcResult();
+}
+
+void    GHistPhysics::Fill(const GTreeMeson& meson, const GTreeParticle& photons, const GTreeParticle& protons, const GTreeTagger& tagger)
+{
+    try
+    {
+        for(int i=0; i<tagger.GetNTagged(); i++)
+        {
+            etap.Fill(meson, 0, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            if(protons.GetNParticles()>0)
+                proton.Fill(protons, 0, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            etaPhotons.Fill(photons, 0, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            etaPhotons.Fill(photons, 1, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0Photons.Fill(photons, 2, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0Photons.Fill(photons, 3, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0Photons.Fill(photons, 4, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0Photons.Fill(photons, 5, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 0, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 1, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 2, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 3, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 4, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 5, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+        }
+    }
+    catch(...)
+    {
+        std::cout << "Can not find all particles in GHistPhysics!" << std::endl;
+        return;
+    }
+}
+
+void    GHistPhysics::FillFitted(const GTreeParticle& photons, const GTreeParticle &protons, const GTreeTagger &tagger)
+{
+    try
+    {
+        TLorentzVector  lv(photons.Particle(6));
+        for(int i=7; i<12; i++)
+            lv  +=  photons.Particle(i);
+
+        for(int i=0; i<tagger.GetNTagged(); i++)
+        {
+            etap.Fill(lv, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            if(protons.GetNParticles()>0)
+                proton.Fill(protons, 1, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            etaPhotons.Fill(photons, 6, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            etaPhotons.Fill(photons, 7, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0Photons.Fill(photons, 8, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0Photons.Fill(photons, 9, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0Photons.Fill(photons, 10, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0Photons.Fill(photons, 11, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 6, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 7, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 8, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 9, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 10, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 11, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+        }
+    }
+    catch(...)
+    {
+        std::cout << "no true tree!" << std::endl;
+        return;
+    }
+}
+
+void    GHistPhysics::PrepareWriteList(GHistWriteList* arr, const char* Name)
+{
+    if(!arr)
+        return;
+
+
+    GHistWriteList* folder  = arr;
+    if(Name)
+        folder  = arr->GetDirectory(Name);
+
+    proton.PrepareWriteList(folder, "proton");
+    etap.PrepareWriteList(folder, "etap");
+    etaPhotons.PrepareWriteList(folder, "etaPhotons");
+    pi0Photons.PrepareWriteList(folder, "pi0Photons");
+    allPhotons.PrepareWriteList(folder, "allPhotons");
+}
+
+void    GHistPhysics::Reset(Option_t* option)
+{
+    proton.Reset(option);
+    etap.Reset(option);
+    etaPhotons.Reset(option);
+    pi0Photons.Reset(option);
+    allPhotons.Reset(option);
+}
+
+void    GHistPhysics::ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads)
+{
+    proton.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+    etap.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+    etaPhotons.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+    pi0Photons.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+    allPhotons.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GHistPhysicsFitted::GHistPhysicsFitted(const char* Name, Bool_t linkHistogram)  :
+    GHistPhysics(TString(Name).Append("_unfitted"), linkHistogram),
+    name(Name),
+    fitted(TString(Name).Append("_fitted"), kFALSE)
+{
+
+}
+
+void    GHistPhysicsFitted::CalcResult()
+{
+    GHistPhysics::CalcResult();
+    fitted.CalcResult();
+}
+
+void    GHistPhysicsFitted::Fill(const GTreeMeson& meson, const GTreeParticle& photons, const GTreeParticle& protons, const GTreeTagger& tagger)
+{
+    GHistPhysics::Fill(meson, photons, protons, tagger);
+    fitted.FillFitted(photons, protons, tagger);
+}
+
+void    GHistPhysicsFitted::PrepareWriteList(GHistWriteList* arr, const char* Name)
+{
+    if(!arr)
+        return;
+
+    GHistWriteList* folder  = arr->GetDirectory(name);
+
+    GHistPhysics::PrepareWriteList(folder, "raw");
+    fitted.PrepareWriteList(folder, "fit");
+}
+
+void    GHistPhysicsFitted::Reset(Option_t* option)
+{
+    GHistPhysics::Reset(option);
+    fitted.Reset(option);
+}
+
+void    GHistPhysicsFitted::ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads)
+{
+    GHistPhysics::ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+    fitted.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
 }

@@ -14,11 +14,9 @@
 class	MyPhysics  : public GTreeManager
 {
 private:
-    GHistParticle    proton;
-    GHistParticle    etap;
-    GHistParticle    etaPhotons;
-    GHistParticle    pi0Photons;
-    GHistParticle    allPhotons;
+    GHistPhysicsFitted  all;
+    GHistPhysicsFitted  hits6;
+    GHistPhysicsFitted  hits7;
 
 protected:
     virtual Bool_t  Start();

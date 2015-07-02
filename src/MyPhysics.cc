@@ -3,11 +3,9 @@
 
 
 MyPhysics::MyPhysics()  :
-    proton("proton", "proton"),
-    etap("etap", "etap"),
-    etaPhotons("etaPhotons", "etaPhotons"),
-    pi0Photons("pi0Photons", "pi0Photons"),
-    allPhotons("allPhotons", "allPhotons")
+    all("all"),
+    hits6("hits6"),
+    hits7("hits7")
 { 
         GHistBGSub::InitCuts(-20, 20, -535, -35);
         GHistBGSub::AddRandCut(35, 535);
@@ -42,25 +40,12 @@ Bool_t	MyPhysics::Start()
 
 void	MyPhysics::ProcessEvent()
 {
-    for(int i=0; i<GetTagger()->GetNTagged(); i++)
-    {
+    all.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetTagger());
 
-        etap.Fill(*GetEtaPrimes(), 0, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-        if(GetProtons()->GetNParticles()>0)
-            proton.Fill(*GetProtons(), 0, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-        etaPhotons.Fill(*GetPhotons(), 0, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-        etaPhotons.Fill(*GetPhotons(), 1, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-        pi0Photons.Fill(*GetPhotons(), 2, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-        pi0Photons.Fill(*GetPhotons(), 3, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-        pi0Photons.Fill(*GetPhotons(), 4, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-        pi0Photons.Fill(*GetPhotons(), 5, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-        allPhotons.Fill(*GetPhotons(), 0, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-        allPhotons.Fill(*GetPhotons(), 1, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-        allPhotons.Fill(*GetPhotons(), 2, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-        allPhotons.Fill(*GetPhotons(), 3, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-        allPhotons.Fill(*GetPhotons(), 4, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-        allPhotons.Fill(*GetPhotons(), 5, GetTagger()->GetTaggedEnergy(i), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-    }
+    if(GetProtons()->GetNParticles()>0)
+        hits6.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetTagger());
+    else
+        hits7.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetTagger());
 }
 
 void	MyPhysics::ProcessScalerRead()
