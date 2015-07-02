@@ -208,7 +208,7 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, GTreeParticle& photons, 
                         for(int l=k+1; l<6; l++)
                             hist_fit4_SubAll.Fill((photons.Particle(k)+photons.Particle(l)).M(), tagger.GetTaggedTime(i));
 
-                        photons.AddParticle(fit4.GetFittedPhoton(k).Ek, fit4.GetFittedPhoton(k).Theta, fit4.GetFittedPhoton(k).Phi,
+                        photons.AddParticle(fit4.GetFittedPhoton(k).Ek, fit4.GetFittedPhoton(k).Theta * TMath::RadToDeg(), fit4.GetFittedPhoton(k).Phi * TMath::RadToDeg(),
                                             0.0, photons.GetTime(k), photons.GetClusterSize(k), photons.GetCentralCrystal(k), photons.GetCentralVeto(k), photons.GetDetectors(k),
                                             photons.GetVetoEnergy(k), photons.GetMWPC0Energy(k), photons.GetMWPC1Energy(k), photons.GetTrackIndex(k));
                     }
@@ -577,11 +577,11 @@ void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, GTreeParticle& pho
                         for(int l=k+1; l<6; l++)
                             hist_fitProton6_SubAll.Fill((photons.Particle(k)+photons.Particle(l)).M(), tagger.GetTaggedTime(i));
 
-                        photons.AddParticle(fitProton6.GetFittedPhoton(k).Ek, fitProton6.GetFittedPhoton(k).Theta, fitProton6.GetFittedPhoton(k).Phi,
+                        photons.AddParticle(fitProton6.GetFittedPhoton(k).Ek, fitProton6.GetFittedPhoton(k).Theta * TMath::RadToDeg(), fitProton6.GetFittedPhoton(k).Phi * TMath::RadToDeg(),
                                             0, photons.GetTime(k), photons.GetClusterSize(k), photons.GetCentralCrystal(k), photons.GetCentralVeto(k), photons.GetDetectors(k),
                                             photons.GetVetoEnergy(k), photons.GetMWPC0Energy(k), photons.GetMWPC1Energy(k), photons.GetTrackIndex(k));
                     }
-                    proton.AddParticle(fitProton6.GetFittedProton().Ek, fitProton6.GetFittedProton().Theta, fitProton6.GetFittedProton().Phi,
+                    proton.AddParticle(fitProton6.GetFittedProton().Ek, fitProton6.GetFittedProton().Theta * TMath::RadToDeg(), fitProton6.GetFittedProton().Phi * TMath::RadToDeg(),
                                         MASS_PROTON, proton.GetTime(0), proton.GetClusterSize(0), proton.GetCentralCrystal(0), proton.GetCentralVeto(0), proton.GetDetectors(0),
                                         proton.GetVetoEnergy(0), proton.GetMWPC0Energy(0), proton.GetMWPC1Energy(0), proton.GetTrackIndex(0));
                 }
