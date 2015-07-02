@@ -84,6 +84,8 @@ GHistBGSub::~GHistBGSub()
 {
 }
 
+
+
 Bool_t	GHistBGSub::Add(const GHistBGSub* h, Double_t c)
 {
     result->Add(h->result, c);
@@ -114,6 +116,7 @@ Bool_t	GHistBGSub::Add(const GHistScaCor* _result, const GHistScaCor* _prompt, c
 
 void    GHistBGSub::CalcResult()
 {
+    prompt->CalcResult();
     result->Add(prompt);
 
     if(rand.GetEntriesFast()==0)
@@ -126,10 +129,14 @@ void    GHistBGSub::CalcResult()
         GHistScaCor*    hist;
         while((hist=(GHistScaCor*)iter.Next()))
             randSum->Add(hist);
+        randSum->CalcResult();
         result->Add(randSum, -backgroundSubstractionFactor);
     }
     else
+    {
+        ((GHistScaCor*)rand.At(0))->CalcResult();
         result->Add((GHistScaCor*)rand.At(0), -backgroundSubstractionFactor);
+    }
 }
 
 void    GHistBGSub::CreateRandBin()

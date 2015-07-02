@@ -32,6 +32,8 @@ private:
     Bool_t      corrected;
     Bool_t      writeUncorrected;
 
+    static  void    CorrectZeroErrors(TH1& hist);
+
 protected:
     TH1*        buffer;
     TH1*        accumulated;
@@ -52,7 +54,7 @@ public:
 
     virtual Bool_t	Add(const GHistScaCor *h, Double_t c = 1);
     virtual Bool_t	Add(const TH1* _buffer, const TH1* _accumulated, const TH1* _accumulatedCorrected, const Bool_t CorrectedInput, const Double_t c = 1);
-    virtual void 	CalcResult()    {}
+    virtual void 	CalcResult();
     virtual Int_t	Fill(Double_t x)    {return buffer->Fill(x);}
     const   TH1*    GetAccumulated()            const   {return accumulated;}
     const   TH1*    GetAccumulatedCorrected()   const   {return accumulatedCorrected;}

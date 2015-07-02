@@ -26,6 +26,8 @@ class  GHistBGSub  : public GHistLinked
 private:
     Bool_t      writeWindows;
 
+    static  void    CorrectZeroErrors(GHistScaCor& hist);
+
 protected:
     GHistScaCor*    result;
     GHistScaCor*    prompt;
