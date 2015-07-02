@@ -7,6 +7,7 @@
 #include "GH1.h"
 #include "APLCON.hpp"
 
+class   GTreeA2Geant;
 
 
 class	GFit    : public GHistLinked
@@ -113,6 +114,8 @@ private:
     GHistBGSub              sub2Im;
     GHistBGSub              theta;
     GH1                     thetaCM;
+    GH1                     thetaCMTrue;
+    GHistBGSub              CMtest;
     GHistBGSub              phi;
     GH1                     chiSq;
     GH1                     confidenceLevel;
@@ -147,7 +150,7 @@ public:
         aplconPhotons[5].SetFromVector(p5);
     }
     virtual void    SetBeam(const Double_t _Beam)    {beam=_Beam;}
-    virtual bool    Solve(const double time, const int channel);
+    virtual bool    Solve(const double time, const int channel, const GTreeA2Geant& geantTree);
 };
 
 const GFit::FitParticle& GFit::GetFittedPhoton(const int i) const
@@ -183,7 +186,7 @@ public:
     virtual void    CalcResult();
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void    Reset(Option_t* option = "");
-    virtual bool    Solve(const double time, const int channel);
+    virtual bool    Solve(const double time, const int channel, const GTreeA2Geant &geantTree);
 };
 
 

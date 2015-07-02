@@ -43,7 +43,7 @@ public:
             aplconProtonPhiSigma = 1*TMath::DegToRad();
         }
     }
-    virtual bool    Solve(const double time, const int channel);
+    virtual bool    Solve(const double time, const int channel, const GTreeA2Geant &geantTree);
 };
 
 
@@ -70,7 +70,7 @@ public:
     virtual void    CalcResult();
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void    Reset(Option_t* option = "");
-    virtual bool    Solve(const double time, const int channel);
+    virtual bool    Solve(const double time, const int channel, const GTreeA2Geant &geantTree);
 };
 
 

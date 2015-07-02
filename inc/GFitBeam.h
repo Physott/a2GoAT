@@ -29,7 +29,7 @@ public:
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void    Reset(Option_t* option = "");
     virtual Int_t   WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)   {return 0;}
-    virtual bool    Solve(const double time, const int channel);
+    virtual bool    Solve(const double time, const int channel, const GTreeA2Geant &geantTree);
     virtual void    SetBeam(const double _Beam)    {aplconBeam.SetFromBeam(_Beam);}
 };
 
@@ -54,7 +54,7 @@ public:
     virtual void    CalcResult();
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void    Reset(Option_t* option = "");
-    virtual bool    Solve(const double time, const int channel);
+    virtual bool    Solve(const double time, const int channel, const GTreeA2Geant& geantTree);
 };
 
 

@@ -16,9 +16,9 @@ GFitBeam::GFitBeam(const char* _Name, const Bool_t linkHistogram)   :
     fitter.LinkVariable("Be", aplconBeam.Link(), aplconBeam.LinkSigma());
 }
 
-bool GFitBeam::Solve(const double time, const int channel)
+bool GFitBeam::Solve(const double time, const int channel, const GTreeA2Geant& geantTree)
 {
-    if(GFit::Solve(time, channel))
+    if(GFit::Solve(time, channel, geantTree))
     {
         beamTheta.Fill(aplconBeam.Theta*TMath::RadToDeg(), time, channel);
         beamPhi.Fill(aplconBeam.Phi*TMath::RadToDeg(), time);
@@ -203,9 +203,9 @@ void    GFitBeam::AddConstraintsIM()
         }
 
 
-        bool GFitBeamVertex::Solve(const double time, const int channel)
+        bool GFitBeamVertex::Solve(const double time, const int channel, const GTreeA2Geant& geantTree)
         {
-            if(GFitBeam::Solve(time, channel))
+            if(GFitBeam::Solve(time, channel, geantTree))
             {
                 const APLCON::Result_Variable_t& var = result.Variables.at("Ve");
                 vertex.Fill(var.Value.After, time, channel);

@@ -7,7 +7,7 @@ using namespace std;
 #define MASS_ETAP   957.78
 #define MASS_PROTON 938.272046
 
-
+#include "GTreeA2Geant.h"
 
 
 GFit::GFit(const char* _Name, const Bool_t linkHistogram)   :
@@ -22,6 +22,8 @@ GFit::GFit(const char* _Name, const Bool_t linkHistogram)   :
     sub2Im(TString(_Name).Append("_sub2Im"), TString(_Name).Append(" sub2 inv Mass"), 300, 0, 300, kFALSE),
     theta(TString(_Name).Append("_theta"), TString(_Name).Append(" theta"), 180, 0, 180, kFALSE),
     thetaCM(TString(_Name).Append("_thetaCM"), TString(_Name).Append(" thetaCM"), 180, 0, 180, 48, kFALSE),
+    thetaCMTrue(TString(_Name).Append("_thetaCMTrue"), TString(_Name).Append(" thetaCMTrue"), 180, 0, 180, 48, kFALSE),
+    CMtest(TString(_Name).Append("_CMtest"), TString(_Name).Append(" CMtest"), 1600, 0, 1600, kFALSE),
     phi(TString(_Name).Append("_phi"), TString(_Name).Append(" phi"), 360, -180, 180, kFALSE),
     chiSq(TString(_Name).Append("_ChiSq"), TString(_Name).Append(" ChiSq"), 1000, 0, 100, 48, kFALSE),
     confidenceLevel(TString(_Name).Append("_ConfLev"), TString(_Name).Append(" ConfLev"), 1000, 0, 1, 48, kFALSE)
@@ -39,7 +41,7 @@ GFit::GFit(const char* _Name, const Bool_t linkHistogram)   :
     fitter.SetSettings(settings);
 }
 
-bool GFit::Solve(const double time, const int channel)
+bool GFit::Solve(const double time, const int channel, const GTreeA2Geant& geantTree)
 {
     success = false;
     result = fitter.DoFit();
@@ -65,6 +67,17 @@ bool GFit::Solve(const double time, const int channel)
         helpCM.Boost(-helpCM3.BoostVector());
         //cout << helpCM.Theta()*TMath::RadToDeg() << endl;
         thetaCM.Fill(helpCM.Theta()*TMath::RadToDeg(), time, channel);
+        try
+        {
+            TLorentzVector  helpCMtrue(geantTree.GetTrueVector(2));
+            helpCMtrue.Boost(-helpCM3.BoostVector());
+            thetaCMTrue.Fill(helpCMtrue.Theta()*TMath::RadToDeg(), time, channel);
+        }
+        catch (...)
+        {
+        }
+        helpCM3.Boost(-helpCM3.BoostVector());
+        CMtest.Fill(helpCM3.P(), time);
         phi.Fill(etap.Phi()*TMath::RadToDeg(), time);
         chiSq.Fill(result.ChiSquare, time);
         for(int i=0; i<6; i++)
@@ -146,6 +159,8 @@ void    GFit::AddConstraintsIM()
         sub2Im.CalcResult();
         theta.CalcResult();
         thetaCM.CalcResult();
+        thetaCMTrue.CalcResult();
+        CMtest.CalcResult();
         phi.CalcResult();
         chiSq.CalcResult();
         confidenceLevel.CalcResult();
@@ -164,6 +179,8 @@ void    GFit::AddConstraintsIM()
         sub2Im.PrepareWriteList(arr, "sub2Im");
         theta.PrepareWriteList(arr, "theta");
         thetaCM.PrepareWriteList(arr, "thetaCM");
+        thetaCMTrue.PrepareWriteList(arr, "thetaCMTrue");
+        CMtest.PrepareWriteList(arr, "CMtest");
         phi.PrepareWriteList(arr, "phi");
         chiSq.PrepareWriteList(arr, "chiSq");
         confidenceLevel.PrepareWriteList(arr, "confidenceLevel");
@@ -179,6 +196,8 @@ void    GFit::AddConstraintsIM()
         sub2Im.Reset(option);
         theta.Reset(option);
         thetaCM.Reset(option);
+        thetaCMTrue.Reset(option);
+        CMtest.Reset(option);
         phi.Reset(option);
         chiSq.Reset(option);
         confidenceLevel.Reset(option);
@@ -286,9 +305,9 @@ void    GFit::AddConstraintsIM()
         }
 
 
-        bool GFitVertex::Solve(const double time, const int channel)
+        bool GFitVertex::Solve(const double time, const int channel, const GTreeA2Geant& geantTree)
         {
-            if(GFit::Solve(time, channel))
+            if(GFit::Solve(time, channel, geantTree))
             {
                 const APLCON::Result_Variable_t& var = result.Variables.at("Ve");
                 vertex.Fill(var.Value.After, time, channel);

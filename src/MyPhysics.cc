@@ -56,7 +56,7 @@ void	MyPhysics::ProcessEvent()
     {
         if(GetProtons()->GetNParticles()>0)
         {
-            hist_etap_proton.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetTagger());
+            hist_etap_proton.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetTagger(), *GetGeant());
             for(int i=0; i<GetTagger()->GetNTagged(); i++)
             {
                 try
@@ -75,7 +75,7 @@ void	MyPhysics::ProcessEvent()
         }
         else
         {
-            hist_etap.Fill(*GetEtaPrimes(), *GetPhotons(), *GetTagger());
+            hist_etap.Fill(*GetEtaPrimes(), *GetPhotons(), *GetTagger(), *GetGeant());
             for(int i=0; i<GetTagger()->GetNTagged(); i++)
             {
                 try

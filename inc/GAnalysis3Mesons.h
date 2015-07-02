@@ -71,7 +71,7 @@ public:
     virtual void    CalcResult();
             Bool_t  IsEtap()    const   {return isEtap;}
     virtual Int_t   Fill(Double_t x)    {return 0;}
-    virtual void    Fill(const GTreeMeson& meson, GTreeParticle& photons, const GTreeTagger& tagger);
+    virtual void    Fill(const GTreeMeson& meson, GTreeParticle& photons, const GTreeTagger& tagger, const GTreeA2Geant &geantTree);
             bool    IsSuccess() const   {return fit4.IsSuccess();}
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void    Reset(Option_t* option = "");
@@ -135,7 +135,7 @@ public:
 
     virtual void        CalcResult();
     virtual Int_t       Fill(Double_t x)    {return 0;}
-    virtual void        Fill(const GTreeMeson& meson, GTreeParticle &photons, GTreeParticle &proton, const GTreeTagger& tagger);
+    virtual void        Fill(const GTreeMeson& meson, GTreeParticle &photons, GTreeParticle &proton, const GTreeTagger& tagger, const GTreeA2Geant &geantTree);
             bool        IsSuccess() const   {return fitProton6.IsSuccess();}
     virtual void        PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void        Reset(Option_t* option = "");

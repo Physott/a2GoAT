@@ -84,9 +84,9 @@ void    GFitBeamProton::AddConstraintsTotEnergy()
     );
 }
 
-bool GFitBeamProton::Solve(const double time, const int channel)
+bool GFitBeamProton::Solve(const double time, const int channel, const GTreeA2Geant& geantTree)
 {
-    if(GFitBeam::Solve(time, channel))
+    if(GFitBeam::Solve(time, channel, geantTree))
     {
         const APLCON::Result_Variable_t& pe = result.Variables.at("PE");
         protonEnergy.Fill(pe.Value.After, time, channel);
@@ -325,9 +325,9 @@ bool GFitBeamProton::Solve(const double time, const int channel)
         }
 
 
-        bool GFitBeamProtonVertex::Solve(const double time, const int channel)
+        bool GFitBeamProtonVertex::Solve(const double time, const int channel, const GTreeA2Geant& geantTree)
         {
-            if(GFitBeamProton::Solve(time, channel))
+            if(GFitBeamProton::Solve(time, channel, geantTree))
             {
                 const APLCON::Result_Variable_t& var = result.Variables.at("Ve");
                 vertex.Fill(var.Value.After, time, channel);
