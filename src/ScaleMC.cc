@@ -54,9 +54,16 @@ void	ScaleMC::ProcessEvent()
 
     for(int i=0; i<GetTagger()->GetNTagged(); i++)
     {
-        TLorentzVector  helpCM(GetGeant()->GetTrueVector(2));
-        helpCM.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
-        AcceptanceTrue.Fill(helpCM.Theta()*TMath::RadToDeg(), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+        try
+        {
+            TLorentzVector  helpCM(GetGeant()->GetTrueVector(2));
+            helpCM.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+            AcceptanceTrue.Fill(helpCM.Theta()*TMath::RadToDeg(), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+        }
+        catch (...)
+        {
+
+        }
     }
 
 
