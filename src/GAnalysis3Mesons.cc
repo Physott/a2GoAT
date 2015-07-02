@@ -111,7 +111,7 @@ void   GAnalysis3Mesons::CalcResult()
 //    hist_fitBeam4Vertex.CalcResult();
 }
 
-void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeParticle& photons, const GTreeTagger& tagger)
+void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, GTreeParticle& photons, const GTreeTagger& tagger)
 {
     Double_t    im  = meson.Particle(0).M();
     Double_t    theta  = meson.Particle(0).Theta()*TMath::RadToDeg();
@@ -204,6 +204,10 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, const GTreeParticle& pho
                     {
                         for(int l=k+1; l<6; l++)
                             hist_fit4_SubAll.Fill((photons.Particle(k)+photons.Particle(l)).M(), tagger.GetTaggedTime(i));
+
+                        photons.AddParticle(fit4.GetFittedPhoton(k).Ek, fit4.GetFittedPhoton(k).Theta, fit4.GetFittedPhoton(k).Phi,
+                                            0.0, photons.GetTime(k), photons.GetClusterSize(k), photons.GetCentralCrystal(k), photons.GetCentralVeto(k), photons.GetDetectors(k),
+                                            photons.GetVetoEnergy(k), photons.GetMWPC0Energy(k), photons.GetMWPC1Energy(k), photons.GetTrackIndex(k));
                     }
                 }
 //                if(fit4Vertex.Solve(tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i)))
@@ -458,7 +462,7 @@ void   GAnalysis3MesonsProton::CalcResult()
 //    hist_fitBeamProton6Vertex.CalcResult();
 }
 
-void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, const GTreeParticle& photons, const GTreeParticle& proton, const GTreeTagger& tagger)
+void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, GTreeParticle& photons, GTreeParticle& proton, const GTreeTagger& tagger)
 {
     Double_t    im  = meson.Particle(0).M();
     Double_t    theta  = meson.Particle(0).Theta()*TMath::RadToDeg();
@@ -566,7 +570,14 @@ void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, const GTreeParticl
                     {
                         for(int l=k+1; l<6; l++)
                             hist_fitProton6_SubAll.Fill((photons.Particle(k)+photons.Particle(l)).M(), tagger.GetTaggedTime(i));
+
+                        photons.AddParticle(fitProton6.GetFittedPhoton(k).Ek, fitProton6.GetFittedPhoton(k).Theta, fitProton6.GetFittedPhoton(k).Phi,
+                                            0, photons.GetTime(k), photons.GetClusterSize(k), photons.GetCentralCrystal(k), photons.GetCentralVeto(k), photons.GetDetectors(k),
+                                            photons.GetVetoEnergy(k), photons.GetMWPC0Energy(k), photons.GetMWPC1Energy(k), photons.GetTrackIndex(k));
                     }
+                    proton.AddParticle(fitProton6.GetFittedProton().Ek, fitProton6.GetFittedProton().Theta, fitProton6.GetFittedProton().Phi,
+                                        MASS_PROTON, proton.GetTime(0), proton.GetClusterSize(0), proton.GetCentralCrystal(0), proton.GetCentralVeto(0), proton.GetDetectors(0),
+                                        proton.GetVetoEnergy(0), proton.GetMWPC0Energy(0), proton.GetMWPC1Energy(0), proton.GetTrackIndex(0));
                 }
 //                if(fitProton6Vertex.Solve(tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i)))
 //                    hist_fitProton6Vertex.Fill(im, mm, sub_im_0, sub_im_1, sub_im_2, tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));

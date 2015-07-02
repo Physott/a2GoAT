@@ -70,6 +70,8 @@ void	MyPhysics::ProcessEvent()
 
 				}
             }
+            if(hist_etap_proton.IsSuccess())
+                FillReadList();
         }
         else
         {
@@ -87,6 +89,8 @@ void	MyPhysics::ProcessEvent()
 
 				}
             }
+            if(hist_etap.IsSuccess())
+                FillReadList();
         }
     }
 }

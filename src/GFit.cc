@@ -41,6 +41,7 @@ GFit::GFit(const char* _Name, const Bool_t linkHistogram)   :
 
 bool GFit::Solve(const double time, const int channel)
 {
+    success = false;
     result = fitter.DoFit();
     if(result.Status == APLCON::Result_Status_t::Success)
     {
@@ -48,6 +49,7 @@ bool GFit::Solve(const double time, const int channel)
         Double_t    cl  = TMath::Prob(result.ChiSquare, GetNDOF()-result.NDoF);
         confidenceLevel.Fill(cl, time);
         if(cl<0.01) return false;
+        success = true;
         TLorentzVector etap(0,0,0,0);
         for(size_t t=0;t<aplconPhotons.size();t++)
             etap += FitParticle::Make(aplconPhotons[t], 0);

@@ -104,6 +104,8 @@ private:
     std::string                 name;
     std::vector<FitParticle>    aplconPhotons;
 
+    bool                    success;
+
     GHistBGSub              steps;
     GH1                     im;
     GHistBGSub              sub0Im;
@@ -126,6 +128,7 @@ public:
     virtual void    CalcResult();
     virtual Int_t   Fill(Double_t x)    {return 0;}
     inline  const FitParticle& GetFittedPhoton(const int i) const;
+            bool    IsSuccess() const   {return success;}
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void    Reset(Option_t* option = "");
     virtual Int_t   WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)   {return 0;}
