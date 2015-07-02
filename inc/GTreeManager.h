@@ -154,6 +154,7 @@ public:
 
     static  Int_t   CheckInput(const char* input_filename);
             Int_t   GetEventNumber()    const   {return eventParameters->GetEventNumber();}
+            TFile&  GetInputFileRef()  {return *inputFile;}
             UInt_t  GetNEntries()       const;
             Int_t   GetNReconstructed() const   {return countReconstructed;}
             UInt_t  GetNScalerEntries() const;

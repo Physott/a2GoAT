@@ -7,23 +7,18 @@
 #include <string> 
 
 #include "GTreeManager.h"
-#include "GAnalysis3Mesons.h"
+#include "GHistPhysics.h"
+
+
 
 class	MyPhysics  : public GTreeManager
 {
 private:
-    //GAnalysis3Mesons        hist_eta;
-    //GAnalysis3MesonsProton  hist_eta_proton;
-    GAnalysis3Mesons        hist_etap;
-    GAnalysis3MesonsProton  hist_etap_proton;
-
-    GH1     EPTscalers;
-    GH1     EPTscalersCor;
-    TH1D    EPTscalersT;
-    TH1D    EPTscalersCorT;
-
-    GH1             AcceptanceTrue;
-    GH1             AcceptanceProtonTrue;
+    GHistParticle    proton;
+    GHistParticle    etap;
+    GHistParticle    etaPhotons;
+    GHistParticle    pi0Photons;
+    GHistParticle    allPhotons;
 
 protected:
     virtual Bool_t  Start();

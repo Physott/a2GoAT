@@ -162,7 +162,7 @@ add_executable(pi0-example
    )
 target_link_libraries(pi0-example ${LIBS} ${ROOT_LIBRARIES})
 
-add_executable(MyPhysics
+add_executable(MyFit
    ${GOAT_BASE}
    ${GOAT_GHIST}
    inc/GKinFitterParticle.h
@@ -176,7 +176,7 @@ add_executable(MyPhysics
    inc/GHistEvent.h
    inc/GCheckProton.h
    inc/GAnalysis3Mesons.h
-   inc/MyPhysics.h
+   inc/MyFit.h
    src/GKinFitterParticle.cc
    src/GKinFitter.cc
    #src/GFitHist.cc
@@ -188,6 +188,19 @@ add_executable(MyPhysics
    src/GHistEvent.cc
    src/GCheckProton.cc
    src/GAnalysis3Mesons.cc
+   src/MyFit.cc
+   src/MyFit_main.cc
+   )
+target_link_libraries(MyFit ${ROOT_LIBRARIES} aplcon++)
+
+add_executable(MyPhysics
+   ${GOAT_BASE}
+   ${GOAT_GHIST}
+   inc/GHistEvent.h
+   inc/GHistPhysics.h
+   inc/MyPhysics.h
+   src/GHistEvent.cc
+   src/GHistPhysics.cc
    src/MyPhysics.cc
    src/MyPhysics_main.cc
    )
