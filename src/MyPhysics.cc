@@ -40,12 +40,12 @@ Bool_t	MyPhysics::Start()
 
 void	MyPhysics::ProcessEvent()
 {
-    all.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetTagger());
+    all.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetGeant(), *GetTagger());
 
     if(GetProtons()->GetNParticles()>0)
-        hits6.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetTagger());
+        hits6.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetGeant(), *GetTagger());
     else
-        hits7.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetTagger());
+        hits7.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetGeant(), *GetTagger());
 }
 
 void	MyPhysics::ProcessScalerRead()

@@ -2,6 +2,7 @@
 #include "GTreeParticle.h"
 #include "GTreeTagger.h"
 #include "GTreeMeson.h"
+#include "GTreeA2Geant.h"
 
 
 
@@ -292,6 +293,44 @@ void    GHistPhysics::FillFitted(const GTreeParticle& photons, const GTreePartic
     }
 }
 
+void    GHistPhysics::FillTrue(const GTreeA2Geant& geant, const GTreeTagger &tagger)
+{
+    try
+    {
+        TLorentzVector  ph[6];
+        TLorentzVector  lv(0.0, 0.0, 0.0, 0.0);
+        for(int i=0; i<6; i++)
+        {
+            ph[i]   = geant.GetTrueVector(i+6)*1000.0;
+            lv     += ph[i];
+        }
+        TLorentzVector  pr(geant.GetTrueVector(1)*1000.0);
+
+        for(int i=0; i<tagger.GetNTagged(); i++)
+        {
+            etap.Fill(lv, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            proton.Fill(pr, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            etaPhotons.Fill(ph[0], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            etaPhotons.Fill(ph[1], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0Photons.Fill(ph[2], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0Photons.Fill(ph[3], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0Photons.Fill(ph[4], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0Photons.Fill(ph[5], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(ph[0], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(ph[1], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(ph[2], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(ph[3], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(ph[4], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(ph[5], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+        }
+    }
+    catch(...)
+    {
+        std::cout << "no true tree!" << std::endl;
+        return;
+    }
+}
+
 void    GHistPhysics::PrepareWriteList(GHistWriteList* arr, const char* Name)
 {
     if(!arr)
@@ -348,7 +387,8 @@ void    GHistPhysics::ScalerReadCorrection(const Double_t CorrectionFactor, cons
 GHistPhysicsFitted::GHistPhysicsFitted(const char* Name, Bool_t linkHistogram)  :
     GHistPhysics(TString(Name).Append("_unfitted"), linkHistogram),
     name(Name),
-    fitted(TString(Name).Append("_fitted"), kFALSE)
+    fitted(TString(Name).Append("_fitted"), kFALSE),
+    trueValues(TString(Name).Append("_true"), kFALSE)
 {
 
 }
@@ -357,12 +397,14 @@ void    GHistPhysicsFitted::CalcResult()
 {
     GHistPhysics::CalcResult();
     fitted.CalcResult();
+    trueValues.CalcResult();
 }
 
-void    GHistPhysicsFitted::Fill(const GTreeMeson& meson, const GTreeParticle& photons, const GTreeParticle& protons, const GTreeTagger& tagger)
+void    GHistPhysicsFitted::Fill(const GTreeMeson& meson, const GTreeParticle& photons, const GTreeParticle& protons, const GTreeA2Geant& geant, const GTreeTagger& tagger)
 {
     GHistPhysics::Fill(meson, photons, protons, tagger);
     fitted.FillFitted(photons, protons, tagger);
+    trueValues.FillTrue(geant, tagger);
 }
 
 void    GHistPhysicsFitted::PrepareWriteList(GHistWriteList* arr, const char* Name)
@@ -374,16 +416,19 @@ void    GHistPhysicsFitted::PrepareWriteList(GHistWriteList* arr, const char* Na
 
     GHistPhysics::PrepareWriteList(folder, "raw");
     fitted.PrepareWriteList(folder, "fit");
+    trueValues.PrepareWriteList(folder, "true");
 }
 
 void    GHistPhysicsFitted::Reset(Option_t* option)
 {
     GHistPhysics::Reset(option);
     fitted.Reset(option);
+    trueValues.Reset(option);
 }
 
 void    GHistPhysicsFitted::ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads)
 {
     GHistPhysics::ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     fitted.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+    trueValues.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
 }

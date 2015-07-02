@@ -53,6 +53,7 @@ public:
 
 class   GTreeTagger;
 class   GTreeMeson;
+class   GTreeA2Geant;
 
 class	GHistPhysics  : public GHistLinked
 {
@@ -74,6 +75,7 @@ public:
     virtual Int_t   Fill(Double_t x)                                                                                            {return 0;}
     virtual void    Fill(const GTreeMeson &meson, const GTreeParticle& photons, const GTreeParticle &protons, const GTreeTagger &tagger);
     virtual void    FillFitted(const GTreeParticle& photons, const GTreeParticle &protons, const GTreeTagger &tagger);
+    virtual void    FillTrue(const GTreeA2Geant& geant, const GTreeTagger &tagger);
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* Name = 0);
     virtual void    Reset(Option_t* option);
     virtual void    ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads);
@@ -87,6 +89,7 @@ class	GHistPhysicsFitted  : public GHistPhysics
 private:
     TString         name;
     GHistPhysics    fitted;
+    GHistPhysics    trueValues;
 
 public:
     GHistPhysicsFitted(const char* Name, Bool_t linkHistogram = kTRUE);
@@ -94,7 +97,7 @@ public:
 
     virtual void    CalcResult();
     virtual Int_t   Fill(Double_t x)                                                                                            {return 0;}
-    virtual void    Fill(const GTreeMeson &meson, const GTreeParticle& photons, const GTreeParticle &protons, const GTreeTagger &tagger);
+    virtual void    Fill(const GTreeMeson &meson, const GTreeParticle& photons, const GTreeParticle &protons, const GTreeA2Geant &geant, const GTreeTagger &tagger);
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* Name = 0);
     virtual void    Reset(Option_t* option);
     virtual void    ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads);
