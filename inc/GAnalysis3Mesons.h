@@ -61,6 +61,8 @@ private:
     Double_t            cutSubIM[6];
     Double_t            cutMM[2];
 
+    bool                success;
+
 protected:
 
 public:
@@ -72,7 +74,7 @@ public:
             Bool_t  IsEtap()    const   {return isEtap;}
     virtual Int_t   Fill(Double_t x)    {return 0;}
     virtual void    Fill(const GTreeMeson& meson, GTreeParticle& photons, const GTreeTagger& tagger, const GTreeA2Geant &geantTree);
-            bool    IsSuccess() const   {return fit4.IsSuccess();}
+            bool    IsSuccess() const   {return success;}
     virtual void    PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void    Reset(Option_t* option = "");
     virtual Int_t   WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)   {return 0;}
@@ -127,6 +129,8 @@ private:
     Double_t            cutSubIM[6];
     Double_t            cutMM[2];
 
+    bool                success;
+
 protected:
 
 public:
@@ -136,7 +140,7 @@ public:
     virtual void        CalcResult();
     virtual Int_t       Fill(Double_t x)    {return 0;}
     virtual void        Fill(const GTreeMeson& meson, GTreeParticle &photons, GTreeParticle &proton, const GTreeTagger& tagger, const GTreeA2Geant &geantTree);
-            bool        IsSuccess() const   {return fitProton6.IsSuccess();}
+            bool        IsSuccess() const   {return success;}
     virtual void        PrepareWriteList(GHistWriteList* arr, const char* name = 0);
     virtual void        Reset(Option_t* option = "");
     virtual Int_t       WriteWithoutCalcResult(const char* name = 0, Int_t option = 0, Int_t bufsize = 0)   {return 0;}

@@ -113,6 +113,8 @@ void   GAnalysis3Mesons::CalcResult()
 
 void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, GTreeParticle& photons, const GTreeTagger& tagger, const GTreeA2Geant& geantTree)
 {
+    success = false;
+
     Double_t    im  = meson.Particle(0).M();
     Double_t    theta  = meson.Particle(0).Theta()*TMath::RadToDeg();
     Double_t    phi  = meson.Particle(0).Phi()*TMath::RadToDeg();
@@ -198,6 +200,7 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, GTreeParticle& photons, 
 //                    hist_fit3Vertex.Fill(im, mm, sub_im_0, sub_im_1, sub_im_2, tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
                 if(fit4.Solve(tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i), geantTree))
                 {
+                    success = true;
                     hist_count.Fill(3);
                     hist_fit4.Fill(im, mm, theta, phi, helpCM.Theta()*TMath::RadToDeg(), sub_im_0, sub_im_1, sub_im_2, tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
                     for(int k=0; k<6; k++)
@@ -464,6 +467,8 @@ void   GAnalysis3MesonsProton::CalcResult()
 
 void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, GTreeParticle& photons, GTreeParticle& proton, const GTreeTagger& tagger, const GTreeA2Geant& geantTree)
 {
+    success = false;
+
     Double_t    im  = meson.Particle(0).M();
     Double_t    theta  = meson.Particle(0).Theta()*TMath::RadToDeg();
     Double_t    phi  = meson.Particle(0).Phi()*TMath::RadToDeg();
@@ -564,6 +569,7 @@ void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, GTreeParticle& pho
 
                 if(fitProton6.Solve(tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i), geantTree))
                 {
+                    success = true;
                     hist_count.Fill(3);
                     hist_fitProton6.Fill(im, mm, theta, phi, helpCM.Theta()*TMath::RadToDeg(), proton.Particle(0).E(), protonTheta, protonPhi, helpProtonCM.Theta()*TMath::RadToDeg(), sub_im_0, sub_im_1, sub_im_2, tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
                     for(int k=0; k<6; k++)
