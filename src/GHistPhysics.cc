@@ -288,7 +288,7 @@ void    GHistPhysics::FillFitted(const GTreeParticle& photons, const GTreePartic
     }
     catch(...)
     {
-        std::cout << "no true tree!" << std::endl;
+        //std::cout << "no true tree!" << std::endl;
         return;
     }
 }
@@ -326,7 +326,7 @@ void    GHistPhysics::FillTrue(const GTreeA2Geant& geant, const GTreeTagger &tag
     }
     catch(...)
     {
-        std::cout << "no true tree!" << std::endl;
+        //std::cout << "no true tree!" << std::endl;
         return;
     }
 }
