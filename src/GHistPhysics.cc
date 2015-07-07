@@ -214,9 +214,11 @@ GHistPhysics::GHistPhysics(const char* Name, Bool_t linkHistogram) :
     name(Name),
     proton(TString(Name).Append("_proton"), kFALSE),
     etap(TString(Name).Append("_etap"), kFALSE),
-    etaPhotons(TString(Name).Append("_etaPhotons"), kFALSE),
-    pi0Photons(TString(Name).Append("_pi0Photons"), kFALSE),
-    allPhotons(TString(Name).Append("_allPhotons"), kFALSE)
+    eta(TString(Name).Append("_eta"), kFALSE),
+    pi0(TString(Name).Append("_pi0"), kFALSE)
+    //etaPhotons(TString(Name).Append("_etaPhotons"), kFALSE),
+    //pi0Photons(TString(Name).Append("_pi0Photons"), kFALSE),
+    //allPhotons(TString(Name).Append("_allPhotons"), kFALSE)
 {
 }
 
@@ -224,9 +226,11 @@ void    GHistPhysics::CalcResult()
 {
     proton.CalcResult();
     etap.CalcResult();
-    etaPhotons.CalcResult();
-    pi0Photons.CalcResult();
-    allPhotons.CalcResult();
+    eta.CalcResult();
+    pi0.CalcResult();
+    //etaPhotons.CalcResult();
+    //pi0Photons.CalcResult();
+    //allPhotons.CalcResult();
 }
 
 void    GHistPhysics::Fill(const GTreeMeson& meson, const GTreeParticle& photons, const GTreeParticle& protons, const GTreeTagger& tagger)
@@ -238,9 +242,12 @@ void    GHistPhysics::Fill(const GTreeMeson& meson, const GTreeParticle& photons
             etap.Fill(meson, 0, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             if(protons.GetNParticles()>0)
                 proton.Fill(protons, 0, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
-            etaPhotons.Fill(photons, 0, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
-            etaPhotons.Fill(photons, 1, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
-            pi0Photons.Fill(photons, 2, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            //etaPhotons.Fill(photons, 0, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            //etaPhotons.Fill(photons, 1, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            eta.Fill(photons.Particle(0)+photons.Particle(1), tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0.Fill(photons.Particle(2)+photons.Particle(3), tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0.Fill(photons.Particle(4)+photons.Particle(5), tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            /*pi0Photons.Fill(photons, 2, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             pi0Photons.Fill(photons, 3, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             pi0Photons.Fill(photons, 4, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             pi0Photons.Fill(photons, 5, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
@@ -249,7 +256,7 @@ void    GHistPhysics::Fill(const GTreeMeson& meson, const GTreeParticle& photons
             allPhotons.Fill(photons, 2, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             allPhotons.Fill(photons, 3, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             allPhotons.Fill(photons, 4, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
-            allPhotons.Fill(photons, 5, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 5, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));*/
         }
     }
     catch(...)
@@ -272,9 +279,12 @@ void    GHistPhysics::FillFitted(const GTreeParticle& photons, const GTreePartic
             etap.Fill(lv, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             if(protons.GetNParticles()>0)
                 proton.Fill(protons, 1, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
-            etaPhotons.Fill(photons, 6, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
-            etaPhotons.Fill(photons, 7, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
-            pi0Photons.Fill(photons, 8, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            //etaPhotons.Fill(photons, 6, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            //etaPhotons.Fill(photons, 7, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            eta.Fill(photons.Particle(6)+photons.Particle(7), tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0.Fill(photons.Particle(8)+photons.Particle(9), tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0.Fill(photons.Particle(10)+photons.Particle(11), tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            /*pi0Photons.Fill(photons, 8, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             pi0Photons.Fill(photons, 9, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             pi0Photons.Fill(photons, 10, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             pi0Photons.Fill(photons, 11, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
@@ -283,7 +293,7 @@ void    GHistPhysics::FillFitted(const GTreeParticle& photons, const GTreePartic
             allPhotons.Fill(photons, 8, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             allPhotons.Fill(photons, 9, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             allPhotons.Fill(photons, 10, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
-            allPhotons.Fill(photons, 11, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(photons, 11, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));*/
         }
     }
     catch(...)
@@ -310,9 +320,12 @@ void    GHistPhysics::FillTrue(const GTreeA2Geant& geant, const GTreeTagger &tag
         {
             etap.Fill(lv, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             proton.Fill(pr, tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
-            etaPhotons.Fill(ph[0], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
-            etaPhotons.Fill(ph[1], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
-            pi0Photons.Fill(ph[2], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            //etaPhotons.Fill(ph[0], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            //etaPhotons.Fill(ph[1], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            eta.Fill(ph[0]+ph[1], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0.Fill(ph[2]+ph[3], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            pi0.Fill(ph[4]+ph[5], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            /*pi0Photons.Fill(ph[2], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             pi0Photons.Fill(ph[3], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             pi0Photons.Fill(ph[4], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             pi0Photons.Fill(ph[5], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
@@ -321,7 +334,7 @@ void    GHistPhysics::FillTrue(const GTreeA2Geant& geant, const GTreeTagger &tag
             allPhotons.Fill(ph[2], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             allPhotons.Fill(ph[3], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
             allPhotons.Fill(ph[4], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
-            allPhotons.Fill(ph[5], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));
+            allPhotons.Fill(ph[5], tagger.GetTaggedEnergy(i), tagger.GetTaggedTime(i), tagger.GetTaggedChannel(i));*/
         }
     }
     catch(...)
@@ -343,27 +356,33 @@ void    GHistPhysics::PrepareWriteList(GHistWriteList* arr, const char* Name)
 
     proton.PrepareWriteList(folder, "proton");
     etap.PrepareWriteList(folder, "etap");
-    etaPhotons.PrepareWriteList(folder, "etaPhotons");
-    pi0Photons.PrepareWriteList(folder, "pi0Photons");
-    allPhotons.PrepareWriteList(folder, "allPhotons");
+    eta.PrepareWriteList(folder, "eta");
+    pi0.PrepareWriteList(folder, "pi0");
+    //etaPhotons.PrepareWriteList(folder, "etaPhotons");
+    //pi0Photons.PrepareWriteList(folder, "pi0Photons");
+    //allPhotons.PrepareWriteList(folder, "allPhotons");
 }
 
 void    GHistPhysics::Reset(Option_t* option)
 {
     proton.Reset(option);
     etap.Reset(option);
-    etaPhotons.Reset(option);
-    pi0Photons.Reset(option);
-    allPhotons.Reset(option);
+    eta.Reset(option);
+    pi0.Reset(option);
+//    etaPhotons.Reset(option);
+//    pi0Photons.Reset(option);
+//    allPhotons.Reset(option);
 }
 
 void    GHistPhysics::ScalerReadCorrection(const Double_t CorrectionFactor, const Bool_t CreateHistogramsForSingleScalerReads)
 {
     proton.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
     etap.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
-    etaPhotons.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
-    pi0Photons.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
-    allPhotons.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+    eta.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+    pi0.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+//    etaPhotons.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+//    pi0Photons.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
+//    allPhotons.ScalerReadCorrection(CorrectionFactor, CreateHistogramsForSingleScalerReads);
 }
 
 

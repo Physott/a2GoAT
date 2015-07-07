@@ -61,9 +61,11 @@ private:
     TString         name;
     GHistParticle   proton;
     GHistParticle   etap;
-    GHistParticle   etaPhotons;
-    GHistParticle   pi0Photons;
-    GHistParticle   allPhotons;
+    GHistParticle   eta;
+    GHistParticle   pi0;
+    //GHistParticle   etaPhotons;
+    //GHistParticle   pi0Photons;
+    //GHistParticle   allPhotons;
 
 protected:
 

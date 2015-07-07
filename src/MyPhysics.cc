@@ -3,6 +3,7 @@
 
 
 MyPhysics::MyPhysics()  :
+    protonThetaVsKinEnergy("protonThetaVsKinEnergy", "protonThetaVsKinEnergy", 700, 0, 700, 180, 0, 180),
     all("all"),
     hits6("hits6"),
     hits7("hits7")
@@ -43,7 +44,13 @@ void	MyPhysics::ProcessEvent()
     all.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetGeant(), *GetTagger());
 
     if(GetProtons()->GetNParticles()>0)
+    {
         hits7.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetGeant(), *GetTagger());
+        for(int i=0; i<GetTagger()->GetNTagged(); i++)
+        {
+            protonThetaVsKinEnergy.Fill(GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0));
+        }
+    }
     else
         hits6.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetGeant(), *GetTagger());
 }
