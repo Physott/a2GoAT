@@ -137,6 +137,7 @@ void    GHistBGSub::CalcResult()
         ((GHistScaCor*)rand.At(0))->CalcResult();
         result->Add((GHistScaCor*)rand.At(0), -backgroundSubstractionFactor);
     }
+    result->CorrectZeroErrors();
 }
 
 void    GHistBGSub::CreateRandBin()

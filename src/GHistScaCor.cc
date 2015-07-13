@@ -12,13 +12,19 @@ void    GHistScaCor::CorrectZeroErrors(TH1& hist)
         {
             for(int z=0; z<hist.GetNbinsZ(); z++)
             {
-                if(hist.GetBinError(x, y, z)<=0)
-                    hist.SetBinError(x, y, z, 1);
+                if(hist.GetBinContent(x, y, z)<0)
+                    hist.SetBinError(x, y, z, hist.GetBinError(x, y, z) + 0.666666);
             }
         }
     }
 }
 
+void    GHistScaCor::CorrectZeroErrors()
+{
+    if(buffer)                  CorrectZeroErrors(*buffer);
+    if(accumulated)             CorrectZeroErrors(*accumulated);
+    if(accumulatedCorrected)    CorrectZeroErrors(*accumulatedCorrected);
+}
 
 
 GHistScaCor::GHistScaCor(const Bool_t linkHistogram) :
@@ -154,9 +160,9 @@ Bool_t	GHistScaCor::Add(const GHistScaCor *h, Double_t c)
 
 void 	GHistScaCor::CalcResult()
 {
-    if(buffer)                  CorrectZeroErrors(*buffer);
-    if(accumulated)             CorrectZeroErrors(*accumulated);
-    if(accumulatedCorrected)    CorrectZeroErrors(*accumulatedCorrected);
+    //if(buffer)                  CorrectZeroErrors(*buffer);
+    //if(accumulated)             CorrectZeroErrors(*accumulated);
+    //if(accumulatedCorrected)    CorrectZeroErrors(*accumulatedCorrected);
 }
 
 void    GHistScaCor::CreateSingleScalerRead()
