@@ -162,6 +162,19 @@ add_executable(pi0-example
    )
 target_link_libraries(pi0-example ${LIBS} ${ROOT_LIBRARIES})
 
+add_executable(MyCutSubIM
+   ${GOAT_BASE}
+   ${GOAT_GHIST}
+   inc/GHistEvent.h
+   inc/GCheckProton.h
+   inc/MyCutSubIM.h
+   src/GHistEvent.cc
+   src/GCheckProton.cc
+   src/MyCutSubIM.cc
+   src/MyCutSubIM_main.cc
+   )
+target_link_libraries(MyCutSubIM ${ROOT_LIBRARIES})
+
 add_executable(MyFit
    ${GOAT_BASE}
    ${GOAT_GHIST}
