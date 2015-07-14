@@ -126,8 +126,6 @@ void	MyCutSubIM::ProcessEvent()
                 mm  = (GetTagger()->GetVectorProtonTarget(i)-GetEtaPrimes()->Particle(0)).M();
                 TLorentzVector  helpMeson(GetEtaPrimes()->Particle(0));
                 helpMeson.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
-                TLorentzVector  helpProton(GetProtons()->Particle(0));
-                helpProton.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
 
                 all.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
 
