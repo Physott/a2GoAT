@@ -21,45 +21,9 @@ class   GAnalysis3Mesons  : public GHistLinked
 private:
     Bool_t              isEtap;
 
-    GHistBGSub          hist_count;
-
-    GHistEvent3Mesons   hist_raw;
-    GHistBGSub          hist_raw_SubAll;
-    GHistEvent3Mesons   hist_SubImCut;
-    GHistBGSub          hist_SubImCut_SubAll;
-
-    GHistEvent3Mesons   hist_MMCut;
-    GHistBGSub          hist_SubAll;
-
-//    GFit                fit1;
-//    GHistEvent3Mesons   hist_fit1;
-//    GFitVertex          fit1Vertex;
-//    GHistEvent3Mesons   hist_fit1Vertex;
-//    GFit                fit3;
-//    GHistEvent3Mesons   hist_fit3;
-//    GFitVertex          fit3Vertex;
-//    GHistEvent3Mesons   hist_fit3Vertex;
     GFit                fit4;
     GHistEvent3Mesons   hist_fit4;
     GHistBGSub          hist_fit4_SubAll;
-//    GFitVertex          fit4Vertex;
-//    GHistEvent3Mesons   hist_fit4Vertex;
-
-//    GFitBeam            fitBeam1;
-//    GHistEvent3Mesons   hist_fitBeam1;
-//    GFitBeamVertex      fitBeam1Vertex;
-//    GHistEvent3Mesons   hist_fitBeam1Vertex;
-//    GFitBeam            fitBeam3;
-//    GHistEvent3Mesons   hist_fitBeam3;
-//    GFitBeamVertex      fitBeam3Vertex;
-//    GHistEvent3Mesons   hist_fitBeam3Vertex;
-//    GFitBeam            fitBeam4;
-//    GHistEvent3Mesons   hist_fitBeam4;
-//    GFitBeamVertex      fitBeam4Vertex;
-//    GHistEvent3Mesons   hist_fitBeam4Vertex;
-
-    Double_t            cutSubIM[6];
-    Double_t            cutMM[2];
 
     bool                success;
 
@@ -89,45 +53,9 @@ class   GAnalysis3MesonsProton  : public GHistLinked
 private:
     Bool_t              isEtap;
 
-    GHistBGSub          hist_count;
-
-    GCheckProton        checkProton;
-
-    GHistEvent3MesonsProton   hist_raw;
-    GHistBGSub2         hist_raw_TOF;
-    GHistBGSub          hist_raw_SubAll;
-
-    GHistEvent3MesonsProton   hist_SubImCut;
-    GHistBGSub2         hist_SubImCut_TOF;
-    GHistBGSub          hist_SubImCut_SubAll;
-
-    GHistEvent3MesonsProton   hist_MMCut;
-    GHistBGSub2         hist_TOF;
-    GHistBGSub          hist_SubAll;
-
-//    GFit                fit4;
-//    GHistEvent3Mesons   hist_fit4;
-//    GFitVertex          fit4Vertex;
-//    GHistEvent3Mesons   hist_fit4Vertex;
-
-//    GFitBeam            fitBeam4;
-//    GHistEvent3Mesons   hist_fitBeam4;
-//    GFitBeamVertex      fitBeam4Vertex;
-//    GHistEvent3Mesons   hist_fitBeam4Vertex;
-
     GFitProton          fitProton6;
     GHistEvent3MesonsProton   hist_fitProton6;
     GHistBGSub          hist_fitProton6_SubAll;
-//    GFitProtonVertex    fitProton6Vertex;
-//    GHistEvent3Mesons   hist_fitProton6Vertex;
-
-//    GFitBeamProton          fitBeamProton6;
-//    GHistEvent3Mesons       hist_fitBeamProton6;
-//    GFitBeamProtonVertex    fitBeamProton6Vertex;
-//    GHistEvent3Mesons       hist_fitBeamProton6Vertex;
-
-    Double_t            cutSubIM[6];
-    Double_t            cutMM[2];
 
     bool                success;
 
