@@ -15,7 +15,7 @@ class	MyPhysics  : public GTreeManager
 {
 private:
     GHistBGSub2         protonThetaVsKinEnergy;
-    GHistPhysicsFitted  all;
+    //GHistPhysicsFitted  all;
     GHistPhysicsFitted  hits6;
     GHistPhysicsFitted  hits7;
 
