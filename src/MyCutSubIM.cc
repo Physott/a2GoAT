@@ -68,106 +68,154 @@ void	MyCutSubIM::ProcessEvent()
         sub_im[1]   = (GetPhotons()->Particle(2) + GetPhotons()->Particle(3)).M();
         sub_im[2]   = (GetPhotons()->Particle(4) + GetPhotons()->Particle(5)).M();
 
-        if(GetProtons()->GetNParticles()>0)
+        bool    found   = false;
+
+        switch(type)
         {
-            for(int i=0; i<GetTagger()->GetNTagged(); i++)
+        case isEta:
             {
-                mm  = (GetTagger()->GetVectorProtonTarget(i)-GetEtaPrimes()->Particle(0)).M();
-                TLorentzVector  helpMeson(GetEtaPrimes()->Particle(0));
-                helpMeson.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
-                TLorentzVector  helpProton(GetProtons()->Particle(0));
-                helpProton.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
-
-                all.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-
-                switch(type)
+                if((sub_im[0]>cutSubIM[0] && sub_im[0]<cutSubIM[1]))
                 {
-                case isEta:
+                    found   = true;
+                    for(int i=0; i<GetTagger()->GetNTagged(); i++)
                     {
-                        if((sub_im[0]>cutSubIM[0] && sub_im[0]<cutSubIM[1]))
+                        mm  = (GetTagger()->GetVectorProtonTarget(i)-GetEtaPrimes()->Particle(0)).M();
+                        TLorentzVector  helpMeson(GetEtaPrimes()->Particle(0));
+                        helpMeson.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+
+                        if(GetProtons()->GetNParticles()>0)
                         {
+                            TLorentzVector  helpProton(GetProtons()->Particle(0));
+                            helpProton.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+                            all.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
                             pass.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-                            FillReadList();
                         }
                         else
-                            fail.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-                    }
-                    break;
-                case isPi0:
-                    {
-                        if((sub_im[1]>cutSubIM[0] && sub_im[1]<cutSubIM[1]) &&
-                           (sub_im[2]>cutSubIM[0] && sub_im[2]<cutSubIM[1]))
                         {
-                            pass.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-                            FillReadList();
+                            all.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                            pass.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                        }
+                    }
+                }
+                else
+                {
+                    for(int i=0; i<GetTagger()->GetNTagged(); i++)
+                    {
+                        mm  = (GetTagger()->GetVectorProtonTarget(i)-GetEtaPrimes()->Particle(0)).M();
+                        TLorentzVector  helpMeson(GetEtaPrimes()->Particle(0));
+                        helpMeson.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+
+                        if(GetProtons()->GetNParticles()>0)
+                        {
+                            TLorentzVector  helpProton(GetProtons()->Particle(0));
+                            helpProton.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+                            all.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                            fail.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
                         }
                         else
-                            fail.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-                    }
-                    break;
-                case isMM:
-                    {
-                        if(mm>cutSubIM[0] && mm<cutSubIM[1])
                         {
-                            pass.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-                            FillReadList();
+                            all.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                            fail.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
                         }
-                        else
-                            fail.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
                     }
-                    break;
                 }
             }
-        }
-        else
-        {
-            for(int i=0; i<GetTagger()->GetNTagged(); i++)
+            break;
+        case isPi0:
             {
-                mm  = (GetTagger()->GetVectorProtonTarget(i)-GetEtaPrimes()->Particle(0)).M();
-                TLorentzVector  helpMeson(GetEtaPrimes()->Particle(0));
-                helpMeson.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
-
-                all.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-
-                switch(type)
+                if((sub_im[1]>cutSubIM[0] && sub_im[1]<cutSubIM[1]) &&
+                (sub_im[2]>cutSubIM[0] && sub_im[2]<cutSubIM[1]))
                 {
-                case isEta:
+                    found   = true;
+                    for(int i=0; i<GetTagger()->GetNTagged(); i++)
                     {
-                        if((sub_im[0]>cutSubIM[0] && sub_im[0]<cutSubIM[1]))
+                        mm  = (GetTagger()->GetVectorProtonTarget(i)-GetEtaPrimes()->Particle(0)).M();
+                        TLorentzVector  helpMeson(GetEtaPrimes()->Particle(0));
+                        helpMeson.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+
+                        if(GetProtons()->GetNParticles()>0)
                         {
-                            pass.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-                            FillReadList();
+                            TLorentzVector  helpProton(GetProtons()->Particle(0));
+                            helpProton.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+                            all.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                            pass.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
                         }
                         else
-                            fail.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-                    }
-                    break;
-                case isPi0:
-                    {
-                        if((sub_im[1]>cutSubIM[0] && sub_im[1]<cutSubIM[1]) &&
-                           (sub_im[2]>cutSubIM[0] && sub_im[2]<cutSubIM[1]))
                         {
+                            all.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
                             pass.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-                            FillReadList();
+                        }
+                    }
+                }
+                else
+                {
+                    for(int i=0; i<GetTagger()->GetNTagged(); i++)
+                    {
+                        mm  = (GetTagger()->GetVectorProtonTarget(i)-GetEtaPrimes()->Particle(0)).M();
+                        TLorentzVector  helpMeson(GetEtaPrimes()->Particle(0));
+                        helpMeson.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+
+                        if(GetProtons()->GetNParticles()>0)
+                        {
+                            TLorentzVector  helpProton(GetProtons()->Particle(0));
+                            helpProton.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+                            all.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                            fail.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
                         }
                         else
-                            fail.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-                    }
-                    break;
-                case isMM:
-                    {
-                        if(mm>cutSubIM[0] && mm<cutSubIM[1])
                         {
-                            pass.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
-                            FillReadList();
-                        }
-                        else
+                            all.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
                             fail.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                        }
                     }
-                    break;
                 }
             }
+            break;
+        case isMM:
+            {
+                for(int i=0; i<GetTagger()->GetNTagged(); i++)
+                {
+                    mm  = (GetTagger()->GetVectorProtonTarget(i)-GetEtaPrimes()->Particle(0)).M();
+                    TLorentzVector  helpMeson(GetEtaPrimes()->Particle(0));
+                    helpMeson.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+                    if(mm>cutSubIM[0] && mm<cutSubIM[1])
+                    {
+                        found   = true;
+                        if(GetProtons()->GetNParticles()>0)
+                        {
+                            TLorentzVector  helpProton(GetProtons()->Particle(0));
+                            helpProton.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+                            all.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                            pass.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                        }
+                        else
+                        {
+                            all.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                            pass.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                        }
+                    }
+                    else
+                    {
+                        if(GetProtons()->GetNParticles()>0)
+                        {
+                            TLorentzVector  helpProton(GetProtons()->Particle(0));
+                            helpProton.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+                            all.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                            fail.hist7->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0), GetProtons()->GetPhi(0), helpProton.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                        }
+                        else
+                        {
+                            all.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                            fail.hist6->Fill(im, mm, theta, phi, helpMeson.Theta()*TMath::RadToDeg(), sub_im[0], sub_im[1], sub_im[2], GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                        }
+                    }
+                }
+            }
+            break;
         }
+        if(found)
+            FillReadList();
+
     }
 }
 
