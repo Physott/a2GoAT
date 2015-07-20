@@ -61,6 +61,15 @@ void    GAnalysis3Mesons::Fill(const GTreeMeson& meson, GTreeParticle& photons, 
                                     photons.GetVetoEnergy(k), photons.GetMWPC0Energy(k), photons.GetMWPC1Energy(k), photons.GetTrackIndex(k));
             }
         }
+        else
+        {
+            for(int k=0; k<6; k++)
+            {
+                photons.AddParticle(0.0, 0.0, 0.0,
+                                    0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                    0.0, 0.0, 0.0, 0.0);
+            }
+        }
     }
 }
 
@@ -159,6 +168,18 @@ void    GAnalysis3MesonsProton::Fill(const GTreeMeson& meson, GTreeParticle& pho
             proton.AddParticle(fitProton6.GetFittedProton().Ek, fitProton6.GetFittedProton().Theta * TMath::RadToDeg(), fitProton6.GetFittedProton().Phi * TMath::RadToDeg(),
                                MASS_PROTON, proton.GetTime(0), proton.GetClusterSize(0), proton.GetCentralCrystal(0), proton.GetCentralVeto(0), proton.GetDetectors(0),
                                proton.GetVetoEnergy(0), proton.GetMWPC0Energy(0), proton.GetMWPC1Energy(0), proton.GetTrackIndex(0));
+        }
+        else
+        {
+            for(int k=0; k<6; k++)
+            {
+                photons.AddParticle(0.0, 0.0, 0.0,
+                                    0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                    0.0, 0.0, 0.0, 0.0);
+            }
+            proton.AddParticle(0.0, 0.0, 0.0,
+                               0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                               0.0, 0.0, 0.0, 0.0);
         }
     }
 }
