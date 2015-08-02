@@ -217,7 +217,20 @@ add_executable(MyPhysics
    src/MyPhysics.cc
    src/MyPhysics_main.cc
    )
-target_link_libraries(MyPhysics ${ROOT_LIBRARIES} aplcon++)
+target_link_libraries(MyPhysics ${ROOT_LIBRARIES})
+
+add_executable(MyResult
+   ${GOAT_BASE}
+   ${GOAT_GHIST}
+   inc/MRFitTaggerThetaBins.h
+   inc/MRFitTaggerBins.h
+   inc/MyResult.h
+   src/MRFitTaggerThetaBins.cc
+   src/MRFitTaggerBins.cc
+   src/MyResult.cc
+   src/MyResult_main.cc
+   )
+target_link_libraries(MyResult ${ROOT_LIBRARIES})
 
 # install some scripts to the bin directory
 # by creating symlinks

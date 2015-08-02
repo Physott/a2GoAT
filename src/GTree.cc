@@ -125,6 +125,9 @@ Bool_t  GTree::OpenForOutput()
 void    GTree::Close()
 {
     status = FLAG_CLOSED;
+
+    std::cout << GetName() << std::endl;
+
     if(manager->writeList.FindObject(this))
     {
         manager->writeList.Remove(this);

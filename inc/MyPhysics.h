@@ -14,10 +14,11 @@
 class	MyPhysics  : public GTreeManager
 {
 private:
-    GHistBGSub2         protonThetaVsKinEnergy;
+    GHistBGSub          checkFitData;
+    GH2                 IM;
     //GHistPhysicsFitted  all;
-    GHistPhysicsFitted  hits6;
-    GHistPhysicsFitted  hits7;
+    //GHistPhysicsFitted  hits6;
+    //GHistPhysicsFitted  hits7;
 
 protected:
     virtual Bool_t  Start();

@@ -3,10 +3,11 @@
 
 
 MyPhysics::MyPhysics()  :
-    protonThetaVsKinEnergy("protonThetaVsKinEnergy", "protonThetaVsKinEnergy", 700, 0, 700, 180, 0, 180),
+    checkFitData("checkFitData", "checkFitData", 40, -20, 20),
+    IM("IM", "IM", 500, 700, 1200, 36, 0, 180, 48)
     //all("all"),
-    hits6("hits6"),
-    hits7("hits7")
+    //hits6("hits6"),
+    //hits7("hits7")
 { 
         GHistBGSub::InitCuts(-20, 20, -535, -35);
         GHistBGSub::AddRandCut(35, 535);
@@ -43,16 +44,33 @@ void	MyPhysics::ProcessEvent()
 {
     //all.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetGeant(), *GetTagger());
 
+    checkFitData.Fill((GetPhotons()->GetNParticles()/6) - GetTagger()->GetNTagged());
+
     if(GetProtons()->GetNParticles()>0)
     {
-        hits7.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetGeant(), *GetTagger());
+        //hits7.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetGeant(), *GetTagger());
         for(int i=0; i<GetTagger()->GetNTagged(); i++)
         {
-            protonThetaVsKinEnergy.Fill(GetProtons()->GetClusterEnergy(0), GetProtons()->GetTheta(0));
+            //std::cout << GetPhotons()->GetClusterEnergy((i+1)*6) << std::endl;
+            if(GetPhotons()->GetClusterEnergy((i+1)*6) > 0)
+            {
+                TLorentzVector  res = GetPhotons()->Particle((i+1)*6);
+                res += GetPhotons()->Particle(((i+1)*6)+1);
+                res += GetPhotons()->Particle(((i+1)*6)+2);
+                res += GetPhotons()->Particle(((i+1)*6)+3);
+                res += GetPhotons()->Particle(((i+1)*6)+4);
+                res += GetPhotons()->Particle(((i+1)*6)+5);
+
+                TLorentzVector  helpCM(res);
+                helpCM.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
+
+                IM.Fill(res.M(), helpCM.Theta() * TMath::RadToDeg(), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+            }
         }
+        //std::cout << std::endl;
     }
-    else
-        hits6.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetGeant(), *GetTagger());
+    //else
+        //hits6.Fill(*GetEtaPrimes(), *GetPhotons(), *GetProtons(), *GetGeant(), *GetTagger());
 }
 
 void	MyPhysics::ProcessScalerRead()

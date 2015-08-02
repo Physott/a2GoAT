@@ -31,7 +31,6 @@
 class  GTreeManager : public GHistManager, public GConfigFile
 {
 private:
-    TFile*      inputFile;
     TObjArray   treeList;
     TObjArray   treeCorreleatedToScalerReadList;
     TObjArray   treeSingleReadList;
@@ -74,6 +73,7 @@ private:
     GTreeA2Geant*       geant;
 
 protected:
+    TFile*          inputFile;
     TFile*          outputFile;
 
     //protected tree variables Getters
