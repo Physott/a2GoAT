@@ -14,12 +14,12 @@
 class	MRFitTaggerBins
 {
 private:
-    static  double          TaggedEnergy[47];
     TString                 name;
     TFile*                  out;
     int                     color;
     TCanvas*                can;
     int                     nBins;
+    int                     nThetaBins;
     TH1*                    bins[47];
     MRFitTaggerThetaBins*   thetaBins[47];
     TH1*                    sum;
@@ -32,6 +32,8 @@ public:
     MRFitTaggerBins(const char* _Name, TFile *output, const int _Color);
     ~MRFitTaggerBins();
 
+    static  double          TaggedEnergy[47];
+
     void            Add(MRFitTaggerBins& origin);
     TCanvas*        GetCanvas() {return can;}
     FitValuesGauss* GetFitValues()  {return fitValuesBins;}
@@ -41,6 +43,7 @@ public:
     FitValuesGauss& GetFitValuesHelp(const int i)  {return fitValuesBinsHelp[i];}
     FitValuesGauss& GetFitValuesSumHelp()  {return fitValuesSumHelp;}
     FitValuesGauss* GetThetaFitValues(const int i)  {return thetaBins[i]->GetFitValues();}
+    int             GetNBins();
     TH1D*           GetResult();
     TH2D*           GetResult2D();
     void            Draw(TCanvas* _Canvas = 0);

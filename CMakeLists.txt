@@ -224,9 +224,11 @@ add_executable(MyResult
    ${GOAT_GHIST}
    inc/MRFitTaggerThetaBins.h
    inc/MRFitTaggerBins.h
+   inc/MRRecEff.h
    inc/MyResult.h
    src/MRFitTaggerThetaBins.cc
    src/MRFitTaggerBins.cc
+   src/MRRecEff.cc
    src/MyResult.cc
    src/MyResult_main.cc
    )

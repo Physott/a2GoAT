@@ -4,7 +4,7 @@
 
 MyPhysics::MyPhysics()  :
     checkFitData("checkFitData", "checkFitData", 40, -20, 20),
-    IM("IM", "IM", 500, 700, 1200, 36, 0, 180, 48)
+    IM("IM", "IM", 500, 700, 1200, 40, -1, 1, 48)
     //all("all"),
     //hits6("hits6"),
     //hits7("hits7")
@@ -64,7 +64,7 @@ void	MyPhysics::ProcessEvent()
                 TLorentzVector  helpCM(res);
                 helpCM.Boost(-GetTagger()->GetVectorProtonTarget(i).BoostVector());
 
-                IM.Fill(res.M(), helpCM.Theta() * TMath::RadToDeg(), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
+                IM.Fill(res.M(), TMath::Cos(helpCM.Theta()), GetTagger()->GetTaggedTime(i), GetTagger()->GetTaggedChannel(i));
             }
         }
         //std::cout << std::endl;

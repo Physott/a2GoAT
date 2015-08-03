@@ -29,9 +29,10 @@ private:
     TFile*          out;
     int             color;
     TCanvas*        can;
-    TH1*            thetaBins[9];
-    FitValuesGauss  fitValuesBins[9];
-    FitValuesGauss  fitValuesBinsHelp[9];
+
+    TH1*            thetaBins[40];
+    FitValuesGauss  fitValuesBins[40];
+    FitValuesGauss  fitValuesBinsHelp[40];
 
 public:
     MRFitTaggerThetaBins(const char* _Name, TFile* output, const int _Color);

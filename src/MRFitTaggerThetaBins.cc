@@ -9,7 +9,7 @@ MRFitTaggerThetaBins::MRFitTaggerThetaBins(const char* _Name, TFile* output, con
     color(_Color),
     can(0)
 {
-    for(int i=0; i<9; i++)
+    for(int i=0; i<10; i++)
         thetaBins[i] = 0;
 }
 
@@ -19,7 +19,7 @@ MRFitTaggerThetaBins::~MRFitTaggerThetaBins()
 
 void    MRFitTaggerThetaBins::Add(MRFitTaggerThetaBins& origin)
 {
-    for(int i=0; i<9; i++)
+    for(int i=0; i<10; i++)
     {
         thetaBins[i]->Add(origin.thetaBins[i]);
     }
@@ -31,7 +31,7 @@ bool	MRFitTaggerThetaBins::SetFile(TFile* _File, const int minTagger, const int 
     if(!data)
         return false;
 
-    for(int i=0; i<9; i++)
+    for(int i=0; i<10; i++)
     {
         if(thetaBins[i])	delete thetaBins[i];
         TString	str(name);
@@ -45,7 +45,7 @@ bool	MRFitTaggerThetaBins::SetFile(TFile* _File, const int minTagger, const int 
 
 void	MRFitTaggerThetaBins::RebinIM(const int addedBins)
 {
-    for(int i=0; i<9; i++)
+    for(int i=0; i<10; i++)
     {
         thetaBins[i]->RebinX(addedBins);
         //thetaBins[i]->Scale(1/addedBins);
@@ -54,8 +54,8 @@ void	MRFitTaggerThetaBins::RebinIM(const int addedBins)
 
 void    MRFitTaggerThetaBins::FitGauss(const int _Color, const bool signal)
 {
-    TF1*	thetaFit[9];
-    for(int i=0; i<9; i++)
+    TF1*	thetaFit[10];
+    for(int i=0; i<10; i++)
     {
         TString str("fitfktGauss_");
         str.Append(thetaBins[i]->GetName());
@@ -77,7 +77,7 @@ void    MRFitTaggerThetaBins::FitGauss(const int _Color, const bool signal)
         }
         thetaFit[i]->SetParLimits(0, thetaBins[i]->GetMaximum()*0.7, thetaBins[i]->GetMaximum()*1.5);
 
-        thetaBins[i]->Fit(thetaFit[i], "R0");
+        thetaBins[i]->Fit(thetaFit[i], "QR0");
         can->cd(i+1);
         thetaFit[i]->Draw("SAME");
 
@@ -99,9 +99,9 @@ void    MRFitTaggerThetaBins::FitGauss(const int _Color, const bool signal)
 
 void    MRFitTaggerThetaBins::FitGauss(const int _Color, MRFitTaggerThetaBins& _FitValuesSignal, MRFitTaggerThetaBins& _FitValuesBG)
 {
-    TF1*	fit[9];
+    TF1*	fit[10];
 
-    for(int i=0; i<9; i++)
+    for(int i=0; i<10; i++)
     {
         TString str("fitfktGauss_");
         str.Append(thetaBins[i]->GetName());
@@ -116,7 +116,7 @@ void    MRFitTaggerThetaBins::FitGauss(const int _Color, MRFitTaggerThetaBins& _
         fit[i]->SetParLimits(3, 0, thetaBins[i]->GetMaximum()*0.5);
         fit[i]->SetParLimits(4, _FitValuesBG.fitValuesBins[i].mean.value - _FitValuesBG.fitValuesBins[i].mean.error, _FitValuesBG.fitValuesBins[i].mean.value + _FitValuesBG.fitValuesBins[i].mean.error);
         fit[i]->SetParLimits(5, _FitValuesBG.fitValuesBins[i].sigma.value - _FitValuesBG.fitValuesBins[i].sigma.error, _FitValuesBG.fitValuesBins[i].sigma.value + _FitValuesBG.fitValuesBins[i].sigma.error);
-        thetaBins[i]->Fit(fit[i], "R0");
+        thetaBins[i]->Fit(fit[i], "QR0");
         can->cd(i+1);
         fit[i]->Draw("SAME");
 
@@ -153,9 +153,9 @@ void	MRFitTaggerThetaBins::Draw(TCanvas* _Canvas)
     {
         if(can) delete can;
         can = new TCanvas(name, name, 1500, 800);
-        can->Divide(TMath::Ceil(TMath::Sqrt(9)), TMath::Ceil(TMath::Sqrt(9)));
+        can->Divide(TMath::Ceil(TMath::Sqrt(10)), TMath::Ceil(TMath::Sqrt(10)));
 
-        for(int i=0; i<9; i++)
+        for(int i=0; i<10; i++)
         {
             can->cd(i+1);
             thetaBins[i]->SetLineColor(color);
@@ -176,7 +176,7 @@ void	MRFitTaggerThetaBins::Draw(TCanvas* _Canvas)
     }
 
     can = _Canvas;
-    for(int i=0; i<9; i++)
+    for(int i=0; i<10; i++)
     {
         can->cd(i+1);
         thetaBins[i]->SetLineColor(color);
@@ -198,6 +198,6 @@ void	MRFitTaggerThetaBins::Draw(TCanvas* _Canvas)
 
 void    MRFitTaggerThetaBins::Scale(const double factor)
 {
-    for(int i=0; i<9; i++)
+    for(int i=0; i<10; i++)
         thetaBins[i]->Scale(factor);
 }

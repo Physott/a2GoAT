@@ -5,12 +5,8 @@
 #include "TSystemDirectory.h"
 #include "TSystemFile.h"
 #include <time.h>
-#include <TTree.h>
 #include <iostream>
-#include <TH2D.h>
-#include <TVector3.h>
-#include <TLorentzVector.h>
-
+#include "MRRecEff.h"
 
 
 void TaggEff(Double_t* array, Double_t* darray)
@@ -102,169 +98,6 @@ double	MCBackgroundFactor(TFile* acquMcSignalFile, TFile* acquMcBGFile, TFile* o
 }
 
 
-TH2* ReconstructEff(TFile* acquSignalFile, TFile* SignalFile, TFile* out)
-{
-    TTree*	tagger	= (TTree*)acquSignalFile->Get("tagger");
-    TTree*	tracks	= (TTree*)acquSignalFile->Get("tracks");
-    TTree*	pluto	= (TTree*)acquSignalFile->Get("h12");
-
-    Int_t       nTagged;
-    Int_t       taggedChannel[128];
-    Double_t    taggedEnergy[128];
-    Int_t       nTracks;
-    Float_t     plab[20];
-    Float_t     dircos[20][3];
-    Float_t     elab[20];
-
-    tagger->SetBranchAddress("nTagged", &nTagged);
-    tagger->SetBranchAddress("taggedChannel", taggedChannel);
-    tagger->SetBranchAddress("taggedEnergy", taggedEnergy);
-    tracks->SetBranchAddress("nTracks",&nTracks);
-    pluto->SetBranchAddress("plab", &plab);
-    pluto->SetBranchAddress("dircos", &dircos);
-    pluto->SetBranchAddress("elab", &elab);
-
-    TH2D*	count	= new TH2D("count", "count", 48, 0, 48, 36, 0, 180);
-    TH2D*	count6	= new TH2D("count6", "count6", 48, 0, 48, 36, 0, 180);
-    TH2D*	count7	= new TH2D("count7", "count7", 48, 0, 48, 36, 0, 180);
-
-    for(int i=0; i<tracks->GetEntriesFast(); i++)
-    {
-        tagger->GetEntry(i);
-        tracks->GetEntry(i);
-        pluto->GetEntry(i);
-
-        TVector3 p(dircos[2][0], dircos[2][1], dircos[2][2]);
-        p *= plab[2];
-        TLorentzVector lv( p, elab[2]);
-        TLorentzVector tag( 0, 0, taggedEnergy[0], taggedEnergy[0] + 938.272046);
-        lv.Boost(-tag.BoostVector());
-        double  etapTheta = lv.Theta() * TMath::RadToDeg();
-        //std::cout << etapTheta << std::endl;
-
-        for(int t=0; t<nTagged; t++)
-        {
-            count->Fill(taggedChannel[t], etapTheta);
-            if(nTracks==6)
-                count6->Fill(taggedChannel[t], etapTheta);
-            else if(nTracks==7)
-                count7->Fill(taggedChannel[t], etapTheta);
-        }
-    }
-
-    TCanvas*	can = new TCanvas("canReconstructionEfficiency", "ReconstructionEfficiency", 1500, 800);
-    can->Divide(3, 4);
-
-    can->cd(1);
-    count->Sumw2();
-    count->Scale(1);
-    count->RebinX(3);
-    count->RebinY(4);
-    count->SetTitle("all simulated #eta' events 6 Hits");
-    count->GetXaxis()->SetTitle("tagger channel");
-    count->SetStats(0);
-    count->Draw("COLZ");
-    can->cd(2);
-    count6->Sumw2();
-    count6->Scale(1);
-    count6->RebinX(3);
-    count6->RebinY(4);
-    count6->SetTitle("all simulated #eta' events 6 Hits");
-    count6->GetXaxis()->SetTitle("tagger channel");
-    count6->SetStats(0);
-    count6->Draw("COLZ");
-    can->cd(3);
-    count7->Sumw2();
-    count7->Scale(1);
-    count7->RebinX(3);
-    count7->RebinY(4);
-    count7->SetTitle("all simulated #eta' events 7 Hits");
-    count7->GetXaxis()->SetTitle("tagger channel");
-    count7->SetStats(0);
-    count7->Draw("COLZ");
-
-    TH3*		dataRaw	= (TH3*)SignalFile->Get("TaggerBinning/IM");
-    TH2*        data	= (TH2*)dataRaw->Project3D("yze");
-
-    can->cd(6);
-    data->SetTitle("accepted simulated #eta' events 7 Hits");
-    data->GetXaxis()->SetTitle("tagger channel");
-    data->SetStats(0);
-    data->RebinX(3);
-    data->RebinY(4);
-    data->Draw("COLZ");
-
-    can->cd(4);
-    TH1*        dataProjectionAcqu	= count7->ProjectionY();
-    dataProjectionAcqu->SetTitle("accepted simulated #eta' events 7 Hits");
-    dataProjectionAcqu->GetXaxis()->SetTitle("tagger channel");
-    dataProjectionAcqu->SetStats(0);
-    dataProjectionAcqu->Draw();
-
-    can->cd(5);
-    TH1*        dataProjection	= data->ProjectionY();
-    dataProjection->SetTitle("accepted simulated #eta' events 7 Hits");
-    dataProjection->GetXaxis()->SetTitle("tagger channel");
-    dataProjection->SetStats(0);
-    dataProjection->Draw();
-
-
-    can->cd(7);
-    TF1*        sinusFkt	= new TF1("sinusFkt", "sin(x*1.74532925199432955e-02)", 0, 180);
-    sinusFkt->SetTitle("accepted simulated #eta' events 7 Hits");
-    sinusFkt->GetXaxis()->SetTitle("tagger channel");
-    sinusFkt->Draw();
-
-    can->cd(8);
-    TH1*        dataProjectionHelp	= (TH1*)dataProjection->Clone();
-    dataProjectionHelp->SetTitle("accepted simulated #eta' events 7 Hits");
-    dataProjectionHelp->GetXaxis()->SetTitle("tagger channel");
-    dataProjectionHelp->Divide(sinusFkt);
-    dataProjectionHelp->Draw();
-
-    can->cd(9);
-    TH2*        dataResult7	= (TH2*)count7->Clone();
-    dataResult7->Divide(data);
-    dataResult7->SetTitle("accepted simulated #eta' events 7 Hits");
-    dataResult7->GetXaxis()->SetTitle("tagger channel");
-    dataResult7->SetStats(0);
-    dataResult7->Draw("COLZ");
-
-    can->cd(10);
-    TH2*        dataResult	= (TH2*)count->Clone();
-    dataResult->Divide(data);
-    dataResult->SetTitle("accepted simulated #eta' events 7 Hits");
-    dataResult->GetXaxis()->SetTitle("tagger channel");
-    dataResult->SetStats(0);
-    dataResult->Draw("COLZ");
-
-
-    can->cd(11);
-    TH1*        dataResultProjectionY	= dataResult->ProjectionY();
-    dataResultProjectionY->SetTitle("accepted simulated #eta' events 7 Hits");
-    dataResultProjectionY->GetXaxis()->SetTitle("tagger channel");
-    dataResultProjectionY->SetStats(0);
-    dataResultProjectionY->Draw("COLZ");
-
-    can->cd(12);
-    TH1*        dataResultProjectionX	= dataResult->ProjectionX();
-    dataResultProjectionX->SetTitle("accepted simulated #eta' events 7 Hits");
-    dataResultProjectionX->GetXaxis()->SetTitle("tagger channel");
-    dataResultProjectionX->SetStats(0);
-    dataResultProjectionX->Draw("COLZ");
-
-    out->cd();
-    count->Write();
-    count6->Write();
-    count7->Write();
-    dataResult->Write();
-    can->Write();
-
-    return dataResult;
-}
-
-
-
 /**
  * @brief the main routine
  * @param argc number of parameters
@@ -279,21 +112,22 @@ int main(int argc, char *argv[])
 
     double  backgroundFactor    = MCBackgroundFactor(inAcquSimSignal, inAcquSimBG, out);
 
-    TFile*  inSimSignal  = TFile::Open("goatTrees/Sim/Physics_g4_sim_etap.root");
-    TH2*    reconstructEfficiency   = ReconstructEff(inAcquSimSignal, inSimSignal, out);
+    TFile*  inSimSignal = TFile::Open("goatTrees/Sim/Physics_g4_sim_etap.root");
+    MRRecEff    recEff(inAcquSimSignal, inSimSignal);
+    recEff.CalcResult();
+    recEff.Draw(out);
 
     MRFitTaggerBins    resultSimSignal("simSignal", out, kRed);
     resultSimSignal.SetFile(inSimSignal, 3);
-    //resultSimSignal.RebinIM(2);
+    resultSimSignal.RebinIM(5);
     resultSimSignal.Draw();
     resultSimSignal.FitGauss(kBlue, true);
-
 
     TFile*  inSimBG  = TFile::Open("goatTrees/Sim/Physics_g4_sim_3pi0.root");
     MRFitTaggerBins    resultSimBG("simBG", out, kGreen);
     resultSimBG.SetFile(inSimBG, 3);
     resultSimBG.Scale(backgroundFactor);
-    //resultSimBG.RebinIM(5);
+    resultSimBG.RebinIM(5);
     resultSimBG.Draw();
     resultSimBG.FitGauss(kBlue, false);
     //TCanvas*    can = resultSimSignal.GetCanvas()->Clone("SimBoth");
@@ -302,7 +136,7 @@ int main(int argc, char *argv[])
 
     MRFitTaggerBins    resultBoth("both", out, kBlue);
     resultBoth.SetFile(inSimSignal, 3);
-    //resultBoth.RebinIM(5);
+    resultBoth.RebinIM(5);
     resultBoth.Add(resultSimBG);
     resultBoth.Draw();
 
@@ -313,9 +147,11 @@ int main(int argc, char *argv[])
     result.Draw();
     result.FitGauss(kBlack, resultSimSignal, resultSimBG);
 
+
     TCanvas*    can = new TCanvas("endresult", "endresult", 1500, 800);
     can->Divide(4, 3);
     can->cd(1);
+
     TH1*    etapCount   = result.GetResult();
     etapCount->Scale(1.0/5.0);
     etapCount->Draw();
@@ -323,14 +159,15 @@ int main(int argc, char *argv[])
     TH1*    etapCount2D = result.GetResult2D();
     etapCount2D->Scale(1.0/5.0);
     etapCount2D->Draw("COLZ");
+
     can->cd(3);
-    TH1*    rrr2 = reconstructEfficiency->ProjectionX("rrr2");
-    rrr2->Multiply(etapCount);
-    rrr2->Draw();
+    TH1*    etapCountCor = (TH1*)recEff.GetFactor();
+    etapCountCor->Multiply(etapCount);
+    etapCountCor->Draw();
     can->cd(4);
-    TH2*    rrr1 = (TH2*)reconstructEfficiency->Clone("rrr1");
-    rrr1->Multiply(etapCount2D);
-    rrr1->Draw("COLZ");
+    TH2*    etapCount2DCor = (TH2*)recEff.GetFactor2D();
+    etapCount2DCor->Multiply(etapCount2D);
+    etapCount2DCor->Draw("COLZ");
 
     double  taggEff[48];
     double  dTaggEff[48];
@@ -362,28 +199,79 @@ int main(int argc, char *argv[])
     scalerTeCor->Draw();
 
     can->cd(11);
-    TH1*    scalerTeCorRebined = (TH1*)scalerTeCor->Clone("scalerTeCor");
+    TH1*    scalerTeCorRebined = (TH1*)scalerTeCor->Clone("scalerTeCorRebined");
     //scalerTeCorRebined->Sumw2();
     scalerTeCorRebined->Rebin(3);
     //scalerTeCorRebined->Scale(1.0/3.0);
     scalerTeCorRebined->Draw();
 
     can->cd(12);
-    TH1*    xSec = (TH1*)rrr2->Clone("xSec");
+    TH1*    xSec = (TH1*)etapCountCor->Clone("xSec");
     //xSec->Sumw2();
     xSec->Divide(scalerTeCorRebined);
+    xSec->Scale(1000000.0*4.2/0.08491);
     xSec->Draw();
 
 
     TCanvas*    thetacan = new TCanvas("thetaEndresult", "thetaEndresult", 1500, 800);
     thetacan->Divide(4, 4);
-    for(int i=0; i<15; i++)
+    for(int i=0; i<16; i++)
     {
-        TH1*    hhh = (TH1*)rrr1->ProjectionY(TString("proj").Append(TString().Itoa(i, 10)), i+1, i+1)->Clone();
+        TH1*    hhh = (TH1*)etapCount2DCor->ProjectionY(TString("proj").Append(TString().Itoa(i, 10)), i+1, i+1)->Clone();
         double  integral    = hhh->Integral();
         hhh->Scale(xSec->GetBinContent(i+1)/integral);
+        TString str("diffxSec");
+        str.Append("_Tag_").Append(TString().Itoa(MRFitTaggerBins::TaggedEnergy[i*3], 10));
+        str.Append("_to_").Append(TString().Itoa(MRFitTaggerBins::TaggedEnergy[(i*3)+3], 10));
+        hhh->SetTitle(str);
         thetacan->cd(i+1);
         hhh->Draw();
+    }
+
+    TCanvas*    thetacanBoth = new TCanvas("thetaEndresultBoth", "thetaEndresultBoth", 1500, 800);
+    thetacanBoth->Divide(4, 4);
+
+    FILE*   otherResultsFile    = fopen("otherResults.dat", "r");
+    char    str[4096];
+    double  x[12][10];
+    double  y[12][10];
+    double  dy[12][10];
+    int step = 11;
+    while(!feof(otherResultsFile))
+    {
+        std::cout << step << std::endl;
+        fgets(str, 4096, otherResultsFile); fgets(str, 4096, otherResultsFile); fgets(str, 4096, otherResultsFile);
+        for(int i=0; i<10; i++)
+        {
+            fgets(str, 4096, otherResultsFile);
+            sscanf(str, "%lf %lf %lf", &x[step][i], &y[step][i], &dy[step][i]);
+            std::cout << x[step][i] << "   " << y[step][i] << "   " << dy[step][i] << std::endl;
+        }
+        fgets(str, 4096, otherResultsFile); fgets(str, 4096, otherResultsFile);
+        step--;
+    }
+
+    for(int i=0; i<12; i++)
+    {
+        TH1*    hhh = (TH1*)etapCount2DCor->ProjectionY(TString("proj").Append(TString().Itoa(i, 10)), i+1, i+1)->Clone();
+        double  integral    = hhh->Integral();
+        hhh->Scale(xSec->GetBinContent(i+1)/integral);
+        TString str("diffxSec");
+        str.Append("_Tag_").Append(TString().Itoa(MRFitTaggerBins::TaggedEnergy[i*3], 10));
+        str.Append("_to_").Append(TString().Itoa(MRFitTaggerBins::TaggedEnergy[(i*3)+3], 10));
+        hhh->SetTitle(str);
+        thetacanBoth->cd(i+1);
+        hhh->Draw();
+
+        TH1D*   hhhhh   = new TH1D(TString("otherResults").Append(TString().Itoa(i, 10)), TString("otherResults").Append(TString().Itoa(i, 10)), 10, -1, 1);
+        for(int t=0; t<10; t++)
+        {
+            hhhhh->SetBinContent(t+1, y[i][t]);
+            hhhhh->SetBinError(t+1, dy[i][t]);
+        }
+        thetacanBoth->cd(i+1);
+        hhhhh->SetLineColor(kRed);
+        hhhhh->Draw("SAME");
     }
 
     out->cd();
@@ -391,6 +279,7 @@ int main(int argc, char *argv[])
     result.GetResult2D()->Write();
     can->Write();
     thetacan->Write();
+    thetacanBoth->Write();
 
     return 0;
 }

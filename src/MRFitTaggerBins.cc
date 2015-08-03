@@ -124,7 +124,7 @@ void    MRFitTaggerBins::FitGauss(const int _Color, const bool signal)
         sumfit->SetParLimits(2, 25, 250);
     }
     sumfit->SetParLimits(0, sum->GetMaximum()*0.7, sum->GetMaximum()*1.5);
-    sum->Fit(sumfit, "R0");
+    sum->Fit(sumfit, "QR0");
 
     fitValuesSum.factor.value	= sumfit->GetParameter(0);
     fitValuesSum.factor.error	= sumfit->GetParError(0);
@@ -156,7 +156,7 @@ void    MRFitTaggerBins::FitGauss(const int _Color, const bool signal)
         }
         fit[i]->SetParLimits(0, bins[i]->GetMaximum()*0.7, bins[i]->GetMaximum()*1.5);
 
-        bins[i]->Fit(fit[i], "R0");
+        bins[i]->Fit(fit[i], "QR0");
         can->cd(i+1);
         fit[i]->Draw("SAME");
 
@@ -197,7 +197,7 @@ void    MRFitTaggerBins::FitGauss(const int _Color, MRFitTaggerBins& _FitValuesS
     sumfit->SetParLimits(3, 0, sum->GetMaximum()*0.5);
     sumfit->SetParLimits(4, _FitValuesBG.fitValuesSum.mean.value - _FitValuesBG.fitValuesSum.mean.error, _FitValuesBG.fitValuesSum.mean.value + _FitValuesBG.fitValuesSum.mean.error);
     sumfit->SetParLimits(5, _FitValuesBG.fitValuesSum.sigma.value - _FitValuesBG.fitValuesSum.sigma.error, _FitValuesBG.fitValuesSum.sigma.value + _FitValuesBG.fitValuesSum.sigma.error);
-    sum->Fit(sumfit, "R0");
+    sum->Fit(sumfit, "QR0");
 
     fitValuesSum.factor.value	= sumfit->GetParameter(0);
     fitValuesSum.factor.error	= sumfit->GetParError(0);
@@ -231,7 +231,7 @@ void    MRFitTaggerBins::FitGauss(const int _Color, MRFitTaggerBins& _FitValuesS
         fit[i]->SetParLimits(3, 0, bins[i]->GetMaximum()*0.5);
         fit[i]->SetParLimits(4, _FitValuesBG.fitValuesSum.mean.value - _FitValuesBG.fitValuesSum.mean.error, _FitValuesBG.fitValuesSum.mean.value + _FitValuesBG.fitValuesSum.mean.error);
         fit[i]->SetParLimits(5, _FitValuesBG.fitValuesSum.sigma.value - _FitValuesBG.fitValuesSum.sigma.error, _FitValuesBG.fitValuesSum.sigma.value + _FitValuesBG.fitValuesSum.sigma.error);
-        bins[i]->Fit(fit[i], "R0");
+        bins[i]->Fit(fit[i], "QR0");
         can->cd(i+1);
         fit[i]->Draw("SAME");
 
@@ -340,10 +340,10 @@ TH1D*    MRFitTaggerBins::GetResult()
 
 TH2D*    MRFitTaggerBins::GetResult2D()
 {
-    TH2D*    result  = new TH2D("endresult2D", "endresult2D", 16, 0, 48, 9, 0, 180);
+    TH2D*    result  = new TH2D("endresult2D", "endresult2D", 16, 0, 48, 10, -1, 1);
     for(int i=0; i<16; i++)
     {
-        for(int t=0; t<9; t++)
+        for(int t=0; t<10; t++)
         {
             if(thetaBins[i]->GetFitValues(t).count>0)
             {
