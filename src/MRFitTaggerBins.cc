@@ -277,6 +277,9 @@ void	MRFitTaggerBins::Draw(TCanvas *_Canvas)
         for(int i=0; i<nBins; i++)
         {
             can->cd(i+1);
+            bins[i]->SetStats(0);
+            bins[i]->SetTitle(bins[i]->GetName());
+            bins[i]->SetAxisRange(825, 1025);
             bins[i]->SetLineColor(color);
             bins[i]->Draw();
             thetaBins[i]->Draw();
@@ -300,6 +303,9 @@ void	MRFitTaggerBins::Draw(TCanvas *_Canvas)
     for(int i=0; i<nBins; i++)
     {
         can->cd(i+1);
+        bins[i]->SetStats(0);
+        bins[i]->SetTitle(bins[i]->GetName());
+        bins[i]->SetAxisRange(825, 1025);
         bins[i]->SetLineColor(color);
         bins[i]->Draw("SAME");
         thetaBins[i]->Draw();
