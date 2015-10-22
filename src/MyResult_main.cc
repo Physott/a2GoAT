@@ -155,19 +155,28 @@ int main(int argc, char *argv[])
     TH1*    etapCount   = result.GetResult();
     etapCount->Scale(1.0/5.0);
     etapCount->Draw();
+    out->cd();
+    etapCount->Write();
     can->cd(2);
     TH1*    etapCount2D = result.GetResult2D();
     etapCount2D->Scale(1.0/5.0);
     etapCount2D->Draw("COLZ");
+    out->cd();
+    etapCount2D->Write();
 
     can->cd(3);
     TH1*    etapCountCor = (TH1*)recEff.GetFactor();
     etapCountCor->Multiply(etapCount);
+    etapCountCor->SetTitle("");
     etapCountCor->Draw();
+    out->cd();
+    etapCountCor->Write("etapCountCor");
     can->cd(4);
     TH2*    etapCount2DCor = (TH2*)recEff.GetFactor2D();
     etapCount2DCor->Multiply(etapCount2D);
     etapCount2DCor->Draw("COLZ");
+    out->cd();
+    etapCount2DCor->Write("etapCount2DCor");
 
     double  taggEff[48];
     double  dTaggEff[48];
@@ -180,23 +189,31 @@ int main(int argc, char *argv[])
     }
     can->cd(5);
     teRaw->Draw();
+    out->cd();
+    teRaw->Write();
     TH1*    te  = (TH1*)teRaw->Clone("taggEff");
     te->RebinX(3);
     te->Scale(1.0/3.0);
     can->cd(6);
     te->Draw();
+    out->cd();
+    te->Write();
 
     TFile*  inScaler = TFile::Open("goatTrees/Scaler_CB.root");
     TH1*    scaler   = (TH1*)inScaler->Get("EPT_ScalerCorT");
     can->cd(9);
     scaler->Sumw2();
     scaler->Draw();
+    out->cd();
+    scaler->Write();
 
     can->cd(10);
     TH1*    scalerTeCor = (TH1*)scaler->Clone("scalerTeCor");
     //scalerTeCor->Sumw2();
     scalerTeCor->Multiply(teRaw);
     scalerTeCor->Draw();
+    out->cd();
+    scalerTeCor->Write();
 
     can->cd(11);
     TH1*    scalerTeCorRebined = (TH1*)scalerTeCor->Clone("scalerTeCorRebined");
@@ -204,6 +221,8 @@ int main(int argc, char *argv[])
     scalerTeCorRebined->Rebin(3);
     //scalerTeCorRebined->Scale(1.0/3.0);
     scalerTeCorRebined->Draw();
+    out->cd();
+    scalerTeCorRebined->Write();
 
     can->cd(12);
     TH1*    xSec = (TH1*)etapCountCor->Clone("xSec");
@@ -211,6 +230,8 @@ int main(int argc, char *argv[])
     xSec->Divide(scalerTeCorRebined);
     xSec->Scale(1000000.0*4.2/0.08491);
     xSec->Draw();
+    out->cd();
+    xSec->Write();
 
 
     TCanvas*    thetacan = new TCanvas("thetaEndresult", "thetaEndresult", 1500, 800);
