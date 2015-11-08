@@ -151,6 +151,15 @@ add_executable(goat_detailed
    )
 target_link_libraries(goat_detailed ${ROOT_LIBRARIES})
 
+add_executable(goat_2gamma
+   ${GOAT_BASE}
+   ${GOAT_GHIST}
+   inc/GoAT_2gamma.h
+   src/GoAT_2gamma.cc
+   src/goat_2gamma_main.cc
+   )
+target_link_libraries(goat_2gamma ${ROOT_LIBRARIES})
+
 add_executable(pi0-example
    ${GOAT_BASE}
    ${GOAT_GHIST}
